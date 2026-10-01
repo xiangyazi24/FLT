@@ -1,0 +1,31 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "154-line principal numerator module only; normalized matching and K2 remain open",
+  "files": [
+    {
+      "path": "INDEPENDENT_PRINCIPAL_NUMERATOR_REVIEW.md",
+      "bytes": 9302,
+      "sha256": "2394608d1282f6e455fef184c1558a9aee9e387bd11201d42452659d52088fa5"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 54943,
+      "sha256": "0bcfbbaaebc88b4b76b9d63c65ab1a93042956d5484f1f1aaef1b6f1977a3939"
+    },
+    {
+      "path": "mathlib/Mathlib__GroupTheory__QuotientGroup__Basic.lean",
+      "bytes": 21417,
+      "sha256": "89a049bd82c9e6caaa7df776d61692034341793be70acb8be200b1165547b1e3"
+    },
+    {
+      "path": "mathlib/Mathlib__GroupTheory__QuotientGroup__Defs.lean",
+      "bytes": 17107,
+      "sha256": "79db6701ce4ea14c464823f151575f180f3519ad3fc4a08a0ea64e644346510b"
+    },
+    {
+      "path": "mathlib/Mathlib__RingTheory__FractionalIdeal__Operations.lean",
+      "bytes": 43480,
+      "sha256": "a3e702af88e53eb3a1ffbb53d850e9c7a811a5fc085dd19d833d1560b7e776f7"
+    }
+  ]
+}

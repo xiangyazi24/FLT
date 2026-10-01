@@ -1,0 +1,183 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ActualHermiteEquations.lean",
+    "bytes": 5108,
+    "lines": 108,
+    "sha256": "7825b13ddc6a5ce4a623996089eb8684c88e0df991f42345a2f4783335789f02",
+    "git_blob": "ae5ac13f15c76ca59a6557f1076386c5f07743ce"
+  },
+  "current_manifest": {
+    "path": "/workspace/shared/flt-c13-kernel-next/k2-actual-hermite-current-review-manifest.json",
+    "bytes": 225,
+    "lines": 6,
+    "sha256": "c5aa55f1a0b76b99cce3978472dc95235bffb4f890a0caa05bce729b24b8de90",
+    "git_blob": "805c26f163117badf08c450e51eb9a2457ef3a1d"
+  },
+  "theorems": 6,
+  "base_source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "operative_accepted_dependency_overlay": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "new_mathlib_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-actual-hermite-audit/mathlib/Mathlib__Algebra__Polynomial__Eval__Defs.lean",
+      "bytes": 25292,
+      "lines": 790,
+      "sha256": "af7ee077c261bb6f2bd43028c35fe75e46e7278d71f5642e53f26401d7d15eae",
+      "git_blob": "6cfdf3fe6d567dee90518d218fe4e96d0cb7d330",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/Polynomial/Eval/Defs.lean"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-actual-hermite-audit/mathlib/Mathlib__Algebra__EuclideanDomain__Defs.lean",
+      "bytes": 9144,
+      "lines": 263,
+      "sha256": "00cdc131b09c868f94179716d61273d8fdf897ed023d34f30c7085668a3b31ac",
+      "git_blob": "ab7635c4a5e85bd5e287f011b2b13f72257c58e3",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/EuclideanDomain/Defs.lean"
+    }
+  ],
+  "new_dependencies": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13GoodCenteredNumerator.lean",
+      "bytes": 6173,
+      "lines": 132,
+      "sha256": "094cc2f034f0832132b31754960e81e76d6058a37246c1ecd4e396485d3c397f",
+      "git_blob": "e2a35a7bc7a51a926f2d1ba613247cd0fc04fd5c"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13GoodPointFirstJet.lean",
+      "bytes": 4748,
+      "lines": 117,
+      "sha256": "58d6b66f721d40f04592519d8f07c93a2091faf8398da881addf87b6cd2066f2",
+      "git_blob": "f7df21130d293d9abf8da190bcc662ad3ce8e491"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7134,
+      "lines": 149,
+      "sha256": "7ac7d80ce7e37d0b850c9c874d2b90fd99810421e95674246d321f22b3566712",
+      "git_blob": "79bb3964f8a05dfec6ad6cd574f536bb66a41d82"
+    }
+  ],
+  "verified_original_extra_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13SpecialQuotientBasis.lean",
+      "bytes": 4294,
+      "lines": 139,
+      "sha256": "84632d7cc20bc56610cff7144abb8baa86e63c117fcd9a28d65957d64203c1b9",
+      "git_blob": "2696ff5d62873de4cb517ff0f3bbf8c2f227c09e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13CanonicalContractionQuotient.lean",
+      "bytes": 5465,
+      "lines": 161,
+      "sha256": "f131ee616d8c6f88fbdcff5a69bdc4fe742a051579d6297816892372d6a6d752",
+      "git_blob": "f73e1098c5e3855b0d81ef4d6f472b0c4142dad4"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartRecover.lean",
+      "bytes": 17478,
+      "lines": 517,
+      "sha256": "49789796c21f0ecc559694e317f7ff2ae5814f270a009d02ac16931978b65d75",
+      "git_blob": "4b46b7a097ec6f40f00642eb1df332a51a84acea"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13Jacobian.lean",
+      "bytes": 10570,
+      "lines": 309,
+      "sha256": "5ebe0a39be24822c485ee4671316cb6d67f41b536758c4783280901280bbd833",
+      "git_blob": "1bf85f2302691fe9ba2e48ca67b3185a30053c3d"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/GeneralizedGraphIdealCore.lean",
+      "bytes": 12704,
+      "lines": 345,
+      "sha256": "f40996e1937ddb018488758b374dd4c0335aa7cede7d66048782e3a21a936aab",
+      "git_blob": "3a834be87e18cb5f232fde23f27871cbb919a443"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13AbelChartBase.lean",
+      "bytes": 4294,
+      "lines": 147,
+      "sha256": "a5b607004e0f6d0471eaed2b87ca791601e9e21e99c573a407dd79c8a647848c",
+      "git_blob": "e229707497042e27ef8993e12dac4e9e2d73b15e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoAdicMumfordTransport.lean",
+      "bytes": 7069,
+      "lines": 213,
+      "sha256": "ecd55742e16f104cca0c01275f5ca5195e5ad6cc9d81547a364efcfaa43d308c",
+      "git_blob": "712c835356c3c5e08b478ebb47e6d3b5c84b78d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13InfinityBaseChange.lean",
+      "bytes": 14394,
+      "lines": 389,
+      "sha256": "51a4d66e883a76fc6d60beeda55db902721bf4d8b8123d12c3dcfe54970f7e57",
+      "git_blob": "de30c9a3b730c565e7df92c190610dd6fe5073b4"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13GoodSexticMumfordTransport.lean",
+      "bytes": 11689,
+      "lines": 344,
+      "sha256": "ea64d189b02bc651f43c9a2d611b9ab00d9a57665acd081bd2733023a2c20fd0",
+      "git_blob": "39125cba0fc036f4d0b713ec53e76a1806ebaf08"
+    }
+  ],
+  "accepted_overlay_files": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "bytes": 7043,
+      "lines": 148,
+      "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3",
+      "git_blob": "5f6de2b80c149b468cd86e4f45fb840e857235d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "bytes": 5942,
+      "lines": 135,
+      "sha256": "fe2d0476062e9dbd14cb85502284c4c0ecdb37291a185008e941ef4d5f2655d5",
+      "git_blob": "d703ecb9b6984ba99615ba87e8ac90974b6e51c9"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7134,
+      "lines": 149,
+      "sha256": "7ac7d80ce7e37d0b850c9c874d2b90fd99810421e95674246d321f22b3566712",
+      "git_blob": "79bb3964f8a05dfec6ad6cd574f536bb66a41d82"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "bytes": 5854,
+      "lines": 125,
+      "sha256": "eab56f03f596072421f6b3e476a0ff53ec55ec431fb6a28c3fe07f352d9d3408",
+      "git_blob": "d11485c291f2f603734f78ccf9d20d272905a001"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+      "bytes": 6877,
+      "lines": 146,
+      "sha256": "a53b19458b8fe8fb29449b1c6707179cff6e61d55770b6badd0183a794e3bfff",
+      "git_blob": "928f79b7033c97d8b5825741fa4ea812f97a57f5"
+    }
+  ],
+  "supplied_lead_receipt": {
+    "path": "/workspace/shared/flt-c13-kernel-accepted-940d/lead-receipt.md",
+    "bytes": 1451,
+    "lines": 22,
+    "sha256": "b0e310103199f7c38689b0ae28959b52f88d17118237d8bb17a72392e3cf7446",
+    "git_blob": "129d0d323b1583243975410ad6c1a18f2c8d763d"
+  },
+  "accepted_proof_delta": {
+    "path": "/workspace/shared/flt-c13-kernel-accepted-940d/accepted-delta.patch",
+    "bytes": 4227,
+    "lines": 87,
+    "sha256": "c64fd4bc51fcc4fbff3ffbcddc801ff32e6343d634a136cc72bbd9083030181a",
+    "git_blob": "b0c4221eebb37bb00fd4178ab1a6192580659bf6"
+  },
+  "accepted_delta_review": "Proof elaboration changes only, including PrimitiveChartTransport; no declaration conclusion or premise change found",
+  "lead_report": "Four initial K2 arithmetic modules built, 11 theorem axiom checks reported as propext/Classical.choice/Quot.sound; K1 queued; not actual K2 closure",
+  "lean_run_by_reviewer": false,
+  "remote_writes": false,
+  "actual_K2_proved": false
+}

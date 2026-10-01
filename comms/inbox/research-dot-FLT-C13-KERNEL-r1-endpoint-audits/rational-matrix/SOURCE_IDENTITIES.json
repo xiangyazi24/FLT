@@ -1,0 +1,85 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13RationalHermiteMatrix.lean",
+    "bytes": 5439,
+    "lines": 113,
+    "sha256": "b6be44e4fadd5e511928134e13946684e41e5d42d1f799a7f8eab105c2c241b9",
+    "git_blob": "33d8d16302e6ef0ce2b5ccb1461d5ff117b829d4"
+  },
+  "theorems": 5,
+  "operative_source_commit": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "base_source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "accepted_overlay": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "bytes": 7043,
+      "lines": 148,
+      "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3",
+      "git_blob": "5f6de2b80c149b468cd86e4f45fb840e857235d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "bytes": 5942,
+      "lines": 135,
+      "sha256": "fe2d0476062e9dbd14cb85502284c4c0ecdb37291a185008e941ef4d5f2655d5",
+      "git_blob": "d703ecb9b6984ba99615ba87e8ac90974b6e51c9"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7134,
+      "lines": 149,
+      "sha256": "7ac7d80ce7e37d0b850c9c874d2b90fd99810421e95674246d321f22b3566712",
+      "git_blob": "79bb3964f8a05dfec6ad6cd574f536bb66a41d82"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "bytes": 5854,
+      "lines": 125,
+      "sha256": "eab56f03f596072421f6b3e476a0ff53ec55ec431fb6a28c3fe07f352d9d3408",
+      "git_blob": "d11485c291f2f603734f78ccf9d20d272905a001"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+      "bytes": 6877,
+      "lines": 146,
+      "sha256": "a53b19458b8fe8fb29449b1c6707179cff6e61d55770b6badd0183a794e3bfff",
+      "git_blob": "928f79b7033c97d8b5825741fa4ea812f97a57f5"
+    }
+  ],
+  "new_mathlib_source": {
+    "path": "/workspace/shared/flt-c13-k2-rational-matrix-audit/Matrix_Mul.lean",
+    "bytes": 46859,
+    "lines": 1257,
+    "sha256": "b3963abe98d6357da96f7018ed1b652ff813e347c3a928c6cb19a8fcf978c4eb",
+    "git_blob": "5cdb2a47f5e0a528c16cac3d2469f3516595807c",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Data/Matrix/Mul.lean"
+  },
+  "pinned_matrix_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/LinearAlgebra/Matrix/NonsingularInverse.lean",
+      "bytes": 32369,
+      "lines": 797,
+      "sha256": "72679731461877dfaf76b1b258c4f8906ed7729d5c99ea6fe55dc61a4ffd0bff",
+      "git_blob": "21703a4f35bf9dc40685fdcdb7df2607fd99b8e1"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/LinearAlgebra/Matrix/Determinant/Basic.lean",
+      "bytes": 37654,
+      "lines": 826,
+      "sha256": "110add520fefca3e5f6ca1ab6cd68764e842c06fab0e1648d57f1158a5c8ed29",
+      "git_blob": "bb576bab423ae3b34e32b8d185f4c2bf3d6ba876"
+    }
+  ],
+  "current_geometry_dependency": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ActualHermiteEquations.lean",
+    "bytes": 5108,
+    "lines": 108,
+    "sha256": "7825b13ddc6a5ce4a623996089eb8684c88e0df991f42345a2f4783335789f02",
+    "git_blob": "ae5ac13f15c76ca59a6557f1076386c5f07743ce"
+  },
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false
+}

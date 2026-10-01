@@ -1,0 +1,61 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13GoodPointFirstJet.lean",
+    "bytes": 4748,
+    "lines": 117,
+    "sha256": "58d6b66f721d40f04592519d8f07c93a2091faf8398da881addf87b6cd2066f2",
+    "git_blob": "f7df21130d293d9abf8da190bcc662ad3ce8e491"
+  },
+  "theorems": 5,
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "verified_trivsqzero_source": {
+    "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/TrivSqZeroExt/Basic.lean",
+    "bytes": 42247,
+    "lines": 1122,
+    "sha256": "bfa09c84935f5aa2a984a22aeb2fd8790d990159b488939fc1d6148e16a4e8bd",
+    "git_blob": "7133a5c4559176d0b19fac5c3d9013d12d217a03"
+  },
+  "new_adjoin_source": {
+    "path": "/workspace/shared/flt-c13-k2-point-jet-audit/AdjoinRoot.lean",
+    "bytes": 45287,
+    "lines": 1058,
+    "sha256": "3d672d875924ec581e4391b422698e1f527ecd53de54233ce19319d1b4508671",
+    "git_blob": "829bc3c3d9bc5b2dca04971242e14699a364995d",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/RingTheory/AdjoinRoot.lean"
+  },
+  "prior_pinned_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/FLT__Assumptions__MazurProof__N13GeneralizedMumfordIntegral.lean",
+      "bytes": 20052,
+      "lines": 609,
+      "sha256": "dab20959c86a1a3f342428a9193ea3d1987cbd4e01cb6cf66d068548f6d6eba0",
+      "git_blob": "d2269b4183ad0df914eff99b0dec1e77849863ef"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__RingTheory__Ideal__Operations.lean",
+      "bytes": 63275,
+      "lines": 1474,
+      "sha256": "ea87bac1c5ccd530f0710ced7c7c396a8a64c392cb28da70f77637f9fc0740a5",
+      "git_blob": "e0824b1e53b0ca2e677958e25c3ce01aa47ff83c"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-numerator-audit/mathlib/Mathlib__Algebra__Polynomial__Derivative.lean",
+      "bytes": 31782,
+      "lines": 785,
+      "sha256": "d4e27f0cf165fedaeb7eb9e64990383c53d5923425d78fd74f71ce31d4e3e803",
+      "git_blob": "ba8ca6254097ba7c88889a00caf828fbded38747"
+    }
+  ],
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false,
+  "theorem_names": [
+    "root_jet",
+    "pointJet_xClass",
+    "pointJet_yClass",
+    "square_graph_maps_to_zero",
+    "value_derivative_of_square_graph"
+  ]
+}

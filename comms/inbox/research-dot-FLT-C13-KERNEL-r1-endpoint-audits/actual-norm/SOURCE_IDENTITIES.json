@@ -1,0 +1,97 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ActualPrincipalNorm.lean",
+    "bytes": 5322,
+    "lines": 109,
+    "sha256": "2f7d3b5ccbd6c3bfd852cf8fa0df236494cafb8026da0dcc81565f6d84dd47e1",
+    "git_blob": "fadef9466ddb04e6693b7ea49f88ee2ed4a2b519"
+  },
+  "theorems": 4,
+  "operative_source_commit": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "base_source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "direct_normalization_dependency": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13PrincipalHermiteNormalization.lean",
+    "bytes": 6763,
+    "lines": 139,
+    "sha256": "fd8d5f776c829a9bbd802eb61388c1456554cc478839c8f5348ddb4de72f7165",
+    "git_blob": "bef5dad3c257cb2ada22c5d20dd0db8d2126827c"
+  },
+  "branch_balance_dependency": {
+    "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13PrincipalBranchBalance.lean",
+    "bytes": 6463,
+    "lines": 133,
+    "sha256": "d9f6679a94ef94f3f8b3099be3877c8bc1546a28845cf8d8afbece0e22a48a8f",
+    "git_blob": "26d3e1f6dcd8a2b22fc235b6ea931acc6110a56d"
+  },
+  "inspected_pinned_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityAPI.lean",
+      "bytes": 3917,
+      "lines": 105,
+      "sha256": "4cdd225407278f7dbf456d55ab82e153e057608d0188f9dde371b187be48acb2",
+      "git_blob": "f7fe373b42371088f2f71708ddb4d635c09e2da0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartData.lean",
+      "bytes": 15059,
+      "lines": 482,
+      "sha256": "adf61cb460436fe4c75f40cb7cd9efc80586bb50825218863668d7e21288a4be",
+      "git_blob": "809fd016a6ddbf00fa16288b0e8d71c0e930ecb8"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartPic.lean",
+      "bytes": 4008,
+      "lines": 136,
+      "sha256": "8fd9926056a51634a7a3c271ef864c1886ff4353dd5539abe98e47c46db8245f",
+      "git_blob": "e82bbfd3cfcc621367a9a3a7708817ef328495a5"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticFunctionConjugation.lean",
+      "bytes": 2552,
+      "lines": 78,
+      "sha256": "e3077654453603982ad437f14b81245c0337c9e4d12a89c5397ef7d87ceb917f",
+      "git_blob": "3c41ab2491ab37a08a93bc4566009eb268abcf13"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordIdealConjugation.lean",
+      "bytes": 7024,
+      "lines": 185,
+      "sha256": "3d22488de29dc1efe6aa819552e7ab37d2de6ad6f79eb1053993e8241901b98f",
+      "git_blob": "f4e2c34d15ebeb08df098e5cbd981c13c4b4682a"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordNorm.lean",
+      "bytes": 3200,
+      "lines": 105,
+      "sha256": "da28bc91773b9b846257be1c44cbb613b593353f6e84f953a8a48674d700e4f7",
+      "git_blob": "157ac9c58fe1532448e33fa6604cfe7af3dd75fe"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13GoodSexticCoordinateEquiv.lean",
+      "bytes": 9405,
+      "lines": 291,
+      "sha256": "7c072093a252417b9a7662e5211f2948fd5def9e5af36f2573d778422798efa7",
+      "git_blob": "9a6780d7ab6a0d1eaf94ec926f5ade24c8d9db2f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/FLT__Assumptions__MazurProof__N13GeneralizedMumfordIntegral.lean",
+      "bytes": 20052,
+      "lines": 609,
+      "sha256": "dab20959c86a1a3f342428a9193ea3d1987cbd4e01cb6cf66d068548f6d6eba0",
+      "git_blob": "d2269b4183ad0df914eff99b0dec1e77849863ef"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-audit/mathlib/Mathlib__RingTheory__Localization__FractionRing.lean",
+      "bytes": 32477,
+      "lines": 769,
+      "sha256": "1a923b785bc14a1973c6cf0cf61120a7358820b3d3f1a2a98ba91372dce9abde",
+      "git_blob": "00659e147c0d839a222fa0b6b4005524959cdd37"
+    }
+  ],
+  "integration_obligation": "Retain the same multiplier principal ideal relation through final selected-family assembly; earlier existential endpoints omit that relation",
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false
+}

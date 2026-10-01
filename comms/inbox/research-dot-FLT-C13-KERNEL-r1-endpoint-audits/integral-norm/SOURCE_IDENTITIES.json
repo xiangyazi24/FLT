@@ -1,0 +1,88 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralMatchedNorm.lean",
+    "bytes": 4958,
+    "lines": 100,
+    "sha256": "793b58a8f73de5c97a95ffc732c35eb50676d1c30f296a4490b675e908b31d0a",
+    "git_blob": "ea5992ce196845a6dcebc2eea91dece0345e8053"
+  },
+  "theorems": 3,
+  "operative_source_commit": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "base_source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "new_mathlib_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-integral-norm-audit/Mathlib__Algebra__Polynomial__Degree__Lemmas.lean",
+      "bytes": 20811,
+      "lines": 502,
+      "sha256": "77adee51f9fe6f03f88db9ccbd69e3e968e07957b7e2d774b3ae543911cf4c75",
+      "git_blob": "5752203baf7fbae78399d6e784cb2505f693bef2",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/Polynomial/Degree/Lemmas.lean"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-integral-norm-audit/Mathlib__Algebra__GroupWithZero__Defs.lean",
+      "bytes": 14279,
+      "lines": 342,
+      "sha256": "ebd4c4b8ed5e63d9ab41920c182f9c3dde99f8c979b4da118544c73f22b30cc5",
+      "git_blob": "0845c14350e2d6aef4048fa7646cc6a09ed1d9bc",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/GroupWithZero/Defs.lean"
+    }
+  ],
+  "reviewed_dependencies": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ActualPrincipalNorm.lean",
+      "bytes": 5322,
+      "lines": 109,
+      "sha256": "2f7d3b5ccbd6c3bfd852cf8fa0df236494cafb8026da0dcc81565f6d84dd47e1",
+      "git_blob": "fadef9466ddb04e6693b7ea49f88ee2ed4a2b519"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13NormalizedHermiteResidual.lean",
+      "bytes": 4646,
+      "lines": 105,
+      "sha256": "dba1627201b7df1e9073b7d28b4be237dddde3216c2e0432d1da94a396ed51f2",
+      "git_blob": "d6d6ae39bdcf15681acabe0b39b5b1baf8a80c0e"
+    }
+  ],
+  "accepted_overlay": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "bytes": 7043,
+      "lines": 148,
+      "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3",
+      "git_blob": "5f6de2b80c149b468cd86e4f45fb840e857235d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "bytes": 5942,
+      "lines": 135,
+      "sha256": "fe2d0476062e9dbd14cb85502284c4c0ecdb37291a185008e941ef4d5f2655d5",
+      "git_blob": "d703ecb9b6984ba99615ba87e8ac90974b6e51c9"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7134,
+      "lines": 149,
+      "sha256": "7ac7d80ce7e37d0b850c9c874d2b90fd99810421e95674246d321f22b3566712",
+      "git_blob": "79bb3964f8a05dfec6ad6cd574f536bb66a41d82"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "bytes": 5854,
+      "lines": 125,
+      "sha256": "eab56f03f596072421f6b3e476a0ff53ec55ec431fb6a28c3fe07f352d9d3408",
+      "git_blob": "d11485c291f2f603734f78ccf9d20d272905a001"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+      "bytes": 6877,
+      "lines": 146,
+      "sha256": "a53b19458b8fe8fb29449b1c6707179cff6e61d55770b6badd0183a794e3bfff",
+      "git_blob": "928f79b7033c97d8b5825741fa4ea812f97a57f5"
+    }
+  ],
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false
+}

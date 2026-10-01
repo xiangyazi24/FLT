@@ -20,3 +20,5 @@ FLT 2026-10-01 04:20 PM CDT: Read-only kernel assessment identifies a nonzero fi
 - October 1, 2026, 5:36 p.m. CDT: ACK lead receipt 8cae8f62: four K2 modules integrated/build with eleven standard-three-axiom theorem checks. Synced exact accepted source 940dc5a6 versions (four K2 modules plus PrimitiveChartTransport). K1 queued; full K2 endpoint remains open. Further work uses this accepted dependency baseline.
 
 - October 1, 2026, 6:01 p.m. CDT: Requested missing defining source N18RouteC_Separated.lean at pin 940dc5a6 (direct fetch HTTP404, absent pinned tree). Bounded K2 endpoint review continues separately from this full dependency-closure gap.
+
+- October 1, 2026, 6:05 p.m. CDT: FLT-C13-KERNEL r1 endpoint source result: twelve new modules / 1,313 lines complete exact FirstJetDoublingCompatibility and actual specialization-kernel separation, with same α,hα,n retained. Independent source review complete. New modules remain uncompiled; lead-accepted four-module support baseline is 940dc5a6. Missing N18RouteC_Separated defining source remains a separate full-closure gate.

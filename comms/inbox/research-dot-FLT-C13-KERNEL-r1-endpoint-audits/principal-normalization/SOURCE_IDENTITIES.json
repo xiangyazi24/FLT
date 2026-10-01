@@ -1,0 +1,107 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13PrincipalHermiteNormalization.lean",
+    "bytes": 6763,
+    "lines": 139,
+    "sha256": "fd8d5f776c829a9bbd802eb61388c1456554cc478839c8f5348ddb4de72f7165",
+    "git_blob": "bef5dad3c257cb2ada22c5d20dd0db8d2126827c"
+  },
+  "theorems": 4,
+  "operative_source_commit": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "base_source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "accepted_overlay": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "bytes": 7043,
+      "lines": 148,
+      "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3",
+      "git_blob": "5f6de2b80c149b468cd86e4f45fb840e857235d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "bytes": 5942,
+      "lines": 135,
+      "sha256": "fe2d0476062e9dbd14cb85502284c4c0ecdb37291a185008e941ef4d5f2655d5",
+      "git_blob": "d703ecb9b6984ba99615ba87e8ac90974b6e51c9"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7134,
+      "lines": 149,
+      "sha256": "7ac7d80ce7e37d0b850c9c874d2b90fd99810421e95674246d321f22b3566712",
+      "git_blob": "79bb3964f8a05dfec6ad6cd574f536bb66a41d82"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "bytes": 5854,
+      "lines": 125,
+      "sha256": "eab56f03f596072421f6b3e476a0ff53ec55ec431fb6a28c3fe07f352d9d3408",
+      "git_blob": "d11485c291f2f603734f78ccf9d20d272905a001"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+      "bytes": 6877,
+      "lines": 146,
+      "sha256": "a53b19458b8fe8fb29449b1c6707179cff6e61d55770b6badd0183a794e3bfff",
+      "git_blob": "928f79b7033c97d8b5825741fa4ea812f97a57f5"
+    }
+  ],
+  "direct_reviewed_dependencies": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13RationalHermiteMatrix.lean",
+      "bytes": 5439,
+      "lines": 113,
+      "sha256": "b6be44e4fadd5e511928134e13946684e41e5d42d1f799a7f8eab105c2c241b9",
+      "git_blob": "33d8d16302e6ef0ce2b5ccb1461d5ff117b829d4"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ActualHermiteEquations.lean",
+      "bytes": 5108,
+      "lines": 108,
+      "sha256": "7825b13ddc6a5ce4a623996089eb8684c88e0df991f42345a2f4783335789f02",
+      "git_blob": "ae5ac13f15c76ca59a6557f1076386c5f07743ce"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13GoodCenteredNumerator.lean",
+      "bytes": 6173,
+      "lines": 132,
+      "sha256": "094cc2f034f0832132b31754960e81e76d6058a37246c1ecd4e396485d3c397f",
+      "git_blob": "e2a35a7bc7a51a926f2d1ba613247cd0fc04fd5c"
+    }
+  ],
+  "inspected_pinned_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-actual-hermite-audit/mathlib/Mathlib__Algebra__Polynomial__Eval__Defs.lean",
+      "bytes": 25292,
+      "lines": 790,
+      "sha256": "af7ee077c261bb6f2bd43028c35fe75e46e7278d71f5642e53f26401d7d15eae",
+      "git_blob": "6cfdf3fe6d567dee90518d218fe4e96d0cb7d330"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-numerator-audit/mathlib/Mathlib__Algebra__Polynomial__Derivative.lean",
+      "bytes": 31782,
+      "lines": 785,
+      "sha256": "d4e27f0cf165fedaeb7eb9e64990383c53d5923425d78fd74f71ce31d4e3e803",
+      "git_blob": "ba8ca6254097ba7c88889a00caf828fbded38747"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/Polynomial/Degree/Operations.lean",
+      "bytes": 31418,
+      "lines": 790,
+      "sha256": "6cf6ab951454822af7f2e4a926dc326078ef2431ed579b8b02ac7442c82b84a3",
+      "git_blob": "47254f2cbeae4ddd81a3c73bb2a35c0092ce9755"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13GoodSexticCoordinateEquiv.lean",
+      "bytes": 9405,
+      "lines": 291,
+      "sha256": "7c072093a252417b9a7662e5211f2948fd5def9e5af36f2573d778422798efa7",
+      "git_blob": "9a6780d7ab6a0d1eaf94ec926f5ade24c8d9db2f"
+    }
+  ],
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false
+}

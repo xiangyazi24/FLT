@@ -1,0 +1,21 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "96-line actual pole-bound delta only",
+  "files": [
+    {
+      "path": "HahnSeries_Multiplication.lean",
+      "bytes": 43957,
+      "sha256": "5596724266063c95bd7c3b79e894544045556a2fdd0d7b0136189582e7829a9b"
+    },
+    {
+      "path": "INDEPENDENT_POLE_BOUND_REVIEW.md",
+      "bytes": 5678,
+      "sha256": "1b5a128b7d46352660f39b3277489f39dc26b5c4f05ee8a5335cc3da9cabdbba"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 3819,
+      "sha256": "473b2ae3bc55bbb8e77cd468b477e626fa02a892a0f4dd05d9f1bdcf3d243797"
+    }
+  ]
+}

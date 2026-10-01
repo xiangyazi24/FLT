@@ -1,0 +1,16 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "139-line same-numerator principal/Hermite normalization",
+  "files": [
+    {
+      "path": "INDEPENDENT_PRINCIPAL_NORMALIZATION_REVIEW.md",
+      "bytes": 5781,
+      "sha256": "2363a06ba06906b254aa06b8d9137a2c2956287a5dde8dbaa028182044d62fb6"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 4529,
+      "sha256": "16ecdc6e7ed45f674ff3a135958bb10ff4dd161314ff9cee05b6b008618777ce"
+    }
+  ]
+}

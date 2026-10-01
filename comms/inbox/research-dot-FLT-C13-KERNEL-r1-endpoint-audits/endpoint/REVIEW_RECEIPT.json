@@ -1,0 +1,40 @@
+{
+  "status": "SOURCE_REVIEWED_ENDPOINT_CANDIDATE_COMPILER_AND_CLOSURE_GATES_OPEN",
+  "files": [
+    {
+      "path": "INDEPENDENT_K2_ENDPOINT_REVIEW.md",
+      "bytes": 9794,
+      "sha256": "b644cf64f8cdbe0f062d10036c378f7b444dc150f5a90aa650d0c6f67b79bb29"
+    },
+    {
+      "path": "K2_CHAIN_FROZEN_IDENTITIES.json",
+      "bytes": 5149,
+      "sha256": "4f31b7f64c6cb2ee2ee32e001e91a76147c2cd2fc151c8671b96b8bab0042f29"
+    },
+    {
+      "path": "MISSING_SEPARATED_SOURCE.json",
+      "bytes": 577,
+      "sha256": "c491f20830761c61ee108aeba337dd0892aa121ad3692279c09bf989be7c6d13"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 4736,
+      "sha256": "6dff2bbec6bae2a58b42006ffb7c9497409fe266780d5c754e24b428aabcb3a4"
+    },
+    {
+      "path": "current-consumer-sources/N13MumfordCenteredDoublingAdapter.lean",
+      "bytes": 8086,
+      "sha256": "ad4aca58a9497cf467a70887dab308981e7501f7fbbc285978a50565bbe96d3d"
+    },
+    {
+      "path": "current-consumer-sources/N13RationalKernelDoublingAdapter.lean",
+      "bytes": 18568,
+      "sha256": "c7b957e195e1aff5503ccc64222b1853799418570c004d591737f9865a38ad0e"
+    },
+    {
+      "path": "current-consumer-sources/N13TwoAdicAbelChartSection.lean",
+      "bytes": 6653,
+      "sha256": "bca21651e3f45500b2b1a96d39c6167f02222a2b30b0e206f45b451304016b40"
+    }
+  ]
+}

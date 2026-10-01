@@ -1,0 +1,126 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13GoodCenteredNumerator.lean",
+    "bytes": 6173,
+    "lines": 132,
+    "sha256": "094cc2f034f0832132b31754960e81e76d6058a37246c1ecd4e396485d3c397f",
+    "git_blob": "e2a35a7bc7a51a926f2d1ba613247cd0fc04fd5c"
+  },
+  "theorems": 7,
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "geometry_source_records": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13BranchLeading.lean",
+      "bytes": 6735,
+      "lines": 185,
+      "sha256": "817de00e8293d8378f3d829b86eba964efb60407909aed71be2829ed6b2d4817",
+      "git_blob": "5dc4f7b699cae7bd2c55f2401652719ccb5a4d91"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13InfinityMinus.lean",
+      "bytes": 3340,
+      "lines": 97,
+      "sha256": "e358e96399ae2d2104bed95454bdb906f5d2d74d38b8e8fd399e89a3ac5a200e",
+      "git_blob": "4bf136110d9567437c8f5fb6eed8c6baf211f082"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13GoodSexticCoordinateEquiv.lean",
+      "bytes": 9405,
+      "lines": 291,
+      "sha256": "7c072093a252417b9a7662e5211f2948fd5def9e5af36f2573d778422798efa7",
+      "git_blob": "9a6780d7ab6a0d1eaf94ec926f5ade24c8d9db2f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13RankTwoSemiGraphRecovery.lean",
+      "bytes": 6264,
+      "lines": 185,
+      "sha256": "21855da976a2868bf3c6733d2f36159d8e1624dc7fdfa36c5cbd96a009791f78",
+      "git_blob": "44c256636bb3550af9a9dd8648149c63590c7247"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoGeneratorFiberBasis.lean",
+      "bytes": 6923,
+      "lines": 201,
+      "sha256": "ac2eb748d30b21dadefa43dbd32997c1ca1c51d5ae5967b90e550973faf09aeb",
+      "git_blob": "d2682582f4a438c3aa77e9885c672e3dde61a9d4"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13ContractQuotientXYBasis.lean",
+      "bytes": 12010,
+      "lines": 328,
+      "sha256": "73aebb1b4f7cd22dc3123380f2dfe7d0cc3ae3a3a144f934e532c933ca8ca42a",
+      "git_blob": "14255484ba85d9cb7cc7ec4ed79f8db0444bb9ab"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/TrivSqZeroExt/Basic.lean",
+      "bytes": 42247,
+      "lines": 1122,
+      "sha256": "bfa09c84935f5aa2a984a22aeb2fd8790d990159b488939fc1d6148e16a4e8bd",
+      "git_blob": "7133a5c4559176d0b19fac5c3d9013d12d217a03"
+    }
+  ],
+  "direct_source_records": [
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13GeneralizedMumfordReduction.lean",
+      "bytes": 13800,
+      "lines": 378,
+      "sha256": "53974ebf095e2225b5d00f4292094e102a425d0ab5e14589ac7473a1cbdd42e3",
+      "git_blob": "c245f3d05c049d827882b394f5de4ad68f4e702e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartData.lean",
+      "bytes": 15059,
+      "lines": 482,
+      "sha256": "adf61cb460436fe4c75f40cb7cd9efc80586bb50825218863668d7e21288a4be",
+      "git_blob": "809fd016a6ddbf00fa16288b0e8d71c0e930ecb8"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoAdicMumfordTransport.lean",
+      "bytes": 7069,
+      "lines": 213,
+      "sha256": "ecd55742e16f104cca0c01275f5ca5195e5ad6cc9d81547a364efcfaa43d308c",
+      "git_blob": "712c835356c3c5e08b478ebb47e6d3b5c84b78d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13FormalAbelLinearization.lean",
+      "bytes": 6073,
+      "lines": 188,
+      "sha256": "1156f0f6d18b5019a47a38185435bd66ae6eca18e9836d6b20e5dee112364a27",
+      "git_blob": "a7da80f648477843701183922cb08e3af8275a4a"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__RingTheory__Ideal__Maps.lean",
+      "bytes": 53425,
+      "lines": 1330,
+      "sha256": "3fb8edb05b1a5a19ed4fa810712ce51c6f18123390205602ed81b3261c8dd90b",
+      "git_blob": "8b2013443e57fbc50e43d4d8ecb42ce09c83cbe3"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/FLT__Assumptions__MazurProof__N13GeneralizedMumfordIntegral.lean",
+      "bytes": 20052,
+      "lines": 609,
+      "sha256": "dab20959c86a1a3f342428a9193ea3d1987cbd4e01cb6cf66d068548f6d6eba0",
+      "git_blob": "d2269b4183ad0df914eff99b0dec1e77849863ef"
+    }
+  ],
+  "new_dependency": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNumeratorPoleBounds.lean",
+    "bytes": 5172,
+    "lines": 96,
+    "sha256": "a29f0961026d3a44e868aefb15307de75f7462707c295eb137c772634cdacffc",
+    "git_blob": "910427ebc3c773449ef1fee3e9bd460a0631c39e"
+  },
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false,
+  "correction": {
+    "original_candidate_sha256": "671cc6955a9627182618c4e6759c8411cc67cce01cdfc219da79f3a9f2f5f4ec",
+    "original_report_sha256": "594053f7bf1e78061934a36fb1930ac62a6db60d864fb706b5e155f7fd1620f2",
+    "line": 110,
+    "old": "Ideal.mul_le_right (Ideal.mul_le_left hn)",
+    "new": "Ideal.mul_le_left (Ideal.mul_le_right hn)",
+    "verified_exact_one_line_delta": true
+  }
+}

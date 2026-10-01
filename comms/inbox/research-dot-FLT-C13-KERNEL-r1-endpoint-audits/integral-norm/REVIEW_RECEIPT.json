@@ -1,0 +1,26 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "100-line integral matched-norm descent",
+  "files": [
+    {
+      "path": "INDEPENDENT_INTEGRAL_MATCHED_NORM_REVIEW.md",
+      "bytes": 5541,
+      "sha256": "097e6d4bc6c5bb018d3abff01f5dae152b7784dbb7046b997e710a238bceddcb"
+    },
+    {
+      "path": "Mathlib__Algebra__GroupWithZero__Defs.lean",
+      "bytes": 14279,
+      "sha256": "ebd4c4b8ed5e63d9ab41920c182f9c3dde99f8c979b4da118544c73f22b30cc5"
+    },
+    {
+      "path": "Mathlib__Algebra__Polynomial__Degree__Lemmas.lean",
+      "bytes": 20811,
+      "sha256": "77adee51f9fe6f03f88db9ccbd69e3e968e07957b7e2d774b3ae543911cf4c75"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 3871,
+      "sha256": "0119054685dbc868fd00f8ec18b0d0837552ed2e97fb53e5d025e39ec0ed9eaa"
+    }
+  ]
+}

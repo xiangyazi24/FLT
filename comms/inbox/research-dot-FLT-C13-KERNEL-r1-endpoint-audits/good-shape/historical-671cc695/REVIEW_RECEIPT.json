@@ -1,0 +1,16 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "132-line good-model shape delta only",
+  "files": [
+    {
+      "path": "INDEPENDENT_GOOD_SHAPE_REVIEW.md",
+      "bytes": 6171,
+      "sha256": "594053f7bf1e78061934a36fb1930ac62a6db60d864fb706b5e155f7fd1620f2"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 4994,
+      "sha256": "eb201bb319eab815e94f89f48c67e4927d785c5c52481b9b791d6133d8e48878"
+    }
+  ]
+}

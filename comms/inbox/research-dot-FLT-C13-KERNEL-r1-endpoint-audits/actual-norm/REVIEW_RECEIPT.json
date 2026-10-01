@@ -1,0 +1,16 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "109-line exact actual principal norm",
+  "files": [
+    {
+      "path": "INDEPENDENT_ACTUAL_NORM_REVIEW.md",
+      "bytes": 6166,
+      "sha256": "e3952bfa215f2aa6f66d9b760d5568cb0ea13e45b28bd966a38fe927a127b409"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 4313,
+      "sha256": "52576b4484fe5342cf64e5a49b757781bcaf0b38bef15a233e8a7520a3f72482"
+    }
+  ]
+}

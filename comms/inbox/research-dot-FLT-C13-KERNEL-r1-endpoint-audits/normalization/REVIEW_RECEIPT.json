@@ -1,0 +1,26 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "105-line normalization delta only",
+  "files": [
+    {
+      "path": "INDEPENDENT_NORMALIZATION_REVIEW.md",
+      "bytes": 4763,
+      "sha256": "39ed06a4a0e80319dbb7dff41aee55a46a56e40e743c38c677f139bb2d1aa40f"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 3846,
+      "sha256": "875c4f6665f21762a9c803167ad9748c4c1283a6a2c86b8dcae8a0be4a5f89f6"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__Polynomial__Degree__Domain.lean",
+      "bytes": 3317,
+      "sha256": "c5f338125e105370e6b60b3092d657c57dd76c8a5bf67b78c2085a8241132cbc"
+    },
+    {
+      "path": "mathlib/Mathlib__Tactic__ComputeDegree.lean",
+      "bytes": 23032,
+      "sha256": "a1363186e0225ff1ae17ad30b626624ffbb52fc134b3b9f2519ebeff9c271a21"
+    }
+  ]
+}

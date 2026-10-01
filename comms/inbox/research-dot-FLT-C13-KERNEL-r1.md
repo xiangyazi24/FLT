@@ -1,72 +1,102 @@
 TASK_ID: FLT-C13-KERNEL
 REVISION: 1
 TYPE: RESULT
-STATUS: K1_SOURCE_COMPLETE_K2_IN_PROGRESS
-NONCE: FLT-DOT-20261001
-SOURCE_COMMIT: 887d29cd9eb9b60a6e5ec438ff919a74ccda41e5
+STATUS: K1_K2_SOURCE_COMPLETE_COMPILER_AND_SOURCE_CLOSURE_GATES_OPEN
+SOURCE_COMMIT: 940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5
 DISPATCH_COMMIT: 05ced4c57c83858c84032b8452b8c47f30ded392
+LEAD_ACCEPTANCE_RECEIPT: 8cae8f62da2a335c03193fac4829c0216a271e69
 OUTPUT_BRANCH: research-dot/flt-collaboration-20261001
-DEPENDENCY_DELIVERY: 2561ea7c66fb30c15416934a7ae513127cb387e1
-DATE: October 1, 2026, 4:52 p.m. CDT (America/Chicago)
+K1_DELIVERY: c8753dd7e6e7a17557e0fe2ca4dcc9d4a472e483
+PRIOR_K2_SUPPORT_DELIVERY: 4a257c2a12abf09f43d27b1ab2f2b0cdd1aff4e9
+DATE: October 1, 2026, 6:05 p.m. CDT (America/Chicago)
 
-## K1 result
+## Exact result
 
-Five new modules (513 lines) construct the exact endpoint
-`N13ConstructedMappedSpecialFamily.mappedSpecialFamily :
-N13RationalKernelDoublingAdapter.MappedSpecialFamily
-N13ConstructedSpecialization.specialization.ker`.
-The endpoint has no mapped-special, near-base, separatedness, or K2 input.
+Twelve new modules (1,313 lines) finish the source construction of the
+unchanged K2 endpoint. The complete K2 chain has sixteen modules / 1,870
+lines, counting the four exact lead-accepted support modules.
 
-1. Additive specialization and noncanonical code8 force the SAME translated
-   chosen witness to have literal special divisor C+B.
-2. The reduced infinity ideal contains t-1. Integral-to-special branch
-   constant-coefficient compatibility then forces both actual generic
-   infinity multiplicities to vanish. The effective graph has degree2 and
-   nInf=-1, hence raw mark-2.
-3. Vertical saturation identifies the same affine lattice with the canonical
-   contraction of its generic graph. Its reduction is exactly the adapter's
-   specialIdeal=(X²+X,Y).
-4. Balancing the graph changes the raw mark from-2 to-1. The explicit C+B
-   base pair acquires the SAME +1 raw twist, establishing the precise
-   c+basePic class required by MappedSpecialRepresentative.
-5. Existing Hensel graph recovery gives the centered NearBaseFamily.
+- `N13ConstructedKernelDoubling.firstJetCompatibility` has the exact type
+  `FirstJetDoublingCompatibility N13ConstructedMappedSpecialFamily.nearBaseFamily`.
+- `N13ConstructedKernelDoubling.actual_kernel_separated` has the exact type
+  `N18RouteC.Separated.NSeparated N13ConstructedSpecialization.specialization.ker 2`.
+- K1 remains the previously delivered exact constructed MappedSpecialFamily
+  for that same actual specialization kernel.
 
-## Validation and scope
+No comparison, normalized-numerator, first-jet, or separatedness premise
+was added to these endpoint declarations. Existing lead declarations and
+their statements were not changed. The noncanonical base divisor remains
+C+B, code 8; both +1 raw twists remain explicit in K1.
 
-Independent mathematical/source/API-shape review passed after correcting
-`sub_right_injective` to `sub_left_injective` in chosen_translated_code.
-The original review snapshot is preserved as historical metadata; current
-manifest hashes record the corrected source. All five dispatch inputs and
-additional source/API captures were verified at exact pins.
+## Same-witness proof chain
 
-Lean compilation, ordinary-decide evaluation, kernel checking, and #print
-axioms: NOT RUN. The lead owns all such checks and integration. Earlier
-B00/B03 source dependencies remain uncompiled from dot's perspective.
-No existing lead source declaration was edited. No main/PR/release/site
-action is part of this delivery.
+The selected centered-double class relation produces one multiplier α and
+its principal ideal equation hα. Both infinity orders of α are zero. Clearing
+u(P)^2 gives one nonzero regular numerator n that retains membership in the
+base/double ideal TIMES the squared conjugate ideal.
 
-## K2 remains active
+The two actual infinity orders of n are -4, forcing its sextic coefficient
+degrees to be at most 4 and 1. Completion of the square and the retained
+base-ideal membership put this same n into good-model shape uBase*A+b*y,
+with degrees at most 2 and 1. Actual opposite-sheet dual-number jets turn
+the squared-ideal membership into the four Hermite equations.
 
-FirstJetDoublingCompatibility and actual-kernel separatedness are NOT
-claimed. The exact existing N13MumfordCenteredDoublingAdapter reduces K2
-to coefficients1 and3 of u(P)^2-uBase*u(Q) lying in I(P)^2. The pinned
-GaugeFreedom module proves weightedGaugeJet is surjective; arbitrary
-Cech/Picard equality cannot justify applying firstJet.
+The lead-accepted integral matrix stays invertible over Q2. It proves that
+the rational coefficients are a scalar t times one integral normalized
+Hermite solution. Nonvanishing of n proves t is nonzero; no moving coordinate
+is divided out. The same α,hα,n then supply the exact four-factor norm
+identity. Leading coefficients determine its scalar as t^2*c(1-e1).
+Cancelling nonzero C(t^2) over Q2 and reflecting coefficient equality to Z2
+gives the literal integral norm with scalar 1-e1 and the actual selected Q.u.
 
-Current arithmetic work uses a regular numerator N=uBase*A+b*y, A monic
-quadratic and b linear. Four actual Hermite equations on the conjugate
-disk pair force b=0 and A=2u(P)-uBase modulo I(P)^2. An exact norm identity
-then supplies the centered cross coefficients by monic cancellation over
-the possibly nonreduced quotient R/I(P)^2. The two arithmetic candidates
-are separate from this reviewed K1 batch. Producing that normalized
-numerator, its Hermite equations, and exact norm from the actual principal
-comparison remains the substantive K2 obligation.
+The retained integral coefficient bounds and the accepted centered-norm
+theorem give every coefficient of u(P)^2-uBase*u(Q) in I(P)^2. In particular
+coefficients 1 and 3 fill the existing adapter, yielding the exact unary
+compatibility and actual-kernel separation. The final assembly retains
+the same α,hα,n throughout; it does not independently choose a norm multiplier.
 
-## Files
+## Review, compilation, and provenance
 
-The five new Lean modules are listed in
-`comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-manifest.json`.
-The audit and source identity receipts are under
-`comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/`.
-A separate subsequent commit records the immutable result commit and
-exact remote readback outcome.
+All twelve new modules and the final same-witness assembly passed independent
+mathematical/source/API-shape review. One good-shape API orientation was
+corrected before publication: Ideal.mul_le_left selects the right factor,
+and Ideal.mul_le_right selects the left. The current good-shape hash is
+094cc2f034f0832132b31754960e81e76d6058a37246c1ecd4e396485d3c397f.
+Historical review receipts are preserved and clearly marked superseded.
+
+The lead reports four earlier K2 support modules compiled, with eleven
+selected theorem axiom checks equal to [propext, Classical.choice, Quot.sound].
+The own branch already contains their exact accepted versions at 940dc5a6,
+plus accepted PrimitiveChartTransport. These are the active dependency
+baseline; earlier source-candidate bytes remain historical.
+
+The twelve NEW modules, K1, and their outstanding C13 dependencies are
+UNCOMPILED from dot's perspective. Dot ran no Lean/lake build, cache work,
+ordinary-decide evaluation, or #print axioms. The lead owns compilation,
+emitted-axiom validation, repairs, and integration. Source review is not
+kernel acceptance and this result does not claim fully unconditional FLT.
+
+## Separate defining-source gap
+
+The complete endgame source audit is blocked by the missing tracked
+`FLT/Assumptions/MazurProof/N18RouteC_Separated.lean`, imported on line 1 of
+N13TwoAdicKernelChart. A direct fetch at 940dc5a6 returned HTTP 404 and the
+path is absent from the pinned tree. The exact request was committed at
+2e6dfecab9dce66d1deddb95ffeaf09a58dfd304. Please supply that defining source
+and any omitted imports at a new authoritative pin. This does not establish
+falsity or an axiom; it remains distinct from the bounded K2 assembly review.
+
+A thin adapter to the identical C13Sextic_affine_x_is_cuspidal proposition is
+prepared separately while the existing twoSurjective/endgame dependency
+chain is traced. It is not included in this reviewed kernel-endpoint batch.
+
+## Delivery files and lead checks
+
+The result manifest lists the twelve current Lean hashes and build order.
+The endpoint audit freezes all sixteen K2 modules including the accepted
+dependency versions. Individual audits and exact source identities are
+under `comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/`.
+`comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-validation.lean` checks
+the exact K1/K2 consumer types and prints their axioms; it has NOT RUN.
+A subsequent receipt records this immutable result commit and exact remote
+readback. No main merge, PR, release, or site action is part of this delivery.

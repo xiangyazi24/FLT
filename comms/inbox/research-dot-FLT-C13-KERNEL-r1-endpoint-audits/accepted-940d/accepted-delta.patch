@@ -1,0 +1,87 @@
+--- candidate/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean
++++ accepted/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean
+@@ -50,7 +50,8 @@
+     residueMatrix s₀ s₁ * residueInverse s₀ s₁ = 1 := by
+   ext i j
+   fin_cases i <;> fin_cases j <;>
+-    simp [residueMatrix, residueInverse, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
++    simp [residueMatrix, residueInverse, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring_nf <;>
++    simp [show (2 : ZMod 2) = 0 from rfl]
+ 
+ private theorem reduce_matrix (P : DiskPair) (s : Fin 2 → R₂) :
+     (matrix P s).map N13GeneralizedMumfordReduction.reduceBase =
+@@ -59,13 +60,16 @@
+   ext i j
+   fin_cases i <;> fin_cases j <;>
+     norm_num [matrix, residueMatrix, Matrix.map, oppositeY,
+-      N13GoodModelTwo.h, map_add, map_sub, map_neg, map_mul, map_pow]
++      N13GoodModelTwo.h, map_add, map_sub, map_neg, map_mul, map_pow] <;>
++    first | rfl | decide | (ring_nf; simp [show (2 : ZMod 2) = 0 from rfl])
+ 
+ theorem matrix_det_unit (P : DiskPair) (s : Fin 2 → R₂) :
+     IsUnit (matrix P s).det := by
+   let r := N13GeneralizedMumfordReduction.reduceBase
+   have hunit : IsUnit (r (matrix P s).det) := by
+-    rw [r.map_det, reduce_matrix]
++    rw [r.map_det]
++    change IsUnit ((matrix P s).map r).det
++    rw [reduce_matrix]
+     exact Matrix.isUnit_det_of_right_inverse
+       (residueMatrix_mul_inverse (r (s 0)) (r (s 1)))
+   have hres : r (matrix P s).det = 1 := by
+--- candidate/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean
++++ accepted/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean
+@@ -55,8 +55,7 @@
+         (5 * x P j ^ 4 + 4 * x P j ^ 3) = 0 := by
+   have hi : (2 * oppositeY P j + (x P j ^ 3 + x P j + 1)) *
+       (↑((vertical_derivative_unit P j).unit⁻¹) : R₂) = 1 := by
+-    rw [← (vertical_derivative_unit P j).unit_spec]
+-    exact Units.mul_inv _
++    exact (vertical_derivative_unit P j).mul_val_inv
+   dsimp [slope]
+   linear_combination
+     (5 * x P j ^ 4 + 4 * x P j ^ 3 -
+@@ -115,7 +114,7 @@
+     (oppositeY_unit P j).ne_zero
+   have hz := hzero
+   simp only [residual, quad, lin, eval_sub, eval_mul, eval_pow, eval_add, eval_X, eval_C, eval_one] at hz
+-  simp [residual, quad, lin, derivative_mul, derivative_pow, y]
++  simp [residual, quad, lin, derivative_mul, derivative_pow, y, -mul_eq_zero]
+   linear_combination
+     ((x P j ^ 2 + a₁ * x P j + a₀) * oppositeY P j -
+       (b₀ + b₁ * x P j) * x P j ^ 3) * hd +
+--- candidate/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean
++++ accepted/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean
+@@ -53,14 +53,16 @@
+     ext a
+     exact Ideal.Quotient.eq_zero_iff_mem
+   have hz : (δ ^ 2).map (Ideal.Quotient.mk (I P * I P)) = 0 := by
+-    apply RingHom.mem_ker.mp
+-    change δ ^ 2 ∈ RingHom.ker (Polynomial.mapRingHom (Ideal.Quotient.mk (I P * I P)))
+-    rw [Polynomial.ker_mapRingHom, hk]
+-    exact hδ₂
+-  have hid := congrArg (Polynomial.mapRingHom (Ideal.Quotient.mk (I P * I P)))
++    have hmem : δ ^ 2 ∈ RingHom.ker (Polynomial.mapRingHom (Ideal.Quotient.mk (I P * I P))) := by
++      rw [Polynomial.ker_mapRingHom, hk]
++      exact hδ₂
++    exact RingHom.mem_ker.mp hmem
++  have hid := congrArg (Polynomial.map (Ideal.Quotient.mk (I P * I P)))
+     (N13MumfordCenteredDoublingJet.u_sq_sub_base_mul_centeredSquareU P)
++  rw [Polynomial.map_sub] at hid
+   apply sub_eq_zero.mp
+-  simpa only [map_sub, hz] using hid
++  rw [hid]
++  exact hz
+ 
+ /-- All centered cross coefficients, including the required 1 and 3,
+ follow from a normalized Hermite numerator and its exact norm. -/
+@@ -93,7 +95,8 @@
+     simpa only [Polynomial.map_pow, Polynomial.map_mul] using mapped_u_square P
+   have he : U ^ 2 * Abar ^ 2 = C (q k) * (V ^ 2 * U * W) := by
+     have h := congrArg (Polynomial.mapRingHom q) hnorm
+-    simp only [map_sub, map_pow, map_mul, Polynomial.map_C, hbzero,
++    simp only [Polynomial.coe_mapRingHom, Polynomial.map_sub, Polynomial.map_pow,
++      Polynomial.map_mul, Polynomial.map_C, hbzero,
+       mul_zero, zero_mul, zero_pow (by decide : (2 : ℕ) ≠ 0), sub_zero] at h
+     change (U * Abar) ^ 2 = C (q k) * V ^ 2 * U * W at h
+     convert h using 1 <;> ring

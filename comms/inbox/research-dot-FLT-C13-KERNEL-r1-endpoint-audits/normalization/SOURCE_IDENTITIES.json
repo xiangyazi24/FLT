@@ -1,0 +1,87 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13NormalizedHermiteResidual.lean",
+    "bytes": 4646,
+    "lines": 105,
+    "sha256": "dba1627201b7df1e9073b7d28b4be237dddde3216c2e0432d1da94a396ed51f2",
+    "git_blob": "d6d6ae39bdcf15681acabe0b39b5b1baf8a80c0e"
+  },
+  "theorem_count": 6,
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "verified_candidates": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "bytes": 7043,
+      "lines": 148,
+      "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3",
+      "git_blob": "5f6de2b80c149b468cd86e4f45fb840e857235d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "bytes": 5757,
+      "lines": 122,
+      "sha256": "b1340eb7b4415573f1985e6675d4777186964dc255871a00261aaa7742740907",
+      "git_blob": "9bf7ee6acf9cb08330ac990e2cf444249f026b7f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "bytes": 5762,
+      "lines": 131,
+      "sha256": "b65eef165d6de788ff2b8e1d49910d7c55752be46c772004c853f0a2e28f37d6",
+      "git_blob": "1c37972b2ffe41f29723714fea2ac21efeddb8c3"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7147,
+      "lines": 150,
+      "sha256": "3b761745e4d65a0064bbbf13882c127b0b6a2658a224448377a0d64498e2a658",
+      "git_blob": "0da6c3bcaef175fe9e72f8fc8d3e818cb6d3047e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13NormalizedHermiteResidual.lean",
+      "bytes": 4646,
+      "lines": 105,
+      "sha256": "dba1627201b7df1e9073b7d28b4be237dddde3216c2e0432d1da94a396ed51f2",
+      "git_blob": "d6d6ae39bdcf15681acabe0b39b5b1baf8a80c0e"
+    }
+  ],
+  "new_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-normalization-audit/mathlib/Mathlib__Algebra__Polynomial__Degree__Domain.lean",
+      "bytes": 3317,
+      "lines": 98,
+      "sha256": "c5f338125e105370e6b60b3092d657c57dd76c8a5bf67b78c2085a8241132cbc",
+      "git_blob": "9ae5e8abfb109dc2e288f649587fc9eddb782218",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/Polynomial/Degree/Domain.lean"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-normalization-audit/mathlib/Mathlib__Tactic__ComputeDegree.lean",
+      "bytes": 23032,
+      "lines": 536,
+      "sha256": "a1363186e0225ff1ae17ad30b626624ffbb52fc134b3b9f2519ebeff9c271a21",
+      "git_blob": "d00e44bfc8e562507d5cb5c733a54bb51cf0acfd",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Tactic/ComputeDegree.lean"
+    }
+  ],
+  "prior_reports": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/INDEPENDENT_K2_ARITHMETIC_REVIEW.md",
+      "bytes": 10444,
+      "lines": 100,
+      "sha256": "942afc042c877f37a96af5ffd321f8f5b9af2501a5f3d3031873f411b87d40ec",
+      "git_blob": "15bffa38c34d0ef17e0ac7769a7e13f49b842ad7"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-numerator-audit/INDEPENDENT_NUMERATOR_DIVISIBILITY_REVIEW.md",
+      "bytes": 10039,
+      "lines": 99,
+      "sha256": "4c332854c110f48016f1f0ab69e0b7b08a23020a8c0db9af1ecf6c2a4448ae5e",
+      "git_blob": "430d6e222a9f0c8a08d0f8ea7cd90e2a59870884"
+    }
+  ],
+  "symbolic_expansion": "All seven displayed coefficients independently expanded with SymPy; zero difference",
+  "lean_run": false,
+  "remote_writes": false
+}

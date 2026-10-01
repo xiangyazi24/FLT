@@ -1,0 +1,21 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "113-line rational Hermite matrix comparison",
+  "files": [
+    {
+      "path": "INDEPENDENT_RATIONAL_MATRIX_REVIEW.md",
+      "bytes": 5501,
+      "sha256": "1008d2b06f6bb8b8157ce45e1b4ab970564730ecd59a99e2816bb61ee897f431"
+    },
+    {
+      "path": "Matrix_Mul.lean",
+      "bytes": 46859,
+      "sha256": "b3963abe98d6357da96f7018ed1b652ff813e347c3a928c6cb19a8fcf978c4eb"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 3662,
+      "sha256": "a06f0b3f83c60743a5ece2c73b2834d1874887aca24726e318dbf43a04f68de0"
+    }
+  ]
+}

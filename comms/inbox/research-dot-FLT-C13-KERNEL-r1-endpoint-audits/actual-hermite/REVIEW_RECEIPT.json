@@ -1,0 +1,26 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "108-line current actual-Hermite equations delta on accepted 940dc5 dependency overlay",
+  "files": [
+    {
+      "path": "INDEPENDENT_ACTUAL_HERMITE_REVIEW.md",
+      "bytes": 7475,
+      "sha256": "6883898ebd86bf8d7b3ed3548706a6a7d570e8bf8b879d14f3ee1fe82cfea03a"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 8274,
+      "sha256": "a3361b576196c36edffaada38596cdcc5ccc8dcceeeaf19e772186116cc284c1"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__EuclideanDomain__Defs.lean",
+      "bytes": 9144,
+      "sha256": "00cdc131b09c868f94179716d61273d8fdf897ed023d34f30c7085668a3b31ac"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__Polynomial__Eval__Defs.lean",
+      "bytes": 25292,
+      "sha256": "af7ee077c261bb6f2bd43028c35fe75e46e7278d71f5642e53f26401d7d15eae"
+    }
+  ]
+}

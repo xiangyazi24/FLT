@@ -1,0 +1,89 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNumeratorPoleBounds.lean",
+    "bytes": 5172,
+    "lines": 96,
+    "sha256": "a29f0961026d3a44e868aefb15307de75f7462707c295eb137c772634cdacffc",
+    "git_blob": "910427ebc3c773449ef1fee3e9bd460a0631c39e"
+  },
+  "theorems": 4,
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "source_dependencies": [
+    {
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13BranchLeading.lean",
+      "bytes": 6735,
+      "lines": 185,
+      "sha256": "817de00e8293d8378f3d829b86eba964efb60407909aed71be2829ed6b2d4817",
+      "git_blob": "5dc4f7b699cae7bd2c55f2401652719ccb5a4d91"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13BranchNorm.lean",
+      "bytes": 6938,
+      "lines": 183,
+      "sha256": "314a10cf5af45fd358c8b286bc143b0d5373ffb34f5fc2ed2318b8efcaa356de",
+      "git_blob": "cf93733938ccce5e724f2a0c60dbe31ba645b25b"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityAPI.lean",
+      "bytes": 3917,
+      "lines": 105,
+      "sha256": "4cdd225407278f7dbf456d55ab82e153e057608d0188f9dde371b187be48acb2",
+      "git_blob": "f7fe373b42371088f2f71708ddb4d635c09e2da0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13Infinity.lean",
+      "bytes": 12945,
+      "lines": 358,
+      "sha256": "c122767abf79f1aace46a78f96a3ec58a38135fd8125d182e885b00f9657ebdf",
+      "git_blob": "8b7cbfe946acbb7e544ff9ecb52952126ff7df2f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityMinusAPI.lean",
+      "bytes": 6013,
+      "lines": 166,
+      "sha256": "ba5df9e1f16ed0f4987ec6f9f9633575a643f4ec606fdfd4f59e3b175cbb7901",
+      "git_blob": "c1c566ca1ccd67f5c2a1b60d1cd23a9eacbf2eb8"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13InfinityMinus.lean",
+      "bytes": 3340,
+      "lines": 97,
+      "sha256": "e358e96399ae2d2104bed95454bdb906f5d2d74d38b8e8fd399e89a3ac5a200e",
+      "git_blob": "4bf136110d9567437c8f5fb6eed8c6baf211f082"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13LaurentPolynomialOrder.lean",
+      "bytes": 4680,
+      "lines": 117,
+      "sha256": "3febfd810de3af3c156415eda7d221c36d9339a6a4ea8f69029adb7d650a1b3b",
+      "git_blob": "36f148feb9165ee238e76fe4d1de4060f514c436"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/SexticMumfordBasis.lean",
+      "bytes": 7344,
+      "lines": 212,
+      "sha256": "2333b5d3e2ca7ce635d56ba5006824393443cc2d09434385701be945970f952e",
+      "git_blob": "1ee3b7bc6218d6c3f4f3aac03c5396d05c6929df"
+    }
+  ],
+  "new_dependency": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredPrincipalNumerator.lean",
+    "bytes": 7957,
+    "lines": 154,
+    "sha256": "d67575a8ee276901e15ac41937cb2a916059421d007b1b21da46c5cd40e5af7f",
+    "git_blob": "2a276df66c143512441d8dc329a8f9c98aabe9b0"
+  },
+  "new_mathlib_source": {
+    "path": "/workspace/shared/flt-c13-k2-pole-audit/HahnSeries_Multiplication.lean",
+    "bytes": 43957,
+    "lines": 1042,
+    "sha256": "5596724266063c95bd7c3b79e894544045556a2fdd0d7b0136189582e7829a9b",
+    "git_blob": "b79bc4fe3c4980dc7dc90b89f041b1293fc25db1",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/RingTheory/HahnSeries/Multiplication.lean"
+  },
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false
+}

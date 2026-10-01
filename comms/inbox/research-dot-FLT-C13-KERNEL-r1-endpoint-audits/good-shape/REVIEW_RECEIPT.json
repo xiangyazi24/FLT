@@ -1,0 +1,16 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED_AFTER_ONE_API_CORRECTION",
+  "scope": "Corrected 132-line good-model shape delta",
+  "files": [
+    {
+      "path": "INDEPENDENT_GOOD_SHAPE_REVIEW.md",
+      "bytes": 6774,
+      "sha256": "402480535aad57f055cf32984c60573fecd26c973e6af2ea59362373c5ff5dd7"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 5387,
+      "sha256": "6808f85701e4536097dbdf97a855ac73cfc7a4122896951de029233bc8cfa8ea"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "status": "SOURCE_REVIEWED_ENDPOINT_CANDIDATE_COMPILER_AND_CLOSURE_GATES_OPEN",
+  "endpoint_candidates": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralHermiteCoefficientBounds.lean",
+      "bytes": 2057,
+      "lines": 51,
+      "sha256": "b602bf2369bed4b4370702e81d5b1fee89f3b53e06be305e731e10d1bfc64ad8",
+      "git_blob": "0f7f7e3bf72a2ed82aec1c2afdea0e6425b05084",
+      "theorems": 4,
+      "definitions": 0
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ConstructedKernelDoubling.lean",
+      "bytes": 4690,
+      "lines": 89,
+      "sha256": "b8f047e2602aaf639045d4b2de83c8f58c7a89c3f08d78f74a594c722130069c",
+      "git_blob": "e8fc51c0122153d4d0d92dcfc8d83b7dcf0b73a5",
+      "theorems": 2,
+      "definitions": 2
+    }
+  ],
+  "operative_source_commit": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "base_source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "current_unchanged_consumers": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-endpoint-audit/current-consumer-sources/N13RationalKernelDoublingAdapter.lean",
+      "bytes": 18568,
+      "lines": 531,
+      "sha256": "c7b957e195e1aff5503ccc64222b1853799418570c004d591737f9865a38ad0e",
+      "git_blob": "c0e58c34b50fda8757398e5b392cdd79af747153"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-endpoint-audit/current-consumer-sources/N13MumfordCenteredDoublingAdapter.lean",
+      "bytes": 8086,
+      "lines": 208,
+      "sha256": "ad4aca58a9497cf467a70887dab308981e7501f7fbbc285978a50565bbe96d3d",
+      "git_blob": "184b11d1a5b4f7d7f3397d3e2865febeeb684c88"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-endpoint-audit/current-consumer-sources/N13TwoAdicAbelChartSection.lean",
+      "bytes": 6653,
+      "lines": 234,
+      "sha256": "bca21651e3f45500b2b1a96d39c6167f02222a2b30b0e206f45b451304016b40",
+      "git_blob": "5958734242c83788ea2feea99ec28adda3e7e3f9"
+    }
+  ],
+  "K1_candidates": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ConstructedMappedSpecialFamily.lean",
+      "bytes": 2497,
+      "lines": 54,
+      "sha256": "f20ca03307778ebfae0969a9868947c41a774308f98de88406b653bc86bc1ef0",
+      "git_blob": "fb0298259a0d460d6736d20e6ea9ec4f469b5d57"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13KernelBaseDivisor.lean",
+      "bytes": 3542,
+      "lines": 88,
+      "sha256": "7cb59949e46450341438fec3caa7b1d3981e0320f80bb051a77a5acea35cbd1f",
+      "git_blob": "b9db41e6e298f2d7a7c513862d9e73a28d29e74f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13KernelBasePic.lean",
+      "bytes": 6051,
+      "lines": 134,
+      "sha256": "2237b399608bcfc2e5a43b71afa28caaa05ed4a71a53679ecaab02026644521b",
+      "git_blob": "6cae6a98f83f00359460b99ba430e6796d3edc4a"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13KernelGraphContraction.lean",
+      "bytes": 4715,
+      "lines": 98,
+      "sha256": "c98542116f277997576f09dbf007685d45c1cb80c21e641ec474d60aedab2455",
+      "git_blob": "b90f3ec0b4d795258206b11bfb8d976faa915298"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13KernelInfinityMultiplicity.lean",
+      "bytes": 6426,
+      "lines": 139,
+      "sha256": "fd68334a68946192e6e7a9e3495ffd53c6bc66e46c542aa58e330722bb66e5fd",
+      "git_blob": "8623ec232249ff08b4d559b3d95688a48cb92573"
+    }
+  ],
+  "lead_receipt": {
+    "path": "/workspace/shared/flt-c13-kernel-accepted-940d/lead-receipt.md",
+    "bytes": 1451,
+    "lines": 22,
+    "sha256": "b0e310103199f7c38689b0ae28959b52f88d17118237d8bb17a72392e3cf7446",
+    "git_blob": "129d0d323b1583243975410ad6c1a18f2c8d763d"
+  },
+  "missing_source": {
+    "commit": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+    "url": "https://api.github.com/repos/xiangyazi24/FLT/contents/FLT/Assumptions/MazurProof?ref=940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+    "count": 660,
+    "n18routec_entries": [
+      {
+        "name": "N18RouteC_VariableChangePoints.lean",
+        "path": "FLT/Assumptions/MazurProof/N18RouteC_VariableChangePoints.lean",
+        "sha": "cc57268905755b218bd3eb2b4556f8b59b2c1e73"
+      }
+    ],
+    "missing": "FLT/Assumptions/MazurProof/N18RouteC_Separated.lean",
+    "exact_fetch_status": 404,
+    "author_confirmed_missing": true
+  },
+  "same_multiplier_principal_relation_retained": true,
+  "actual_kernel_target_literal": true,
+  "full_import_axiom_closure_audited": false,
+  "lean_run_by_reviewer": false,
+  "remote_writes": false
+}

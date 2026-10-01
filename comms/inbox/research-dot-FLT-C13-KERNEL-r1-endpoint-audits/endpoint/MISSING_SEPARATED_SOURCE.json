@@ -1,0 +1,15 @@
+{
+  "commit": "940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "url": "https://api.github.com/repos/xiangyazi24/FLT/contents/FLT/Assumptions/MazurProof?ref=940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5",
+  "count": 660,
+  "n18routec_entries": [
+    {
+      "name": "N18RouteC_VariableChangePoints.lean",
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_VariableChangePoints.lean",
+      "sha": "cc57268905755b218bd3eb2b4556f8b59b2c1e73"
+    }
+  ],
+  "missing": "FLT/Assumptions/MazurProof/N18RouteC_Separated.lean",
+  "exact_fetch_status": 404,
+  "author_confirmed_missing": true
+}

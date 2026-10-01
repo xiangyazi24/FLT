@@ -1,0 +1,21 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "117-line good-curve first-jet module",
+  "files": [
+    {
+      "path": "AdjoinRoot.lean",
+      "bytes": 45287,
+      "sha256": "3d672d875924ec581e4391b422698e1f527ecd53de54233ce19319d1b4508671"
+    },
+    {
+      "path": "INDEPENDENT_POINT_JET_REVIEW.md",
+      "bytes": 5431,
+      "sha256": "a7a51b251931c48886ce98361872eab8a70d065d5f109e499e1031589d3aca20"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 2445,
+      "sha256": "8b20820092ece13cfd53e25dc2251f294a916eb9fff92484ce6dfbafda49ab77"
+    }
+  ]
+}
