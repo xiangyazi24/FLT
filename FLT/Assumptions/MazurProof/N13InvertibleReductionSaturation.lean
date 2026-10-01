@@ -235,7 +235,8 @@ theorem twoAdic_scalar_saturated_of_reduction_ne_bot
   rw [PadicInt.unitCoeff_spec hr, map_mul, map_pow] at hx
   have hxpow : (algebraMap R₂ A (2 : R₂)) ^ r.valuation * x ∈ I := by
     apply (I.mul_unit_mem_iff_mem hu).mp
-    simpa only [mul_assoc, mul_comm, mul_left_comm] using hx
+    simpa only [mul_assoc, mul_comm, mul_left_comm, RingHom.map_one,
+      Int.cast_ofNat, Nat.cast_two] using hx
   exact kernel_generator_pow_saturated red _ h2 hker I hI hred r.valuation x hxpow
 
 end TwoAdic
@@ -274,10 +275,13 @@ theorem special_point_infinityIdeal_ne_bot (p : N13SpecialDivisorCharts.CurvePoi
   cases p with
   | inl p =>
     unfold N13SpecialDivisorCharts.point
-    split
-    · exact top_ne_bot
-    · exact special_infinityPointIdeal_ne_bot _ _
-  | inr p => exact special_infinityPointIdeal_ne_bot _ _
+    by_cases hx : p.1.1 = 0
+    · simp [hx, N13SpecialDivisorCharts.affineZeroPoint]
+    · simp only [hx, N13SpecialDivisorCharts.affineOnePoint]
+      exact special_infinityPointIdeal_ne_bot _ _
+  | inr p =>
+    unfold N13SpecialDivisorCharts.point
+    exact special_infinityPointIdeal_ne_bot _ _
 
 theorem special_divisor_infinityIdeal_ne_bot
     (D : N13SpecialDivisorCharts.EffectiveDivisorTwo) :
@@ -295,7 +299,11 @@ theorem infinity_two_ne_zero : algebraMap R₂ B (2 : R₂) ≠ 0 := by
   intro hz
   have hh : N13IntegralInfinityPointSpread.xClassHom (C (2 : R₂)) =
       N13IntegralInfinityPointSpread.xClassHom 0 := by
-    simpa using hz
+    have hmap : N13IntegralInfinityPointSpread.xClassHom (C (2 : R₂)) =
+        algebraMap R₂ B (2 : R₂) := by
+      simp [N13IntegralInfinityPointSpread.xClassHom]
+      rfl
+    rw [hmap, hz, map_zero]
   have hc := N13IntegralInfinityPointSpread.xClassHom_injective hh
   have hcc := congrArg (fun p : R₂[X] => p.coeff 0) hc
   norm_num at hcc

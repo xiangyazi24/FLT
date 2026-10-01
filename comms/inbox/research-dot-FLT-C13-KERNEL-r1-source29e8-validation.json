@@ -1,0 +1,18 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/N18RouteC_Separated.lean",
+    "source_commit": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+    "git_blob": "9d49862027469b7829bdb31766822574cb5b2d2f",
+    "sha256": "157570192a637d365023c493e58d4cf9161a9e281371fefa126f1a58a58f5b6f",
+    "bytes": 8079,
+    "lines": 252
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13InvertibleReductionSaturation.lean",
+    "source_commit": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+    "git_blob": "6e45cebeeac7f344d4b3967d55b9467968f651d8",
+    "sha256": "c5f6127ceeeb382aab3008c2979448095757d07e464d871682b32b98a7ad430d",
+    "bytes": 14715,
+    "lines": 332
+  }
+]
