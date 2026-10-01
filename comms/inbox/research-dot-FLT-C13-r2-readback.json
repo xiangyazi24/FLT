@@ -1,0 +1,557 @@
+{
+  "result_commit": "2561ea7c66fb30c15416934a7ae513127cb387e1",
+  "branch": "research-dot/flt-collaboration-20261001",
+  "status": "91/91 immutable-commit UTF-8 content matches",
+  "compiler_checks": "NOT RUN",
+  "axiom_checks": "NOT RUN",
+  "ordinary_decide_checks": "NOT RUN",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+      "exact_content": true,
+      "git_blob": "9b7939ad9b24bd828b34ead7365ed3094d13daec",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedReductionClassifier.lean",
+      "exact_content": true,
+      "git_blob": "c20631daf122cc6a56a18294b27be21be522eb76",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedSpecialization.lean",
+      "exact_content": true,
+      "git_blob": "31b87d7fffcc9f702b370416d25df1338af916fa",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+      "exact_content": true,
+      "git_blob": "369843f51886808b7a0e274ce74a32f82f865bd2",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveGraphData.lean",
+      "exact_content": true,
+      "git_blob": "ebc966d83706bc1d01f3ecae6409ac2964587bff",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveInfinityRepair.lean",
+      "exact_content": true,
+      "git_blob": "b2336672a81425fa61095eeec36444f888517b8c",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13GenericInfinityComparison.lean",
+      "exact_content": true,
+      "git_blob": "ca585a7b62895aca86c8656614e3015cb21785f6",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityBranchJetLift.lean",
+      "exact_content": true,
+      "git_blob": "f74c256d484b2284709339d770ef3a5d1fe9968b",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityBranchJets.lean",
+      "exact_content": true,
+      "git_blob": "6e870d3c065b6a2c786df230966d952ba1ba9447",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityChartMarking.lean",
+      "exact_content": true,
+      "git_blob": "8a611929516b3e3554c4f9528e5c1bf92991c62b",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityIdealApproximation.lean",
+      "exact_content": true,
+      "git_blob": "46a42ab151654d84548e41a9636934d104f85c3e",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13IntegralPrincipalComparison.lean",
+      "exact_content": true,
+      "git_blob": "c707f3af45705235b86bbb6489d8e30a6f99220a",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InvertibleReductionSaturation.lean",
+      "exact_content": true,
+      "git_blob": "f49a12c0500b0ec0127d7cfb5d36d904fb442b11",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13LocalizationAdicPatch.lean",
+      "exact_content": true,
+      "git_blob": "e6d6e17fbae047177fc8c28ebedf2661f85b7dba",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedEffectiveData.lean",
+      "exact_content": true,
+      "git_blob": "cd5aa83d5c853f0d676666dde18212b8fd07f280",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedQuadraticExistence.lean",
+      "exact_content": true,
+      "git_blob": "29f270da22d286dbe67087d390d1a8ba9473875c",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedTensorComparison.lean",
+      "exact_content": true,
+      "git_blob": "36a20ce73961c2bb4cfa4992a736f32d2d6a9d45",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13OverlapBranchCompatibility.lean",
+      "exact_content": true,
+      "git_blob": "b7dcf6afdbd16587fbc93810456f5c526c6346dd",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PointDataCertificates.lean",
+      "exact_content": true,
+      "git_blob": "53ce1d852555d2035e05593ece687d34b692115d",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveAffineComparison.lean",
+      "exact_content": true,
+      "git_blob": "5f2b6c601911518bd0f30e7f77016c669e70b3fb",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+      "exact_content": true,
+      "git_blob": "00a50dd67e1cff5fea567200f8d4a260d2cb6811",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveVerticalPresentation.lean",
+      "exact_content": true,
+      "git_blob": "ae6c3d9469b0683cb93d393754360d960059f5c4",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrincipalBranchBalance.lean",
+      "exact_content": true,
+      "git_blob": "26d3e1f6dcd8a2b22fc235b6ea931acc6110a56d",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrincipalBranchIdeals.lean",
+      "exact_content": true,
+      "git_blob": "f7e2637d24467d0ba1c468dd4c78c803575b7382",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialAffineNorm.lean",
+      "exact_content": true,
+      "git_blob": "59a71a66567026ad714a58a434d24885c0e6a398",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialBranchFaithfulness.lean",
+      "exact_content": true,
+      "git_blob": "81be3c745a7228465d3b9d5e0c0ba7d3650375ca",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialCertifiedNumerator.lean",
+      "exact_content": true,
+      "git_blob": "f5143f974014ab17594574fc4b602afefbe2fcad",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialComparisonFactorPair.lean",
+      "exact_content": true,
+      "git_blob": "cad5e16b26a810098c61aa032df9c946849e80a1",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialDegreeFourCode.lean",
+      "exact_content": true,
+      "git_blob": "23eef1b87cbe0b89c3d942ff6b93f58a520c9990",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialDivisorBranchOrders.lean",
+      "exact_content": true,
+      "git_blob": "d95901362825ee4218e1adfd51e9f498e678931b",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialFiniteBranchFaithfulness.lean",
+      "exact_content": true,
+      "git_blob": "2cc04221d62582e1e7a270131906a5df2ed9134e",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialFiniteBranchJets.lean",
+      "exact_content": true,
+      "git_blob": "41054ada3f1dfe57e4b71be6c305bb8149cb0887",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialFinitePointOrders.lean",
+      "exact_content": true,
+      "git_blob": "bb7866aa7a7e90cb006f63293b67c54e9c595d8f",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialInfinityBranchJets.lean",
+      "exact_content": true,
+      "git_blob": "0f42ed1e917926670eecd6bebb7412d7554557b3",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialJetOrder.lean",
+      "exact_content": true,
+      "git_blob": "3ce93e2318136eab5183fcf8d47c68eeefa34e3a",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialLaurentBranches.lean",
+      "exact_content": true,
+      "git_blob": "60c22bc452409d06fbde5073f62776b45eb48d53",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialOverlapBranches.lean",
+      "exact_content": true,
+      "git_blob": "2b7a9af112496018c77eab63bd3bb548865310a6",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialRootJetAgreement.lean",
+      "exact_content": true,
+      "git_blob": "875a4861d749cd4910d424d475c61aa315bdb091",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSixJetOrders.lean",
+      "exact_content": true,
+      "git_blob": "0d941fd7c7f2e1bf525a6d1dde4277bfd64d2eeb",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSmallFunctionCertificate.lean",
+      "exact_content": true,
+      "git_blob": "f0b5a4dae13d1d49bc4d722aafb4a32b9a99b3cd",
+      "is_error": false
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSmallNumerator.lean",
+      "exact_content": true,
+      "git_blob": "7be0029a08c1b83f03737927e1b03a3e08c795ae",
+      "is_error": false
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "exact_content": true,
+      "git_blob": "d36c7c522838d465f0b605bd01e64c658e523dd5",
+      "is_error": false
+    },
+    {
+      "path": "comms/checks/N13C13CandidateAudit.lean",
+      "exact_content": true,
+      "git_blob": "290d5592cd9f0f82544526a1251e95e7c16dbc15",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-adic-source-audit.json",
+      "exact_content": true,
+      "git_blob": "308de574eebc14f4851dedad85a56e00b542262f",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-adic-source-audit.md",
+      "exact_content": true,
+      "git_blob": "8c7341533c46bbfe48e16acc5965f9b047195ed1",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-branch-jets-source-audit.json",
+      "exact_content": true,
+      "git_blob": "d3734193e2009953e86c86c5b11bd727199e070e",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-branch-jets-source-audit.md",
+      "exact_content": true,
+      "git_blob": "5e82ff7dd077a615188a6ea2c7d35e30eef5b0a3",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-calibration-classical-delta.json",
+      "exact_content": true,
+      "git_blob": "a39bee979616180454847f3c1c4d168c87ac5a3a",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-calibration-classical-delta.md",
+      "exact_content": true,
+      "git_blob": "04d6cf2f8ac3ae067fef34571680ea7ca563d6b0",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-calibration-classical-delta.patch",
+      "exact_content": true,
+      "git_blob": "944a41659347588f1d095a7d477a393fa677f08c",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-calibration-import-closure.json",
+      "exact_content": true,
+      "git_blob": "dea2aabd5dbb4465903df7ba844768a77b11ff09",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-calibration-source-audit.json",
+      "exact_content": true,
+      "git_blob": "46951969e062cd2ac0147b78954e289c3ec0319c",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-calibration-source-audit.md",
+      "exact_content": true,
+      "git_blob": "059b56961b1b4049186cef64fdfc230bf250fed4",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-effective-compatibility-source-audit.json",
+      "exact_content": true,
+      "git_blob": "1dd964e66b783b6f93391b3d3b054c86c713797c",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-effective-compatibility-source-audit.md",
+      "exact_content": true,
+      "git_blob": "0c0d7e6dd55774c44d0db4fc0afd158d998fbfbd",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-effective-source-audit.json",
+      "exact_content": true,
+      "git_blob": "cb218b7a64f1bff1f62a1b506fd187a1cefda643",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-effective-source-audit.md",
+      "exact_content": true,
+      "git_blob": "c394e28a4f9cbabf193271c6631f3f9457b1c449",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-generic-comparison-source-audit.json",
+      "exact_content": true,
+      "git_blob": "9c6a698239fa7aa26f8d7f77d1afba9d2294bf0a",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-generic-comparison-source-audit.md",
+      "exact_content": true,
+      "git_blob": "3f2c0147c9c43ec7dc57281a937a1f7a7597bde4",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-jet-lift-source-audit.json",
+      "exact_content": true,
+      "git_blob": "92282f6bdac0448a2193191f17a0409d40ca981e",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-jet-lift-source-audit.md",
+      "exact_content": true,
+      "git_blob": "a5a136d3723e2847efbbcf23e98831d7487efd59",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-primitive-source-audit.json",
+      "exact_content": true,
+      "git_blob": "22b7e641efcf8aa8ff1188347ae7e7551e88db67",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-primitive-source-audit.md",
+      "exact_content": true,
+      "git_blob": "7909e9aaaaf61ae67737953d3a1679ad81ec3e5b",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-principal-balance-source-audit.json",
+      "exact_content": true,
+      "git_blob": "7db90573f0cabe16961531ab46b4d29c2a07989a",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-principal-balance-source-audit.md",
+      "exact_content": true,
+      "git_blob": "5c138f08be84eef98050a842d43959dc5a6c0058",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-quadratic-source-audit.json",
+      "exact_content": true,
+      "git_blob": "7616fa67f1ad33bf1f043d79119d90da71d60b2b",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-quadratic-source-audit.md",
+      "exact_content": true,
+      "git_blob": "e8bb6b9f71049b919ec45be10244e7e0c04190a6",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-saturation-source-audit.json",
+      "exact_content": true,
+      "git_blob": "09824c5b1d4818ca0bbce682efe37a56cc94da7b",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-saturation-source-audit.md",
+      "exact_content": true,
+      "git_blob": "0d4eb273b1345d7d2b544ca666d2e1e7bd20bd8d",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-tensor-stack-source-audit.json",
+      "exact_content": true,
+      "git_blob": "8ec0a3665ae987c295e3489292dc71b4a5de6f13",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-tensor-stack-source-audit.md",
+      "exact_content": true,
+      "git_blob": "3cf91adc948f49ef8b7f35ad5c24a55d9bcc9d7d",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-transport-source-audit.json",
+      "exact_content": true,
+      "git_blob": "da93d5e4df288d415f945f9f17938b7435f051e9",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b00-transport-source-audit.md",
+      "exact_content": true,
+      "git_blob": "75c7f2e78c4f620d0d8e20c96e69a929077fb6df",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b03-endpoint-delta-audit.json",
+      "exact_content": true,
+      "git_blob": "4053372241f9bdf8b65db1a65cff44993f40e627",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b03-endpoint-delta-audit.md",
+      "exact_content": true,
+      "git_blob": "bde076ee8d30563a6ace96ce991afa1846125905",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b03-extended-source-audit.json",
+      "exact_content": true,
+      "git_blob": "9b1190d08285536ac92ac328f068144e4d7ec22a",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b03-extended-source-audit.md",
+      "exact_content": true,
+      "git_blob": "fe9fc423a79183de641c9d4a9feb4457a60a27c1",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b03-source-audit.json",
+      "exact_content": true,
+      "git_blob": "70aee8543a56b941b17dae1907ee3ed0759b3bf1",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-b03-source-audit.md",
+      "exact_content": true,
+      "git_blob": "81d83e2ca3038e83771c92f432418c5ed6e2af4d",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-initial-source-audit.json",
+      "exact_content": true,
+      "git_blob": "7c253da608a4285709a385e88b4061a40adbfebc",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/audit-FLT-C13-initial-source-audit.md",
+      "exact_content": true,
+      "git_blob": "91edaff549235bf0b75cd5a3aaa28f30b4f3c150",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-B00-EXIST-r2-global-candidate.md",
+      "exact_content": true,
+      "git_blob": "70fcd9a7d1076d9ca3cf0c9efe944db36df29a8b",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-B00-EXIST-r2.md",
+      "exact_content": true,
+      "git_blob": "e512ff8affc4cc5d9ce04cdded9a6b88c145237d",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-B03-source-completion.md",
+      "exact_content": true,
+      "git_blob": "01501cc47fe43edc185dd23bd1d84fb321d10e33",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-kernel-ownership-assessment.md",
+      "exact_content": true,
+      "git_blob": "24fff4e270399cf62778faf7537bb2332ad73976",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-r2-build-order.json",
+      "exact_content": true,
+      "git_blob": "4e067e47e53e91df1c050f4c1736d41bfaad9e50",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-r2-candidate-manifest.json",
+      "exact_content": true,
+      "git_blob": "96285940a99b57929327d82593f05c71cf4a3f87",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-r2-deliverable-manifest.json",
+      "exact_content": true,
+      "git_blob": "0d548f10ea841d96df66c75fa9a9d7ca5e52af2c",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-r2-input-manifest.json",
+      "exact_content": true,
+      "git_blob": "4cacc72b80c94825122bfd78061872822dda08d1",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-r2-input-validation.json",
+      "exact_content": true,
+      "git_blob": "28048e8c6ff0ad92a18f4f46db47558eb3bbc197",
+      "is_error": false
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-r2-source-validation.json",
+      "exact_content": true,
+      "git_blob": "fbeb3acc2080c0554879a4c5e5523f6e8256c067",
+      "is_error": false
+    }
+  ],
+  "verified_at_central": "2026-10-01 04:14 PM CDT"
+}
