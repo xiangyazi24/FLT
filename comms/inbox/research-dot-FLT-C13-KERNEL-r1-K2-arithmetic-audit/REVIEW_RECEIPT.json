@@ -1,0 +1,76 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "Two frozen K2 arithmetic modules, 270 lines; actual K2 remains open",
+  "files": [
+    {
+      "path": "FLT__Assumptions__MazurProof__N13GeneralizedMumfordIntegral.lean",
+      "bytes": 20052,
+      "sha256": "dab20959c86a1a3f342428a9193ea3d1987cbd4e01cb6cf66d068548f6d6eba0"
+    },
+    {
+      "path": "FLT__Assumptions__MazurProof__N13GoodModelTwo.lean",
+      "bytes": 19312,
+      "sha256": "9af22881278aa61c3b07cc7288ea449227e1b06cc155509167f89e8fc925180d"
+    },
+    {
+      "path": "FLT__Assumptions__MazurProof__N13TwoAdicDisks.lean",
+      "bytes": 8566,
+      "sha256": "59c08ee671091ae0a477ea01d1ef247b0969c0dcae2b92a8e836db69b8c13a25"
+    },
+    {
+      "path": "FLT__Assumptions__MazurProof__N13TwoAdicKernelChart.lean",
+      "bytes": 9652,
+      "sha256": "99aec75f50dd3e9808cbcee2e916956dd3adede49547be913f2fc87ae747f41a"
+    },
+    {
+      "path": "INDEPENDENT_K2_ARITHMETIC_REVIEW.md",
+      "bytes": 10444,
+      "sha256": "942afc042c877f37a96af5ffd321f8f5b9af2501a5f3d3031873f411b87d40ec"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 51843,
+      "sha256": "fcdb3d78fc1f8d2d21abcb0a522c2834cadf55affb1b2bbf7eaa96082056ca1d"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__Polynomial__Degree__Operations.lean",
+      "bytes": 31418,
+      "sha256": "6cf6ab951454822af7f2e4a926dc326078ef2431ed579b8b02ac7442c82b84a3"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__Polynomial__Eval__Coeff.lean",
+      "bytes": 7731,
+      "sha256": "a860db216d36cf7875f6a712c87bb7eed766f7941c3ab6a7791f453d4518427a"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__Polynomial__Monic.lean",
+      "bytes": 22181,
+      "sha256": "04dedab688a8a011d91bccf65e9bb1871fdc73d0fecf44ec685e2b19d965a649"
+    },
+    {
+      "path": "mathlib/Mathlib__RingTheory__Ideal__Defs.lean",
+      "bytes": 4634,
+      "sha256": "f613e5641290025a03855a45d32d106cc9718ab8b9a7be2d08b5b827cb4d19e0"
+    },
+    {
+      "path": "mathlib/Mathlib__RingTheory__Ideal__Maps.lean",
+      "bytes": 53425,
+      "sha256": "3fb8edb05b1a5a19ed4fa810712ce51c6f18123390205602ed81b3261c8dd90b"
+    },
+    {
+      "path": "mathlib/Mathlib__RingTheory__Ideal__Operations.lean",
+      "bytes": 63275,
+      "sha256": "ea87bac1c5ccd530f0710ced7c7c396a8a64c392cb28da70f77637f9fc0740a5"
+    },
+    {
+      "path": "mathlib/Mathlib__RingTheory__Ideal__Quotient__Defs.lean",
+      "bytes": 7800,
+      "sha256": "c069c211dfc1ff3b50cd1a7b798ad7e2545cf3e8fb753b2036e11c3288a9ed01"
+    },
+    {
+      "path": "mathlib/Mathlib__RingTheory__Polynomial__Basic.lean",
+      "bytes": 42738,
+      "sha256": "fae5fb21e86201e78242b19b59af4de30cf64ba4b1993e06c46fe1ec9e087880"
+    }
+  ]
+}

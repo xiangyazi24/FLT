@@ -1,0 +1,34 @@
+{
+  "task": "FLT-C13-KERNEL",
+  "revision": 1,
+  "scope": "four K2 arithmetic/numerator modules,551lines",
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "status": "SOURCE_REVIEWED_UNCOMPILED_K2_OPEN",
+  "lean_files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "bytes": 7043,
+      "lines": 148,
+      "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "bytes": 5757,
+      "lines": 122,
+      "sha256": "b1340eb7b4415573f1985e6675d4777186964dc255871a00261aaa7742740907"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "bytes": 5762,
+      "lines": 131,
+      "sha256": "b65eef165d6de788ff2b8e1d49910d7c55752be46c772004c853f0a2e28f37d6"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7147,
+      "lines": 150,
+      "sha256": "3b761745e4d65a0064bbbf13882c127b0b6a2658a224448377a0d64498e2a658"
+    }
+  ],
+  "remaining": "identify actual principal numerator and residual divisor of selected centered double; derive unchanged FirstJetDoublingCompatibility"
+}

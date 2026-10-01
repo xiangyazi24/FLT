@@ -1,0 +1,46 @@
+{
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "scope": "Two frozen 281-line K2 numerator/divisibility modules; actual K2 remains open",
+  "files": [
+    {
+      "path": "INDEPENDENT_NUMERATOR_DIVISIBILITY_REVIEW.md",
+      "bytes": 10039,
+      "sha256": "4c332854c110f48016f1f0ab69e0b7b08a23020a8c0db9af1ecf6c2a4448ae5e"
+    },
+    {
+      "path": "SOURCE_IDENTITIES.json",
+      "bytes": 11601,
+      "sha256": "b767d1cfd293b01df30d30642eacb0de20810be71dc09ae5742dc7163ea565bc"
+    },
+    {
+      "path": "SYMBOLIC_IDENTITY_RESULT.json",
+      "bytes": 286,
+      "sha256": "373823b481d244a5d4cb6b576840360b5dec5b9f582b94ac98f6fbf80efb4fe5"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__Polynomial__Derivative.lean",
+      "bytes": 31782,
+      "sha256": "d4e27f0cf165fedaeb7eb9e64990383c53d5923425d78fd74f71ce31d4e3e803"
+    },
+    {
+      "path": "mathlib/Mathlib__Algebra__Polynomial__RingDivision.lean",
+      "bytes": 13890,
+      "sha256": "f4baf56001bb5b4adab4c362fad2c231bf63d4b402763c82e07d7e25f57996e1"
+    },
+    {
+      "path": "mathlib/Mathlib__FieldTheory__Finite__Basic.lean",
+      "bytes": 36631,
+      "sha256": "c5601d28962a50663646de942fe8076472b83dc97ca5841e7279fb978335c636"
+    },
+    {
+      "path": "mathlib/Mathlib__NumberTheory__Padics__RingHoms.lean",
+      "bytes": 29527,
+      "sha256": "0df4c544e1cad940e4343cf6df324c441af18cc36a17a61b59377795dd9bd91d"
+    },
+    {
+      "path": "symbolic_identity_check.py",
+      "bytes": 1172,
+      "sha256": "e56fc10795bc20e4fe7a27d156d988a229ad4772fe69dd08822a06366667ec7c"
+    }
+  ]
+}

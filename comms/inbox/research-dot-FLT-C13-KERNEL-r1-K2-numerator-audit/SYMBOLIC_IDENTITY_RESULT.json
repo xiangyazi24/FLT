@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "symbolic_identities": [
+    "4x4 residue inverse product",
+    "residual value identity",
+    "residual derivative identity",
+    "norm base factor",
+    "implicit opposite-sheet slope relation"
+  ],
+  "project_code_executed": false,
+  "lean_executed": false
+}

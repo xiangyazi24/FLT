@@ -1,0 +1,261 @@
+{
+  "status": "INDEPENDENT SOURCE REVIEW COMPLETE; UNCOMPILED",
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "lean": "leanprover/lean4:v4.31.0-rc2",
+  "candidate_manifest": {
+    "path": "/workspace/shared/flt-c13-kernel-next/k2-numerator-review-manifest.json",
+    "bytes": 486,
+    "lines": 14,
+    "sha256": "74c02c52d5b9ec6bc773ceb4d846999e5885b3f1359d3a4447e989978f3a712c",
+    "git_blob": "06b05a029e5cb5e850ef7c028392b5940307aecd"
+  },
+  "candidates": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "bytes": 5762,
+      "lines": 131,
+      "sha256": "b65eef165d6de788ff2b8e1d49910d7c55752be46c772004c853f0a2e28f37d6",
+      "git_blob": "1c37972b2ffe41f29723714fea2ac21efeddb8c3",
+      "theorems": 5
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "bytes": 7147,
+      "lines": 150,
+      "sha256": "3b761745e4d65a0064bbbf13882c127b0b6a2658a224448377a0d64498e2a658",
+      "git_blob": "0da6c3bcaef175fe9e72f8fc8d3e818cb6d3047e",
+      "theorems": 7
+    }
+  ],
+  "retrieved_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-k2-numerator-audit/mathlib/Mathlib__Algebra__Polynomial__RingDivision.lean",
+      "bytes": 13890,
+      "lines": 346,
+      "sha256": "f4baf56001bb5b4adab4c362fad2c231bf63d4b402763c82e07d7e25f57996e1",
+      "git_blob": "04016c3ca5cbc24197ccc092d42385cb7518c94f",
+      "source_path": "Mathlib/Algebra/Polynomial/RingDivision.lean",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/Polynomial/RingDivision.lean"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-numerator-audit/mathlib/Mathlib__Algebra__Polynomial__Derivative.lean",
+      "bytes": 31782,
+      "lines": 785,
+      "sha256": "d4e27f0cf165fedaeb7eb9e64990383c53d5923425d78fd74f71ce31d4e3e803",
+      "git_blob": "ba8ca6254097ba7c88889a00caf828fbded38747",
+      "source_path": "Mathlib/Algebra/Polynomial/Derivative.lean",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/Polynomial/Derivative.lean"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-numerator-audit/mathlib/Mathlib__FieldTheory__Finite__Basic.lean",
+      "bytes": 36631,
+      "lines": 846,
+      "sha256": "c5601d28962a50663646de942fe8076472b83dc97ca5841e7279fb978335c636",
+      "git_blob": "8df34909eaea327612c1ae1388b812deac76e532",
+      "source_path": "Mathlib/FieldTheory/Finite/Basic.lean",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/FieldTheory/Finite/Basic.lean"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-numerator-audit/mathlib/Mathlib__NumberTheory__Padics__RingHoms.lean",
+      "bytes": 29527,
+      "lines": 775,
+      "sha256": "0df4c544e1cad940e4343cf6df324c441af18cc36a17a61b59377795dd9bd91d",
+      "git_blob": "7c697875793946ab36094292e34f389108652fe0",
+      "source_path": "Mathlib/NumberTheory/Padics/RingHoms.lean",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/NumberTheory/Padics/RingHoms.lean"
+    }
+  ],
+  "verified_api_manifest": {
+    "path": "/workspace/shared/flt-c13-kernel-input/k2-api-source-validation.json",
+    "bytes": 4252,
+    "lines": 92,
+    "sha256": "78670d00f1eabd89981f17c14fcd1121eaf9106ef88f7c5bc29278f62750b520",
+    "git_blob": "0a99bc011771ae2a6bc701dcc17cc2cd96b9202a"
+  },
+  "verified_api_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/Polynomial/Monic.lean",
+      "bytes": 22181,
+      "lines": 580,
+      "sha256": "04dedab688a8a011d91bccf65e9bb1871fdc73d0fecf44ec685e2b19d965a649",
+      "git_blob": "57ee0de96fefcaac7ec9e02c0fa70b9edd01c69e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/Polynomial/Div.lean",
+      "bytes": 37051,
+      "lines": 853,
+      "sha256": "c3891b731437099bf621bc5449e2c308adc8415eb2088a18abc8afff3b2671cc",
+      "git_blob": "0dea351b54d6c1ea438fe88950e450b4ea813578"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/Regular/Basic.lean",
+      "bytes": 10635,
+      "lines": 239,
+      "sha256": "21d56b38ba2f7e293940d8cc05024a0a7201b5fbfc19644e3aba28037530b775",
+      "git_blob": "14d957729709056ec2103580d1daefed4105381d"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/Polynomial/Degree/Operations.lean",
+      "bytes": 31418,
+      "lines": 790,
+      "sha256": "6cf6ab951454822af7f2e4a926dc326078ef2431ed579b8b02ac7442c82b84a3",
+      "git_blob": "47254f2cbeae4ddd81a3c73bb2a35c0092ce9755"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/LinearAlgebra/Matrix/NonsingularInverse.lean",
+      "bytes": 32369,
+      "lines": 797,
+      "sha256": "72679731461877dfaf76b1b258c4f8906ed7729d5c99ea6fe55dc61a4ffd0bff",
+      "git_blob": "21703a4f35bf9dc40685fdcdb7df2607fd99b8e1"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/LinearAlgebra/Matrix/Determinant/Basic.lean",
+      "bytes": 37654,
+      "lines": 826,
+      "sha256": "110add520fefca3e5f6ca1ab6cd68764e842c06fab0e1648d57f1158a5c8ed29",
+      "git_blob": "bb576bab423ae3b34e32b8d185f4c2bf3d6ba876"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/RingTheory/Coprime/Lemmas.lean",
+      "bytes": 13492,
+      "lines": 308,
+      "sha256": "8af90c95bbb22d26c16e7d76a680d554e8eecf6676f65305edd1ea0c355bab78",
+      "git_blob": "d5c4654c6cf11b889e09e59e1ea106354542c4cc"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/Mathlib/Algebra/Polynomial/Degree/Definitions.lean",
+      "bytes": 320,
+      "lines": 10,
+      "sha256": "46e4449503178c314d9046c33b01d7ca4009a42984c503c89aa7d7acf0f91ef9",
+      "git_blob": "302423210bf95d16abd5fe0837ad8261cf8d3566"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoAdicDisks.lean",
+      "bytes": 8566,
+      "lines": 278,
+      "sha256": "59c08ee671091ae0a477ea01d1ef247b0969c0dcae2b92a8e836db69b8c13a25",
+      "git_blob": "5c1e9b7ffb3bc6893bd2eea983fc09acaccb024e"
+    }
+  ],
+  "prior_arithmetic_receipt": {
+    "path": "/workspace/shared/flt-c13-k2-audit/REVIEW_RECEIPT.json",
+    "bytes": 2730,
+    "lines": 76,
+    "sha256": "a922c8997fbef2a3f31004af3f2054c5ecedf9cf3c421c7630801543d39a7bd0",
+    "git_blob": "8ed8a55e29bafdde8d1d90da1fab34c24317956d"
+  },
+  "prior_arithmetic_report": {
+    "path": "/workspace/shared/flt-c13-k2-audit/INDEPENDENT_K2_ARITHMETIC_REVIEW.md",
+    "bytes": 10444,
+    "lines": 100,
+    "sha256": "942afc042c877f37a96af5ffd321f8f5b9af2501a5f3d3031873f411b87d40ec",
+    "git_blob": "15bffa38c34d0ef17e0ac7769a7e13f49b842ad7"
+  },
+  "reverified_prior_candidates_and_retrieved_sources": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "bytes": 7043,
+      "lines": 148,
+      "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3",
+      "git_blob": "5f6de2b80c149b468cd86e4f45fb840e857235d0"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "bytes": 5757,
+      "lines": 122,
+      "sha256": "b1340eb7b4415573f1985e6675d4777186964dc255871a00261aaa7742740907",
+      "git_blob": "9bf7ee6acf9cb08330ac990e2cf444249f026b7f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__RingTheory__Ideal__Defs.lean",
+      "bytes": 4634,
+      "lines": 157,
+      "sha256": "f613e5641290025a03855a45d32d106cc9718ab8b9a7be2d08b5b827cb4d19e0",
+      "git_blob": "f8a8c64474e4b238d6b4d4ec9369f5a7df43483a"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__Algebra__Polynomial__Monic.lean",
+      "bytes": 22181,
+      "lines": 580,
+      "sha256": "04dedab688a8a011d91bccf65e9bb1871fdc73d0fecf44ec685e2b19d965a649",
+      "git_blob": "57ee0de96fefcaac7ec9e02c0fa70b9edd01c69e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__RingTheory__Polynomial__Basic.lean",
+      "bytes": 42738,
+      "lines": 1038,
+      "sha256": "fae5fb21e86201e78242b19b59af4de30cf64ba4b1993e06c46fe1ec9e087880",
+      "git_blob": "8bc610e192f05e81a0bacb32262204c0d826082e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__RingTheory__Ideal__Operations.lean",
+      "bytes": 63275,
+      "lines": 1474,
+      "sha256": "ea87bac1c5ccd530f0710ced7c7c396a8a64c392cb28da70f77637f9fc0740a5",
+      "git_blob": "e0824b1e53b0ca2e677958e25c3ce01aa47ff83c"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__RingTheory__Ideal__Quotient__Defs.lean",
+      "bytes": 7800,
+      "lines": 230,
+      "sha256": "c069c211dfc1ff3b50cd1a7b798ad7e2545cf3e8fb753b2036e11c3288a9ed01",
+      "git_blob": "8a05330c3e763bb22daffaaa40c0d83760d08039"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__Algebra__Polynomial__Degree__Operations.lean",
+      "bytes": 31418,
+      "lines": 790,
+      "sha256": "6cf6ab951454822af7f2e4a926dc326078ef2431ed579b8b02ac7442c82b84a3",
+      "git_blob": "47254f2cbeae4ddd81a3c73bb2a35c0092ce9755"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__RingTheory__Ideal__Maps.lean",
+      "bytes": 53425,
+      "lines": 1330,
+      "sha256": "3fb8edb05b1a5a19ed4fa810712ce51c6f18123390205602ed81b3261c8dd90b",
+      "git_blob": "8b2013443e57fbc50e43d4d8ecb42ce09c83cbe3"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/mathlib/Mathlib__Algebra__Polynomial__Eval__Coeff.lean",
+      "bytes": 7731,
+      "lines": 233,
+      "sha256": "a860db216d36cf7875f6a712c87bb7eed766f7941c3ab6a7791f453d4518427a",
+      "git_blob": "88bc89fb77245bbbbcce3b9893538de4d06ac21f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/FLT__Assumptions__MazurProof__N13TwoAdicDisks.lean",
+      "bytes": 8566,
+      "lines": 278,
+      "sha256": "59c08ee671091ae0a477ea01d1ef247b0969c0dcae2b92a8e836db69b8c13a25",
+      "git_blob": "5c1e9b7ffb3bc6893bd2eea983fc09acaccb024e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/FLT__Assumptions__MazurProof__N13TwoAdicKernelChart.lean",
+      "bytes": 9652,
+      "lines": 343,
+      "sha256": "99aec75f50dd3e9808cbcee2e916956dd3adede49547be913f2fc87ae747f41a",
+      "git_blob": "ac740dc43d796e35dc2cbb81d965ddd2bde63f9e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/FLT__Assumptions__MazurProof__N13GoodModelTwo.lean",
+      "bytes": 19312,
+      "lines": 569,
+      "sha256": "9af22881278aa61c3b07cc7288ea449227e1b06cc155509167f89e8fc925180d",
+      "git_blob": "4f743a5f83d70a581ab79b514d6f98bc1f55f08b"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-k2-audit/FLT__Assumptions__MazurProof__N13GeneralizedMumfordIntegral.lean",
+      "bytes": 20052,
+      "lines": 609,
+      "sha256": "dab20959c86a1a3f342428a9193ea3d1987cbd4e01cb6cf66d068548f6d6eba0",
+      "git_blob": "d2269b4183ad0df914eff99b0dec1e77849863ef"
+    }
+  ],
+  "reverified_prior_source_records": 126,
+  "build_run": false,
+  "lean_run": false,
+  "remote_writes": false,
+  "actual_K2_proved": false,
+  "scope": "Two frozen 281-line numerator/divisibility files only; N13NormalizedHermiteResidual excluded"
+}
