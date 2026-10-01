@@ -1,0 +1,300 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "dispatch_commit": "44b6fa4c9bbb43e65d0c136ab8e57bbfa8392402",
+  "status": "SOURCE-REVIEWED; UNCOMPILED; OWN-BRANCH COMMIT/PUSH AUTHORIZED",
+  "compiler_checks": "NOT RUN",
+  "axiom_checks": "NOT RUN",
+  "ordinary_decide_checks": "NOT RUN",
+  "historical_chooser_sha256": "974d3e964af5cae116d7f6155969762fc4267a6f9607239f2ece841a0e1e503d",
+  "current_chooser_sha256": "514c47dedbefede319d8fd87d536d68d50b14790f053c3a34314629231c446c7",
+  "chooser_delta": "Only explicit by/classical/exact around the unchanged piecewise choice; independently source-reviewed",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+      "encoding": "utf-8",
+      "bytes": 7516,
+      "lines": 172,
+      "sha256": "514c47dedbefede319d8fd87d536d68d50b14790f053c3a34314629231c446c7"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedReductionClassifier.lean",
+      "encoding": "utf-8",
+      "bytes": 3129,
+      "lines": 72,
+      "sha256": "62a36109945be7848eef88281ee79783ca43641438d5629a698d2e0a9ad80e02"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedSpecialization.lean",
+      "encoding": "utf-8",
+      "bytes": 5214,
+      "lines": 111,
+      "sha256": "49ee74c8d6aca8db3341da14b97b950f96947e4cb04c1df0349aad323c8bf536"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+      "encoding": "utf-8",
+      "bytes": 5958,
+      "lines": 119,
+      "sha256": "d51692d82deb3182fe88868a75ae4868fb2c659baeea095c6876d87f98b3cd47"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveGraphData.lean",
+      "encoding": "utf-8",
+      "bytes": 11485,
+      "lines": 240,
+      "sha256": "647a2b9f0638ea0ec0817b0c86273bb36832881e65ff3015bddd016f144d2f37"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveInfinityRepair.lean",
+      "encoding": "utf-8",
+      "bytes": 8086,
+      "lines": 196,
+      "sha256": "721e6a9d4fcb531c87cf4d06e77cb33efeba17683d0515e4b78b3e1edb6a97ec"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13GenericInfinityComparison.lean",
+      "encoding": "utf-8",
+      "bytes": 6672,
+      "lines": 127,
+      "sha256": "c9ea24c377870434d182d7a8a28fb244a842a6427f3955eb6a844c55f108d26f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityBranchJetLift.lean",
+      "encoding": "utf-8",
+      "bytes": 6544,
+      "lines": 158,
+      "sha256": "810f97663ffa7ff60901edd372f526788319b0729a4311988d84c030ff2f8b6d"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityBranchJets.lean",
+      "encoding": "utf-8",
+      "bytes": 7227,
+      "lines": 150,
+      "sha256": "172add8cb143b240b8c8b34da867b848d1a723e0b464acaa775e35a463a1993d"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityChartMarking.lean",
+      "encoding": "utf-8",
+      "bytes": 20473,
+      "lines": 413,
+      "sha256": "231fe2f6f1c42fc5848c3012323c06a696ef40075e23ca8beee918c5e223ce8f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityIdealApproximation.lean",
+      "encoding": "utf-8",
+      "bytes": 7216,
+      "lines": 170,
+      "sha256": "1910ec2ebf184998a262a104bf0800a248df889d03439d661adc796977d32e61"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13IntegralPrincipalComparison.lean",
+      "encoding": "utf-8",
+      "bytes": 7515,
+      "lines": 141,
+      "sha256": "848ce71863c68d2891f809d8de9b6dac09fa45df047fa5beaf07a7d5a7c51b12"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InvertibleReductionSaturation.lean",
+      "encoding": "utf-8",
+      "bytes": 14314,
+      "lines": 324,
+      "sha256": "97cf566f264fd21898f56b1337ca806d8da8b40a2cc820efff4aa45a6d9fcb15"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13LocalizationAdicPatch.lean",
+      "encoding": "utf-8",
+      "bytes": 3848,
+      "lines": 92,
+      "sha256": "83cec263181d67459b554e6dc8281101d319ca4f646826055d08771a7358bc60"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedEffectiveData.lean",
+      "encoding": "utf-8",
+      "bytes": 6732,
+      "lines": 139,
+      "sha256": "a6902dffa69b47743e286adbb75760de3481ddb28917bfb15ac083029494feef"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedQuadraticExistence.lean",
+      "encoding": "utf-8",
+      "bytes": 22529,
+      "lines": 568,
+      "sha256": "5d4400534f3623cace6bd726bcb9f49c393093440f3c1c990e85e6591e9c6032"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedTensorComparison.lean",
+      "encoding": "utf-8",
+      "bytes": 8252,
+      "lines": 147,
+      "sha256": "b7cc30867e5b933f5444ed38abaf8d0be15dddf8a29f74be2d709aad54dd6e72"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13OverlapBranchCompatibility.lean",
+      "encoding": "utf-8",
+      "bytes": 9272,
+      "lines": 188,
+      "sha256": "fcf2b05cba651c3c2ac416ac708583b145184ecd8f247b331e0a6dad73050e5f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PointDataCertificates.lean",
+      "encoding": "utf-8",
+      "bytes": 6730,
+      "lines": 115,
+      "sha256": "fcf430dfdcfcd13677d6154ceab24b973f06c0ae3d430573a4be448dc0526c14"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveAffineComparison.lean",
+      "encoding": "utf-8",
+      "bytes": 6783,
+      "lines": 138,
+      "sha256": "801af860d91beba906729b6cc9e2ad222dc70b4cedb336646733c0e55e0ac52e"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+      "encoding": "utf-8",
+      "bytes": 6603,
+      "lines": 141,
+      "sha256": "d1a4a4675ec95385061b838770ade1edc062b6a82a67d9495d6504a51a5cc1f0"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveVerticalPresentation.lean",
+      "encoding": "utf-8",
+      "bytes": 6015,
+      "lines": 144,
+      "sha256": "decd29e0ec9029031e962a56a36549847e5612c69cf3fee2aa389cb0c2edf809"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrincipalBranchBalance.lean",
+      "encoding": "utf-8",
+      "bytes": 6463,
+      "lines": 133,
+      "sha256": "d9f6679a94ef94f3f8b3099be3877c8bc1546a28845cf8d8afbece0e22a48a8f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrincipalBranchIdeals.lean",
+      "encoding": "utf-8",
+      "bytes": 12116,
+      "lines": 224,
+      "sha256": "b52284b2f4795e3a97dceaeeb0283bf69363198c7d198037c583b931686e978f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialAffineNorm.lean",
+      "encoding": "utf-8",
+      "bytes": 5581,
+      "lines": 133,
+      "sha256": "12cc00b3376a5579ace4fc7c6a676b7d456d94284ee7765eadb8708448187268"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialBranchFaithfulness.lean",
+      "encoding": "utf-8",
+      "bytes": 4085,
+      "lines": 92,
+      "sha256": "495229b01c9d6a902b2b5049c42842b9a3557d8a9bfd1e4ef864b30cfb638119"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialCertifiedNumerator.lean",
+      "encoding": "utf-8",
+      "bytes": 3055,
+      "lines": 67,
+      "sha256": "dcbd98c8ad571d53df7c7b7824fbd9145647a37a33954ed82191a00b19a96682"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialComparisonFactorPair.lean",
+      "encoding": "utf-8",
+      "bytes": 7440,
+      "lines": 164,
+      "sha256": "d12fb8b56cd658d3c022fcc50015d7bb4334c34cc69f779f988262c557247ef7"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialDegreeFourCode.lean",
+      "encoding": "utf-8",
+      "bytes": 8684,
+      "lines": 148,
+      "sha256": "70558dfef24c07371c2917d630933fdb376ea1c650f07cfeb00b06adfbd2b775"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialDivisorBranchOrders.lean",
+      "encoding": "utf-8",
+      "bytes": 6239,
+      "lines": 133,
+      "sha256": "3eba00f1628471619a344dc66cad85579abcc98620682165f0a2f5855f0a63e2"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialFiniteBranchFaithfulness.lean",
+      "encoding": "utf-8",
+      "bytes": 3331,
+      "lines": 79,
+      "sha256": "ee59a5f7120edb9541034c9827951702924720ef6f63790c06530780e58645b4"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialFiniteBranchJets.lean",
+      "encoding": "utf-8",
+      "bytes": 6299,
+      "lines": 138,
+      "sha256": "9915e8e7369bac886ad3181db07326659d07267694d9db2dfdde00732c0443ed"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialFinitePointOrders.lean",
+      "encoding": "utf-8",
+      "bytes": 6629,
+      "lines": 122,
+      "sha256": "124232d2561e22844c2beed3aa979a45ce07b2d69cbe88ebfb7d61dbf215148b"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialInfinityBranchJets.lean",
+      "encoding": "utf-8",
+      "bytes": 9710,
+      "lines": 210,
+      "sha256": "01ce5af54b59caa26ac4f78e13ecc42b915a3bbdeeb32bc206c9619bb42995ec"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialJetOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 2081,
+      "lines": 54,
+      "sha256": "350236c43f73e9f70f49455a6798dcff278ef2b4fa10c3d9621e35c27b015d12"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialLaurentBranches.lean",
+      "encoding": "utf-8",
+      "bytes": 11348,
+      "lines": 235,
+      "sha256": "34fd541e9ee868243fd537d68b01b6b41b0428f7ea473b46af9744bfd09db686"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialOverlapBranches.lean",
+      "encoding": "utf-8",
+      "bytes": 5611,
+      "lines": 113,
+      "sha256": "a032d4737f439d781ab00713ff0769143fdcae75e811cd1978445bbd82995123"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialRootJetAgreement.lean",
+      "encoding": "utf-8",
+      "bytes": 3715,
+      "lines": 85,
+      "sha256": "5fc0914ea09a596df5c5736793e63a541a3c2279dfa48d7753856c3cbba54169"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSixJetOrders.lean",
+      "encoding": "utf-8",
+      "bytes": 7300,
+      "lines": 149,
+      "sha256": "aea3ee716d09bea64be39c6c03d88b71de6a8535115ebc5969b2032a3dc3c118"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSmallFunctionCertificate.lean",
+      "encoding": "utf-8",
+      "bytes": 4179,
+      "lines": 84,
+      "sha256": "05ae0db26a4a15ddb632249406038b4bf0e1e0fd44dbd6e58a645b64059c50e6"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSmallNumerator.lean",
+      "encoding": "utf-8",
+      "bytes": 7619,
+      "lines": 137,
+      "sha256": "8c6ccc196c99a9b952194c7dab673e74fcc2a3e8f6a27aafcda4a6898220ecba"
+    }
+  ]
+}

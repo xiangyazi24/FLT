@@ -1,0 +1,21 @@
+--- /workspace/shared/flt-c13-r2-frozen-1541/FLT/Assumptions/MazurProof/N13CalibratedChooser.lean
++++ /workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13CalibratedChooser.lean
+@@ -107,11 +107,13 @@
+   exact congrArg (SexticMumford.classOf Model (N13Infinity.positiveInfinityOrder Q₂))
+     N13InverseInfinityWitness.mapQ₂_oppositeInfinity.symm
+ 
+-def choose (P : G) : Data :=
+-  if P = 0 then N13InfinityPointPicardRealization.infinityPlusData
+-  else if P = tClass then N13InfinityPointPicardRealization.infinityMinusData
+-  else if P = -tClass then N13InverseInfinityWitness.inverseInfinityData
+-  else chooseUncalibrated P
++def choose (P : G) : Data := by
++  classical
++  exact
++    if P = 0 then N13InfinityPointPicardRealization.infinityPlusData
++    else if P = tClass then N13InfinityPointPicardRealization.infinityMinusData
++    else if P = -tClass then N13InverseInfinityWitness.inverseInfinityData
++    else chooseUncalibrated P
+ 
+ theorem choose_certified (P : G) : Certified (choose P) := by
+   unfold choose

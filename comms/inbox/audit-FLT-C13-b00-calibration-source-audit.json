@@ -1,0 +1,30 @@
+{
+  "source_pin": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "review": "source-only, uncompiled",
+  "files": [
+    {
+      "path": "/workspace/shared/flt-c13-r2-frozen-1541/FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+      "bytes": 7485,
+      "lines": 170,
+      "sha256": "974d3e964af5cae116d7f6155969762fc4267a6f9607239f2ece841a0e1e503d"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-frozen-1541/FLT/Assumptions/MazurProof/N13PointDataCertificates.lean",
+      "bytes": 6730,
+      "lines": 115,
+      "sha256": "fcf430dfdcfcd13677d6154ceab24b973f06c0ae3d430573a4be448dc0526c14"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-frozen-1541/FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+      "bytes": 5958,
+      "lines": 119,
+      "sha256": "d51692d82deb3182fe88868a75ae4868fb2c659baeea095c6876d87f98b3cd47"
+    }
+  ],
+  "input_inventory_files": 96,
+  "input_inventory_failures": [],
+  "injectivity_project_import_closure_files": 32,
+  "injectivity_missing_imports": [],
+  "injectivity_prohibited_or_flagged_tokens": [],
+  "result": "No concrete mathematical or inspected source-signature defect found. Exact endpoint preserves original target and calibrations. Kernel/elaboration/axiom checks not run."
+}

@@ -1,0 +1,10 @@
+{
+  "old_path": "/workspace/shared/flt-c13-r2-frozen-1541/FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+  "old_sha256": "974d3e964af5cae116d7f6155969762fc4267a6f9607239f2ece841a0e1e503d",
+  "new_path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+  "new_sha256": "514c47dedbefede319d8fd87d536d68d50b14790f053c3a34314629231c446c7",
+  "bytes": 7516,
+  "lines": 172,
+  "only_delta": "choose now uses by classical; exact before the unchanged nested if branches",
+  "result": "Source-only delta accepted; supplies local classical decidability without adding theorem premises or changing calibration branches. No Lean run."
+}

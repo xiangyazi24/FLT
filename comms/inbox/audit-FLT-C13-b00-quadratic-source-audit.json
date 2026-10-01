@@ -1,0 +1,20 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13MarkedQuadraticExistence.lean",
+    "bytes": 22529,
+    "lines": 568,
+    "sha256": "5d4400534f3623cace6bd726bcb9f49c393093440f3c1c990e85e6591e9c6032"
+  },
+  "scope": "Independent source review of same-witness quadratic marking extension",
+  "concrete_source_issues_found": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "scope_warning": "The intermediate balanced raw mark is not itself geometrically correct; effective-chamber wrapper must use mark -2 for degree two.",
+  "remaining": [
+    "Marked effective-chamber wrapper",
+    "Whole-chart integral principal comparisons",
+    "Global Chooser point compatibility and fixed values",
+    "B03 additivity"
+  ]
+}

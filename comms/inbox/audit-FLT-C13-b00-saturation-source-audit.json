@@ -1,0 +1,21 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13InvertibleReductionSaturation.lean",
+    "bytes": 14314,
+    "lines": 324,
+    "sha256": "97cf566f264fd21898f56b1337ca806d8da8b40a2cc820efff4aa45a6d9fcb15"
+  },
+  "source_blobs_rechecked": 64,
+  "source_blob_mismatches": 0,
+  "scope": "Independent source review: reduction saturation and localized ideal equality descent",
+  "concrete_source_issues_found": [],
+  "mathematical_assumption_review": "PASS source review: nonzero p, invertible ideals, domain reduction, kernel=(p), and nonzero image are substantive sufficient assumptions",
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "remaining": [
+    "Construct shared nonzero-reduction principal presentations",
+    "Establish generic equations on both charts with common overlap function",
+    "Global chooser point compatibility and B03"
+  ]
+}

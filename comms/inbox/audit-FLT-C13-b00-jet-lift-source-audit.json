@@ -1,0 +1,20 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13InfinityBranchJetLift.lean",
+    "bytes": 6544,
+    "lines": 158,
+    "sha256": "810f97663ffa7ff60901edd372f526788319b0729a4311988d84c030ff2f8b6d"
+  },
+  "scope": "Independent source audit: simultaneous scaled finite jets for actual Hensel branches",
+  "concrete_source_issues_found": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "key_api": "Exact pinned IsLocalization.surj2 orientation verified against existing source implementation",
+  "remaining": [
+    "Use scaled jet lift and kernel to derive ideal-membership approximations",
+    "Generic infinity ideal comparison and full integral comparisons",
+    "Global chooser compatibility, B03"
+  ]
+}

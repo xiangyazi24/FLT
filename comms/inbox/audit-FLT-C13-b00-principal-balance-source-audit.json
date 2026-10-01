@@ -1,0 +1,21 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13PrincipalBranchBalance.lean",
+    "bytes": 6463,
+    "lines": 133,
+    "sha256": "d9f6679a94ef94f3f8b3099be3877c8bc1546a28845cf8d8afbece0e22a48a8f"
+  },
+  "scope": "Independent source audit of 2-vs-2 Mumford principal norm and two-infinity degree balance",
+  "source_inventory_rechecked": 73,
+  "extra_sources_independently_fetched_and_verified": 3,
+  "concrete_source_issues_found": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "order_sign": "ordPlus(alpha)+ordMinus(alpha)=degree(D0)+degree(D1)-degree(D2)-degree(D3)",
+  "remaining": [
+    "Instantiate cleared comparison branch ideals using marking and principal orders",
+    "Establish overlap equation and assemble integral comparison",
+    "Global chooser compatibility, B03"
+  ]
+}

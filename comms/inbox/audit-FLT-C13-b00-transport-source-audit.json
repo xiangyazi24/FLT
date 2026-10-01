@@ -1,0 +1,20 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+    "bytes": 6603,
+    "lines": 141,
+    "sha256": "d1a4a4675ec95385061b838770ade1edc062b6a82a67d9495d6504a51a5cc1f0"
+  },
+  "scope": "Independent source review; no Lean execution",
+  "concrete_unresolved_source_issues": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "remaining": [
+    "Prove compatible generic infinity ideal equation for the transported fraction",
+    "Full integral comparisons, chooser compatibility, B03"
+  ],
+  "localization_orientation": "Verified exact Mathlib surj: z*map(s)=map(c)",
+  "cross_product": "aO*map(t^n*d)=bO*map(t^m*c), using aO*t^n=map(c), bO*t^m=map(d)"
+}

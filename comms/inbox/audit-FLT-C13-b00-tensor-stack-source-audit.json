@@ -1,0 +1,51 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "candidates": [
+    {
+      "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13OverlapBranchCompatibility.lean",
+      "bytes": 9272,
+      "lines": 188,
+      "sha256": "fcf2b05cba651c3c2ac416ac708583b145184ecd8f247b331e0a6dad73050e5f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13PrincipalBranchIdeals.lean",
+      "bytes": 12116,
+      "lines": 224,
+      "sha256": "b52284b2f4795e3a97dceaeeb0283bf69363198c7d198037c583b931686e978f"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13PrimitiveAffineComparison.lean",
+      "bytes": 6783,
+      "lines": 138,
+      "sha256": "801af860d91beba906729b6cc9e2ad222dc70b4cedb336646733c0e55e0ac52e"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13IntegralPrincipalComparison.lean",
+      "bytes": 7515,
+      "lines": 141,
+      "sha256": "848ce71863c68d2891f809d8de9b6dac09fa45df047fa5beaf07a7d5a7c51b12"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13MarkedTensorComparison.lean",
+      "bytes": 8252,
+      "lines": 147,
+      "sha256": "b7cc30867e5b933f5444ed38abaf8d0be15dddf8a29f74be2d709aad54dd6e72"
+    }
+  ],
+  "total_lines": 838,
+  "source_files_rechecked": 89,
+  "source_hash_mismatches": 0,
+  "scope": "Independent source review of actual integral tensor-comparison assembly",
+  "concrete_unresolved_source_issues": [],
+  "resolved_provenance_issue": "One extra trailing newline in SexticMumford and IntegralFractionalHull was corrected to exact pinned bytes;89-file refreshed inventory fully reverified",
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "main_result_reviewed": "exists_integral_tensor_comparison constructs four regular functions, nonzero reductions, integral affine/infinity equations, and common overlap cross-product from actual marked-effective data and generic class-sum equality",
+  "remaining": [
+    "Assemble global rational-class chooser and named calibrations",
+    "Prove rational-point compatibility using actual certificates",
+    "Bridge reduced comparisons to special code additivity",
+    "Compile all candidates and inspect axioms"
+  ]
+}

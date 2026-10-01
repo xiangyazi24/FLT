@@ -1,0 +1,310 @@
+{
+  "root": "N13SmallMumfordRigidity",
+  "paths": [
+    {
+      "module": "FLT.Assumptions.MazurProof.N13SmallMumfordRigidity",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SmallMumfordRigidity.lean",
+      "sha256": "5c0792bdc99040c603e99cac9c51737cedad104a25ef6e01b120900eb2759bc7",
+      "git_blob": "ad6cb6081c57ebfed80604d6d6138bd6806687e8"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13FactorRigidity",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FactorRigidity.lean",
+      "sha256": "40ce6c92f210d88d635e683545b88e016f50cfbfffa60fc02fbef18682786648",
+      "git_blob": "14a2b27c8e3585e6b714c869fbc8ca734591c4db"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13BranchLeading",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13BranchLeading.lean",
+      "sha256": "817de00e8293d8378f3d829b86eba964efb60407909aed71be2829ed6b2d4817",
+      "git_blob": "5dc4f7b699cae7bd2c55f2401652719ccb5a4d91"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13BranchNorm",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13BranchNorm.lean",
+      "sha256": "314a10cf5af45fd358c8b286bc143b0d5373ffb34f5fc2ed2318b8efcaa356de",
+      "git_blob": "cf93733938ccce5e724f2a0c60dbe31ba645b25b"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13InfinityAPI",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityAPI.lean",
+      "sha256": "4cdd225407278f7dbf456d55ab82e153e057608d0188f9dde371b187be48acb2",
+      "git_blob": "f7fe373b42371088f2f71708ddb4d635c09e2da0"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13Infinity",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13Infinity.lean",
+      "sha256": "c122767abf79f1aace46a78f96a3ec58a38135fd8125d182e885b00f9657ebdf",
+      "git_blob": "8b7cbfe946acbb7e544ff9ecb52952126ff7df2f"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13Mumford",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13Mumford.lean",
+      "sha256": "2476d35e1426b98f376689858378d0d8660f908b18d3c912227c0b81bedc00aa",
+      "git_blob": "2dfd6ce5ee8784020cf1d9b5bc73dcb53f33fa15"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13CurveModel",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13CurveModel.lean",
+      "sha256": "2bf4bcdebdb20c6a6a745af27ee03495dd818124f0b170fae0e420295df2421c",
+      "git_blob": "b9eda184c922d07aab0c8eefc84de1c1cd213f25"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13TateBridge",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13TateBridge.lean",
+      "sha256": "7936e76a2a5754812e3abda54ff01c56e0efbedeb78930bbdf8f77c499455501",
+      "git_blob": "47fe360dd26490071a4507404dbc8d497f1a7018"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.TateNFDivision",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/TateNFDivision.lean",
+      "sha256": "d3185227bddd66327e7837c13dab0a747452dca2e10b57d638fe81c2dd93cfb8",
+      "git_blob": "676c5bd7dd957d12add96af2b964479e70a3a11b"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumford",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumford.lean",
+      "sha256": "41d8986cf092de90cd3c689f4a92d21dbc0fd5857ef480c0c757e4325833556b",
+      "git_blob": "5c198c75b14da93851a8b5bdf3fe08aff4cda02c"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13InfinityMinusAPI",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityMinusAPI.lean",
+      "sha256": "ba5df9e1f16ed0f4987ec6f9f9633575a643f4ec606fdfd4f59e3b175cbb7901",
+      "git_blob": "c1c566ca1ccd67f5c2a1b60d1cd23a9eacbf2eb8"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13InfinityMinus",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13InfinityMinus.lean",
+      "sha256": "e358e96399ae2d2104bed95454bdb906f5d2d74d38b8e8fd399e89a3ac5a200e",
+      "git_blob": "4bf136110d9567437c8f5fb6eed8c6baf211f082"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13LaurentPolynomialOrder",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/N13LaurentPolynomialOrder.lean",
+      "sha256": "3febfd810de3af3c156415eda7d221c36d9339a6a4ea8f69029adb7d650a1b3b",
+      "git_blob": "36f148feb9165ee238e76fe4d1de4060f514c436"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordBasis",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/SexticMumfordBasis.lean",
+      "sha256": "2333b5d3e2ca7ce635d56ba5006824393443cc2d09434385701be945970f952e",
+      "git_blob": "1ee3b7bc6218d6c3f4f3aac03c5396d05c6929df"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordNorm",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordNorm.lean",
+      "sha256": "da28bc91773b9b846257be1c44cbb613b593353f6e84f953a8a48674d700e4f7",
+      "git_blob": "157ac9c58fe1532448e33fa6604cfe7af3dd75fe"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordPrincipalScale",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordPrincipalScale.lean",
+      "sha256": "661e7bf67496baab7e21edc5cdc9fc7eafde23e1cd3167438c8ff87d06a2d084",
+      "git_blob": "f770ded878f3b32d52a4db98c06bd2d88930bf75"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordPrincipalNumerator",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordPrincipalNumerator.lean",
+      "sha256": "e3ec5062f83a58950b2fa3a3512fdcff1e5b68f1fe24a66196629aac408b82b1",
+      "git_blob": "7a170df2e70d6f18d023b2b233eb93929d82d2ee"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordIdealConjugation",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordIdealConjugation.lean",
+      "sha256": "3d22488de29dc1efe6aa819552e7ab37d2de6ad6f79eb1053993e8241901b98f",
+      "git_blob": "f4e2c34d15ebeb08df098e5cbd981c13c4b4682a"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticFunctionConjugation",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticFunctionConjugation.lean",
+      "sha256": "e3077654453603982ad437f14b81245c0337c9e4d12a89c5397ef7d87ceb917f",
+      "git_blob": "3c41ab2491ab37a08a93bc4566009eb268abcf13"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordUnit",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordUnit.lean",
+      "sha256": "56b51f2a79f1b90e716d56ee49c30d231aaa293efdc424cc4a4b94366d930bfc",
+      "git_blob": "8a8a0739f09a57cc39d08f3e0dba5161a96c6f6c"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordIdeal",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordIdeal.lean",
+      "sha256": "abb950245859ad690907d3d12448d10253802b90f0e183657fce0e98cdbafbf5",
+      "git_blob": "231bd943c9a02c8a9e59bf7c72a99ff5840e34b9"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13MumfordRigidity",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13MumfordRigidity.lean",
+      "sha256": "4a44456d2935f6e9273946f341e6cf956b75096d97eb28ffa689939c30355a48",
+      "git_blob": "cc04cd89548df592e71f2ac5ecaaf7c2b12ab73c"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordRecover",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/SexticMumfordRecover.lean",
+      "sha256": "743675fd21b863a1e4819ad8d3eba497aa239776567cd9e721aecb4b3564c00b",
+      "git_blob": "913f8e628084a2161b88588f20b53f1bd29ea293"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordGroup",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/SexticMumfordGroup.lean",
+      "sha256": "39124c2c08a4f7cb4f7870aadd4aeaea88da7cb94f0bbad7434ac73c1bdc5a09",
+      "git_blob": "0577548911492af8c40653bc3ef1166670104970"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticOrientedPic",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticOrientedPic.lean",
+      "sha256": "c6e531d9ac85bcbd74a6e28810e269fa790342f68081a9582687e7732a668a46",
+      "git_blob": "7c5785edeb3c419410b0b42220677190fdc16a3e"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N13MumfordInfinityBalance",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13MumfordInfinityBalance.lean",
+      "sha256": "141c2f9cc7f31b300987f3fb720ed21376e8683862ae8759c3949096a51fb175",
+      "git_blob": "5c4155caaf42c426b601cb6db4640908398d069d"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordStructuralReduction",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordStructuralReduction.lean",
+      "sha256": "eab27a8e1643877df2e2d03083bd5e469a37bee28ca5649ab1702e24d1dbf9c4",
+      "git_blob": "ebc20f60c85f57cfe77a3b6f0d13850ae5be5df9"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordPrimitivePart",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/SexticMumfordPrimitivePart.lean",
+      "sha256": "6990637e4ab0687494307176215598db94eb7bf31ba9da1a5086c357ac952c18",
+      "git_blob": "dc698d692812be6d14bd0d59e5be6413e048d1dd"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordRepresentative",
+      "path": "/workspace/shared/flt-c13-r2-next-audit/calibration-pinned-reference/SexticMumfordRepresentative.lean",
+      "sha256": "164bdbf42ae452a5d0bb2e00678d9994d81ae503e6d44aedc27924ee9487c96b",
+      "git_blob": "d0007c76ab990744dc5d9e018ce3fddd8cc499c7"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordNormalForm",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordNormalForm.lean",
+      "sha256": "3b9767a6ee008ee38969ad84ab93c94b5b6622d6a1c9a8b46be3ad43af0b6ddf",
+      "git_blob": "ec6f24c4f48866af754f9e7bfe679363072909b9"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.SexticMumfordCantorReduction",
+      "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordCantorReduction.lean",
+      "sha256": "815d6d6851bd0781aee4d507bf4e52a0755997b4b84470301a130d86bcb80323",
+      "git_blob": "d70c01c131d2d9f3eeb50ea4d8acc0538ed8ce0c"
+    }
+  ],
+  "missing": [],
+  "prohibited_or_flagged": [],
+  "edges": {
+    "FLT.Assumptions.MazurProof.N13SmallMumfordRigidity": [
+      "FLT.Assumptions.MazurProof.N13FactorRigidity",
+      "FLT.Assumptions.MazurProof.SexticMumfordPrincipalScale",
+      "FLT.Assumptions.MazurProof.N13MumfordRigidity",
+      "FLT.Assumptions.MazurProof.SexticMumfordGroup",
+      "FLT.Assumptions.MazurProof.N13MumfordInfinityBalance"
+    ],
+    "FLT.Assumptions.MazurProof.N13FactorRigidity": [
+      "FLT.Assumptions.MazurProof.N13BranchLeading",
+      "FLT.Assumptions.MazurProof.SexticMumfordNorm"
+    ],
+    "FLT.Assumptions.MazurProof.N13BranchLeading": [
+      "FLT.Assumptions.MazurProof.N13BranchNorm"
+    ],
+    "FLT.Assumptions.MazurProof.N13BranchNorm": [
+      "FLT.Assumptions.MazurProof.N13InfinityAPI",
+      "FLT.Assumptions.MazurProof.N13InfinityMinusAPI",
+      "FLT.Assumptions.MazurProof.N13LaurentPolynomialOrder",
+      "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+    ],
+    "FLT.Assumptions.MazurProof.N13InfinityAPI": [
+      "FLT.Assumptions.MazurProof.N13Infinity"
+    ],
+    "FLT.Assumptions.MazurProof.N13Infinity": [
+      "FLT.Assumptions.MazurProof.N13Mumford"
+    ],
+    "FLT.Assumptions.MazurProof.N13Mumford": [
+      "FLT.Assumptions.MazurProof.N13CurveModel",
+      "FLT.Assumptions.MazurProof.SexticMumford"
+    ],
+    "FLT.Assumptions.MazurProof.N13CurveModel": [
+      "FLT.Assumptions.MazurProof.N13TateBridge"
+    ],
+    "FLT.Assumptions.MazurProof.N13TateBridge": [
+      "FLT.Assumptions.MazurProof.TateNFDivision"
+    ],
+    "FLT.Assumptions.MazurProof.TateNFDivision": [],
+    "FLT.Assumptions.MazurProof.SexticMumford": [],
+    "FLT.Assumptions.MazurProof.N13InfinityMinusAPI": [
+      "FLT.Assumptions.MazurProof.N13InfinityAPI",
+      "FLT.Assumptions.MazurProof.N13InfinityMinus"
+    ],
+    "FLT.Assumptions.MazurProof.N13InfinityMinus": [
+      "FLT.Assumptions.MazurProof.N13Infinity"
+    ],
+    "FLT.Assumptions.MazurProof.N13LaurentPolynomialOrder": [],
+    "FLT.Assumptions.MazurProof.SexticMumfordBasis": [
+      "FLT.Assumptions.MazurProof.SexticMumford"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordNorm": [
+      "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordPrincipalScale": [
+      "FLT.Assumptions.MazurProof.SexticMumfordPrincipalNumerator",
+      "FLT.Assumptions.MazurProof.SexticMumfordNorm"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordPrincipalNumerator": [
+      "FLT.Assumptions.MazurProof.SexticMumfordIdealConjugation"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordIdealConjugation": [
+      "FLT.Assumptions.MazurProof.SexticFunctionConjugation",
+      "FLT.Assumptions.MazurProof.SexticMumfordUnit"
+    ],
+    "FLT.Assumptions.MazurProof.SexticFunctionConjugation": [
+      "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordUnit": [
+      "FLT.Assumptions.MazurProof.SexticMumfordIdeal"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordIdeal": [
+      "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+    ],
+    "FLT.Assumptions.MazurProof.N13MumfordRigidity": [
+      "FLT.Assumptions.MazurProof.SexticMumfordRecover",
+      "FLT.Assumptions.MazurProof.SexticMumfordUnit",
+      "FLT.Assumptions.MazurProof.N13InfinityAPI"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordRecover": [
+      "FLT.Assumptions.MazurProof.SexticMumfordIdeal"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordGroup": [
+      "FLT.Assumptions.MazurProof.SexticOrientedPic"
+    ],
+    "FLT.Assumptions.MazurProof.SexticOrientedPic": [
+      "FLT.Assumptions.MazurProof.SexticMumfordUnit"
+    ],
+    "FLT.Assumptions.MazurProof.N13MumfordInfinityBalance": [
+      "FLT.Assumptions.MazurProof.SexticMumfordStructuralReduction",
+      "FLT.Assumptions.MazurProof.N13BranchLeading"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordStructuralReduction": [
+      "FLT.Assumptions.MazurProof.SexticMumfordPrimitivePart",
+      "FLT.Assumptions.MazurProof.SexticMumfordCantorReduction"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordPrimitivePart": [
+      "FLT.Assumptions.MazurProof.SexticMumfordRepresentative"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordRepresentative": [
+      "FLT.Assumptions.MazurProof.SexticMumfordNormalForm",
+      "FLT.Assumptions.MazurProof.SexticOrientedPic",
+      "FLT.Assumptions.MazurProof.SexticMumfordNorm"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordNormalForm": [
+      "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+    ],
+    "FLT.Assumptions.MazurProof.SexticMumfordCantorReduction": [
+      "FLT.Assumptions.MazurProof.SexticMumfordRepresentative",
+      "FLT.Assumptions.MazurProof.SexticMumfordIdealConjugation"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "source_pin": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_pin": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "files": [
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialAffineNorm.lean",
+      "bytes": 5581,
+      "lines": 133,
+      "sha256": "12cc00b3376a5579ace4fc7c6a676b7d456d94284ee7765eadb8708448187268"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialBranchFaithfulness.lean",
+      "bytes": 4085,
+      "lines": 92,
+      "sha256": "495229b01c9d6a902b2b5049c42842b9a3557d8a9bfd1e4ef864b30cfb638119"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialCertifiedNumerator.lean",
+      "bytes": 3055,
+      "lines": 67,
+      "sha256": "dcbd98c8ad571d53df7c7b7824fbd9145647a37a33954ed82191a00b19a96682"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialComparisonFactorPair.lean",
+      "bytes": 7440,
+      "lines": 164,
+      "sha256": "d12fb8b56cd658d3c022fcc50015d7bb4334c34cc69f779f988262c557247ef7"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialDivisorBranchOrders.lean",
+      "bytes": 6239,
+      "lines": 133,
+      "sha256": "3eba00f1628471619a344dc66cad85579abcc98620682165f0a2f5855f0a63e2"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialFiniteBranchJets.lean",
+      "bytes": 6299,
+      "lines": 138,
+      "sha256": "9915e8e7369bac886ad3181db07326659d07267694d9db2dfdde00732c0443ed"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialInfinityBranchJets.lean",
+      "bytes": 9710,
+      "lines": 210,
+      "sha256": "01ce5af54b59caa26ac4f78e13ecc42b915a3bbdeeb32bc206c9619bb42995ec"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialJetOrder.lean",
+      "bytes": 2081,
+      "lines": 54,
+      "sha256": "350236c43f73e9f70f49455a6798dcff278ef2b4fa10c3d9621e35c27b015d12"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialLaurentBranches.lean",
+      "bytes": 11348,
+      "lines": 235,
+      "sha256": "34fd541e9ee868243fd537d68b01b6b41b0428f7ea473b46af9744bfd09db686"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialOverlapBranches.lean",
+      "bytes": 5611,
+      "lines": 113,
+      "sha256": "a032d4737f439d781ab00713ff0769143fdcae75e811cd1978445bbd82995123"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialRootJetAgreement.lean",
+      "bytes": 3715,
+      "lines": 85,
+      "sha256": "5fc0914ea09a596df5c5736793e63a541a3c2279dfa48d7753856c3cbba54169"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialSixJetOrders.lean",
+      "bytes": 7300,
+      "lines": 149,
+      "sha256": "aea3ee716d09bea64be39c6c03d88b71de6a8535115ebc5969b2032a3dc3c118"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialSmallFunctionCertificate.lean",
+      "bytes": 4179,
+      "lines": 84,
+      "sha256": "05ae0db26a4a15ddb632249406038b4bf0e1e0fd44dbd6e58a645b64059c50e6"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialSmallNumerator.lean",
+      "bytes": 7619,
+      "lines": 137,
+      "sha256": "8c6ccc196c99a9b952194c7dab673e74fcc2a3e8f6a27aafcda4a6898220ecba"
+    }
+  ],
+  "total_lines": 1794,
+  "prohibited_or_stale_identifier_hits": [],
+  "result": "Source-only: no concrete mathematical or inspected API defect found after includeSeries rename; uncompiled",
+  "remaining": "Finite local ideal multiplicities and their comparison relation; connect weighted local code to existing finite Abel code; B03 endpoint not yet proved"
+}

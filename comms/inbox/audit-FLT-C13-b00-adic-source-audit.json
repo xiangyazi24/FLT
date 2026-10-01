@@ -1,0 +1,19 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13LocalizationAdicPatch.lean",
+    "bytes": 3848,
+    "lines": 92,
+    "sha256": "83cec263181d67459b554e6dc8281101d319ca4f646826055d08771a7358bc60"
+  },
+  "scope": "Independent source audit of Noetherian localization/adic ideal patching",
+  "concrete_source_issues_found": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "key_api": "Exact pinned Ideal.mem_iInf_smul_pow_eq_bot_iff verified",
+  "remaining": [
+    "Derive all-order approximation predicates from actual formal branch data",
+    "Generic infinity comparison, integral comparisons, global chooser compatibility, B03"
+  ]
+}

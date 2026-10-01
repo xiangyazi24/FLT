@@ -1,0 +1,22 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13PrimitiveVerticalPresentation.lean",
+    "bytes": 6015,
+    "lines": 144,
+    "sha256": "decd29e0ec9029031e962a56a36549847e5612c69cf3fee2aa389cb0c2edf809"
+  },
+  "scope": "Independent source review; no Lean execution",
+  "concrete_unresolved_source_issues": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "remaining": [
+    "Prove compatible generic infinity ideal equation for the transported fraction",
+    "Full integral comparisons, chooser compatibility, B03"
+  ],
+  "fixed_findings": [
+    "Added local affine-to-rational Algebra instance before CommonField fraction-ring instance"
+  ],
+  "noetherian_status": "Source-level inference path: PadicInt DVR, polynomial ring, AdjoinRoot quotient; not compiler-tested"
+}

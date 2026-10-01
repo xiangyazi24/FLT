@@ -1,0 +1,19 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+    "bytes": 6071,
+    "lines": 122,
+    "sha256": "07d413028a3d26edcf5d2c428b55d7a09f17300e1a1c0ebc9a7a1a18fa2a887f"
+  },
+  "scope": "Independent source review of certified effective data, cancellation, and uncalibrated rational chooser",
+  "concrete_source_issues_found": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "remaining": [
+    "Exact zero/AJ(T)/negative-AJ(T) calibrations",
+    "Named rational-point compatibility",
+    "Special-code comparison/additivity bridge",
+    "Kernel compilation and axiom verification"
+  ]
+}

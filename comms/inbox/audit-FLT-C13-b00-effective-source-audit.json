@@ -1,0 +1,19 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "candidate": {
+    "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13MarkedEffectiveData.lean",
+    "bytes": 6732,
+    "lines": 139,
+    "sha256": "a6902dffa69b47743e286adbb75760de3481ddb28917bfb15ac083029494feef"
+  },
+  "scope": "Independent source review of marked effective-chamber wrapper",
+  "concrete_source_issues_found": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "degree_two_reorientation": "PASS source review: same witness R, effective nInf=-1, withMark=-2, both actual multiplicities zero",
+  "remaining": [
+    "Whole-chart integral principal comparisons",
+    "Global Chooser point compatibility and fixed values",
+    "B03 additivity"
+  ]
+}

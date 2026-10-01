@@ -1,0 +1,31 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "candidates": [
+    {
+      "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13InfinityIdealApproximation.lean",
+      "bytes": 7216,
+      "lines": 170,
+      "sha256": "1910ec2ebf184998a262a104bf0800a248df889d03439d661adc796977d32e61"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-next/FLT/Assumptions/MazurProof/N13GenericInfinityComparison.lean",
+      "bytes": 6672,
+      "lines": 127,
+      "sha256": "c9ea24c377870434d182d7a8a28fb244a842a6427f3955eb6a844c55f108d26f"
+    }
+  ],
+  "scope": "Independent source audit: actual scaled ideal approximations, generic equality, and saturated integral descent",
+  "concrete_source_issues_found": [],
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "apis_verified": [
+    "Ideal.ideal_prod_eq",
+    "IsLocalization.mem_map_algebraMap_iff"
+  ],
+  "scope_boundary": "Generic equality is proved conditional on actual branch ideal equalities and away-from-t equality; no global chooser comparison is asserted",
+  "remaining": [
+    "Establish branch and overlap equalities for desired cleared line comparisons",
+    "Global chooser compatibility, B03"
+  ]
+}

@@ -1,0 +1,18 @@
+import FLT.Assumptions.MazurProof.N13ConstructedReductionClassifier
+
+-- Lead-owned harness. This file has NOT been executed by research-dot.
+#check MazurProof.N13CalibratedChooser.globalExistenceTarget
+#print axioms MazurProof.N13CalibratedChooser.globalExistenceTarget
+#check MazurProof.N13SpecialDegreeFourCode.degreeFourCode_eq_of_comparison
+#print axioms MazurProof.N13SpecialDegreeFourCode.degreeFourCode_eq_of_comparison
+#check MazurProof.N13SpecialSmallFunctionCertificate.supported_small_function_certificate
+#print axioms MazurProof.N13SpecialSmallFunctionCertificate.supported_small_function_certificate
+#check MazurProof.N13ConstructedSpecialization.specialCode_add
+#print axioms MazurProof.N13ConstructedSpecialization.specialCode_add
+#check MazurProof.N13ConstructedSpecialization.specialization_rationalAbel
+#print axioms MazurProof.N13ConstructedSpecialization.specialization_rationalAbel
+
+#check MazurProof.N13ConstructedReductionClassifier.compatibleReduction
+#print axioms MazurProof.N13ConstructedReductionClassifier.compatibleReduction
+#check MazurProof.N13ConstructedReductionClassifier.specialization_surjective
+#print axioms MazurProof.N13ConstructedReductionClassifier.specialization_surjective

@@ -1,0 +1,41 @@
+{
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "scope": "Independent source review only; no compilation or axiom verification",
+  "candidate_files": [
+    {
+      "path": "/workspace/shared/flt-c13-r2-results/FLT/Assumptions/MazurProof/N13EffectiveGraphData.lean",
+      "bytes": 11485,
+      "lines": 240,
+      "sha256": "647a2b9f0638ea0ec0817b0c86273bb36832881e65ff3015bddd016f144d2f37"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-results/FLT/Assumptions/MazurProof/N13EffectiveInfinityRepair.lean",
+      "bytes": 8086,
+      "lines": 196,
+      "sha256": "721e6a9d4fcb531c87cf4d06e77cb33efeba17683d0515e4b78b3e1edb6a97ec"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-r2-results/FLT/Assumptions/MazurProof/N13InfinityChartMarking.lean",
+      "bytes": 20473,
+      "lines": 413,
+      "sha256": "231fe2f6f1c42fc5848c3012323c06a696ef40075e23ca8beee918c5e223ce8f"
+    }
+  ],
+  "source_files_rechecked": 54,
+  "source_hash_mismatches": 0,
+  "mathematical_contradictions_found": 0,
+  "circular_target_assumptions_found": 0,
+  "prohibited_direct_dependencies_found": 0,
+  "compiler": "NOT RUN",
+  "axiom_check": "NOT RUN",
+  "fixed_findings": [
+    "Added explicit N13InverseInfinityWitnessClass import for inverseInfinityData_geometricMark reference",
+    "Added open Polynomial for unqualified X and C in reciprocal_constant_nonzero"
+  ],
+  "open_obligations": [
+    "Package arbitrary quadratic chart marking with the same Data witness selected by exists_effective_data; reciprocal branch-order criterion and nonzero constant arithmetic are supplied",
+    "Integral chart principal comparison extension and separatedness",
+    "Global chooser point compatibility and prescribed coherent values",
+    "B03 tensor normalization / specialization additivity"
+  ]
+}

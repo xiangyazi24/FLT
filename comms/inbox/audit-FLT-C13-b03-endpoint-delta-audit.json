@@ -1,0 +1,43 @@
+{
+  "source_pin": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "files": [
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13ConstructedReductionClassifier.lean",
+      "bytes": 3129,
+      "lines": 72,
+      "sha256": "62a36109945be7848eef88281ee79783ca43641438d5629a698d2e0a9ad80e02"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13ConstructedSpecialization.lean",
+      "bytes": 5214,
+      "lines": 111,
+      "sha256": "49ee74c8d6aca8db3341da14b97b950f96947e4cb04c1df0349aad323c8bf536"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialDegreeFourCode.lean",
+      "bytes": 8684,
+      "lines": 148,
+      "sha256": "70558dfef24c07371c2917d630933fdb376ea1c650f07cfeb00b06adfbd2b775"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialFiniteBranchFaithfulness.lean",
+      "bytes": 3331,
+      "lines": 79,
+      "sha256": "ee59a5f7120edb9541034c9827951702924720ef6f63790c06530780e58645b4"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialFinitePointOrders.lean",
+      "bytes": 6629,
+      "lines": 122,
+      "sha256": "124232d2561e22844c2beed3aa979a45ce07b2d69cbe88ebfb7d61dbf215148b"
+    }
+  ],
+  "delta_lines": 532,
+  "previous14_changed": [],
+  "b03_candidate_count": 19,
+  "prohibited_or_flagged_source_tokens": [],
+  "pinned_input_inventory_reverified_count": 98,
+  "pinned_input_inventory_failures": [],
+  "result": "No concrete mathematical or inspected source-signature defect found. Exact B03 comparison endpoint, additive specialization, proper reduction compatibility, classifier, and surjectivity constructed at source level.",
+  "limitations": "Uncompiled: no elaboration, ordinary-decide execution, kernel axiom checking, or separatedness proof."
+}

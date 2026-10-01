@@ -1,0 +1,32 @@
+{
+  "source_pin": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_pin": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "files": [
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialAffineNorm.lean",
+      "bytes": 5581,
+      "lines": 133,
+      "sha256": "12cc00b3376a5579ace4fc7c6a676b7d456d94284ee7765eadb8708448187268"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialComparisonFactorPair.lean",
+      "bytes": 7440,
+      "lines": 164,
+      "sha256": "d12fb8b56cd658d3c022fcc50015d7bb4334c34cc69f779f988262c557247ef7"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialInfinityBranchJets.lean",
+      "bytes": 9710,
+      "lines": 210,
+      "sha256": "01ce5af54b59caa26ac4f78e13ecc42b915a3bbdeeb32bc206c9619bb42995ec"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-b03-next/FLT/Assumptions/MazurProof/N13SpecialLaurentBranches.lean",
+      "bytes": 6598,
+      "lines": 137,
+      "sha256": "2fcb06038fb9a745de3364a8331ea3adb6282d6e6f2c87daac1eefb4bf2b0e2f"
+    }
+  ],
+  "result": "No concrete mathematical or inspected API defect found; uncompiled source-only review",
+  "remaining": "Two-infinity factor degree bounds and finite-code bridge remain open"
+}
