@@ -1,0 +1,80 @@
+{
+  "commit": "4a257c2a12abf09f43d27b1ab2f2b0cdd1aff4e9",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+      "exact_content": true,
+      "remote_git_blob": "5f6de2b80c149b468cd86e4f45fb840e857235d0"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+      "exact_content": true,
+      "remote_git_blob": "9bf7ee6acf9cb08330ac990e2cf444249f026b7f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+      "exact_content": true,
+      "remote_git_blob": "1c37972b2ffe41f29723714fea2ac21efeddb8c3"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+      "exact_content": true,
+      "remote_git_blob": "0da6c3bcaef175fe9e72f8fc8d3e818cb6d3047e"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-arithmetic-audit/INDEPENDENT_K2_ARITHMETIC_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "15bffa38c34d0ef17e0ac7769a7e13f49b842ad7"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-arithmetic-audit/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "8ed8a55e29bafdde8d1d90da1fab34c24317956d"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-arithmetic-audit/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "be6c11f46674bf28194b1c9356e0bb58bc9eea22"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-numerator-audit/INDEPENDENT_NUMERATOR_DIVISIBILITY_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "430d6e222a9f0c8a08d0f8ea7cd90e2a59870884"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-numerator-audit/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "f0f09c57b4a72daa0787d44043149f8be83a1328"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-numerator-audit/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "682facd5caf3f6ff6b6a251b47f44685ef0314c1"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-numerator-audit/SYMBOLIC_IDENTITY_RESULT.json",
+      "exact_content": true,
+      "remote_git_blob": "b017288234eb1d23bd5181a503a706b4ac4248d4"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-numerator-audit/symbolic_identity_check.py",
+      "exact_content": true,
+      "remote_git_blob": "c1dc0f8d6b8060e026ef862891768aed9eaa215a"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-arithmetic.md",
+      "exact_content": true,
+      "remote_git_blob": "2902d52308c97defa918fa199ebbb1f28346c167"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "exact_content": true,
+      "remote_git_blob": "7dc8c1dcb90a21f66ad0dd30f5e0b41ee0be9b1b"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K2-arithmetic-manifest.json",
+      "exact_content": true,
+      "remote_git_blob": "666372e99c8c8d0ca2b92b883a4be46c39df0b3b"
+    }
+  ]
+}
