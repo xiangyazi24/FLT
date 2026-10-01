@@ -1,0 +1,80 @@
+{
+  "commit": "c8753dd7e6e7a17557e0fe2ca4dcc9d4a472e483",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedMappedSpecialFamily.lean",
+      "exact_content": true,
+      "remote_git_blob": "fb0298259a0d460d6736d20e6ea9ec4f469b5d57"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelBaseDivisor.lean",
+      "exact_content": true,
+      "remote_git_blob": "b9db41e6e298f2d7a7c513862d9e73a28d29e74f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelBasePic.lean",
+      "exact_content": true,
+      "remote_git_blob": "6cae6a98f83f00359460b99ba430e6796d3edc4a"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelGraphContraction.lean",
+      "exact_content": true,
+      "remote_git_blob": "b90f3ec0b4d795258206b11bfb8d976faa915298"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelInfinityMultiplicity.lean",
+      "exact_content": true,
+      "remote_git_blob": "8623ec232249ff08b4d559b3d95688a48cb92573"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/INDEPENDENT_K1_SOURCE_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "e938a2b8d9a0df97dcd3a9e4a8ee52ef26854559"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "c5bca1696f507766176ca277ee235a06a2674961"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/SOURCE_AND_CANDIDATE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "40fd8e5ad526f4a955b8a3431d22aa9cb1a90c1a"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/MATHLIB_SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "83c07f676b4d7495423995127d2141bc2524a831"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/input-validation.json",
+      "exact_content": true,
+      "remote_git_blob": "277524bbcacbc69bcd5c3c8f89e33d0f14725e95"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/extra-validation.json",
+      "exact_content": true,
+      "remote_git_blob": "f942a38d2ce5246d83b8291c130a6b27caff6dac"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/initial-review-snapshot.json",
+      "exact_content": true,
+      "remote_git_blob": "a5c32751dbbdfd78b22e9b8081468373dfeca172"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1.md",
+      "exact_content": true,
+      "remote_git_blob": "c173f0ef37e79b6fbea9beabf280ea672455c9c7"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "exact_content": true,
+      "remote_git_blob": "d6deb991b9e7fbda2da7b80b818bea6136c6b33f"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-manifest.json",
+      "exact_content": true,
+      "remote_git_blob": "1a38df8a10a4abbcced9b3db45e38572b5173640"
+    }
+  ]
+}
