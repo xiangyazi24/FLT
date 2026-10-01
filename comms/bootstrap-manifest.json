@@ -1,0 +1,25 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "source_commit": "6576b87985deb3a8c0014e5458e56065931a5cc4",
+  "nonce": "FLT-DOT-20261001",
+  "files": [
+    {
+      "path": "COMMS.md",
+      "encoding": "utf-8",
+      "bytes": 3687,
+      "sha256": "e55a875c645ba1b4cec14b35cb1b013ce73f214d8fe8d92589917945f67cf2c2"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 167,
+      "sha256": "eb31a60714e60b12a4a4d676552df52536da158406935f6fa26eb286588636c2"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-DOT-20261001-handshake.md",
+      "encoding": "utf-8",
+      "bytes": 586,
+      "sha256": "2ddf13357219ea1abeae7e3561efa236cb532b662e392baa51896a867bdf31ec"
+    }
+  ]
+}
