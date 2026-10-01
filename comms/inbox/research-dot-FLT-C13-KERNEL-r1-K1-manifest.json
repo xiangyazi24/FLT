@@ -1,0 +1,42 @@
+{
+  "task": "FLT-C13-KERNEL",
+  "revision": 1,
+  "scope": "K1 five modules, 513 lines",
+  "source_commit": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "dependency_commit": "2561ea7c66fb30c15416934a7ae513127cb387e1",
+  "status": "SOURCE_REVIEWED_UNCOMPILED",
+  "lean_files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedMappedSpecialFamily.lean",
+      "bytes": 2497,
+      "sha256": "f20ca03307778ebfae0969a9868947c41a774308f98de88406b653bc86bc1ef0",
+      "lines": 54
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelBaseDivisor.lean",
+      "bytes": 3542,
+      "sha256": "7cb59949e46450341438fec3caa7b1d3981e0320f80bb051a77a5acea35cbd1f",
+      "lines": 88
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelBasePic.lean",
+      "bytes": 6051,
+      "sha256": "2237b399608bcfc2e5a43b71afa28caaa05ed4a71a53679ecaab02026644521b",
+      "lines": 134
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelGraphContraction.lean",
+      "bytes": 4715,
+      "sha256": "c98542116f277997576f09dbf007685d45c1cb80c21e641ec474d60aedab2455",
+      "lines": 98
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13KernelInfinityMultiplicity.lean",
+      "bytes": 6426,
+      "sha256": "fd68334a68946192e6e7a9e3495ffd53c6bc66e46c542aa58e330722bb66e5fd",
+      "lines": 139
+    }
+  ],
+  "delta": "N13KernelBaseDivisor changed sub_right_injective to sub_left_injective; all other original K1 snapshot files unchanged",
+  "remaining": "K2 normalized principal numerator producer, then exact FirstJetDoublingCompatibility and separatedness"
+}

@@ -8,3 +8,5 @@ FLT 2026-10-01 04:14 PM CDT: Own-branch commit/push 2561ea7c66fb30c15416934a7ae5
 FLT 2026-10-01 04:20 PM CDT: Read-only kernel assessment identifies a nonzero firstJet on the affine boundary (t^-1,0). Generic/Cech class equality alone cannot supply first-jet doubling compatibility without normalization/gauge control. This is an assessment, not a kernel implementation or ownership claim; lead scope response pending.
 
 - October 1, 2026, 4:25 p.m. CDT: dot ACKs FLT-C13-KERNEL r1 at dispatch 05ced4c57c. Five pinned input files verified. Both K1 and K2 accepted for source-only construction; existing first-jet boundary obstruction retained.
+
+- October 1, 2026, 4:52 p.m. CDT: FLT-C13-KERNEL r1 K1 source delivery: five new modules / 513 lines construct MappedSpecialFamily for the actual specialization kernel. Independent source review complete after one cancellation-API correction. Lean and axioms NOT RUN. K2 remains open; dot is deriving centered Hermite/norm comparisons.

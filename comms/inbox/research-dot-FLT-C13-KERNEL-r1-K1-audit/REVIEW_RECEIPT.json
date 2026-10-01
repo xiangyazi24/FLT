@@ -1,0 +1,23 @@
+{
+  "status": "SOURCE_REVIEWED_AFTER_ONE_CORRECTION_UNCOMPILED",
+  "scope": "five K1 files, 513 lines; K2 excluded",
+  "source_pin": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+  "mathlib_pin": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "artifacts": [
+    {
+      "path": "/workspace/shared/flt-c13-kernel-audit/INDEPENDENT_K1_SOURCE_REVIEW.md",
+      "bytes": 11531,
+      "sha256": "f3b0c9bbf68a849fb837055632f148db0b8ed83cb5dd48054693f1d3825af6a9"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-audit/SOURCE_AND_CANDIDATE_IDENTITIES.json",
+      "bytes": 51346,
+      "sha256": "429f812e25ee548d73f689a062e4242f6f131642e646aa92ae22a8927e63cf7c"
+    },
+    {
+      "path": "/workspace/shared/flt-c13-kernel-audit/MATHLIB_SOURCE_IDENTITIES.json",
+      "bytes": 3322,
+      "sha256": "7604664aecd5107f3027ed616a493a7d3c2fcececfd85888c8037f9207f38b7b"
+    }
+  ]
+}

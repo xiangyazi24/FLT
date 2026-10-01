@@ -1,0 +1,57 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/N13RationalKernelDoublingAdapter.lean",
+    "encoding": "utf-8",
+    "bytes": 18568,
+    "sha256": "c7b957e195e1aff5503ccc64222b1853799418570c004d591737f9865a38ad0e",
+    "remote_sha": "c0e58c34b50fda8757398e5b392cdd79af747153",
+    "actual_bytes": 18568,
+    "actual_sha256": "c7b957e195e1aff5503ccc64222b1853799418570c004d591737f9865a38ad0e",
+    "actual_blob": "c0e58c34b50fda8757398e5b392cdd79af747153",
+    "pass": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13MumfordFormalTransitionJet.lean",
+    "encoding": "utf-8",
+    "bytes": 16616,
+    "sha256": "c2efa95e21d11b91eb43e8567350e1bb6234f1538ca68e1087e16c6cea4e98f7",
+    "remote_sha": "26216ed8ca6fbddb1b5275f12d2d085d5c8006e5",
+    "actual_bytes": 16616,
+    "actual_sha256": "c2efa95e21d11b91eb43e8567350e1bb6234f1538ca68e1087e16c6cea4e98f7",
+    "actual_blob": "26216ed8ca6fbddb1b5275f12d2d085d5c8006e5",
+    "pass": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13ConcreteGraphRecovery.lean",
+    "encoding": "utf-8",
+    "bytes": 23645,
+    "sha256": "9968e2edf8a05dea1f493b397b88c3895be553e092c079133190477beb7484ad",
+    "remote_sha": "83d0b8fd3b0254809b58131c8bb2cbbec1f179b8",
+    "actual_bytes": 23645,
+    "actual_sha256": "9968e2edf8a05dea1f493b397b88c3895be553e092c079133190477beb7484ad",
+    "actual_blob": "83d0b8fd3b0254809b58131c8bb2cbbec1f179b8",
+    "pass": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13SpreadRationalPointReduction.lean",
+    "encoding": "utf-8",
+    "bytes": 2485,
+    "sha256": "b0dad650f1dacf71564fbe9c16848d2839351894851f40932d1bab21e217c19c",
+    "remote_sha": "f817664f0e1353e4d310c07af81c170ede6aae54",
+    "actual_bytes": 2485,
+    "actual_sha256": "b0dad650f1dacf71564fbe9c16848d2839351894851f40932d1bab21e217c19c",
+    "actual_blob": "f817664f0e1353e4d310c07af81c170ede6aae54",
+    "pass": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13TwoAdicAbelChartSection.lean",
+    "encoding": "utf-8",
+    "bytes": 6653,
+    "sha256": "bca21651e3f45500b2b1a96d39c6167f02222a2b30b0e206f45b451304016b40",
+    "remote_sha": "5958734242c83788ea2feea99ec28adda3e7e3f9",
+    "actual_bytes": 6653,
+    "actual_sha256": "bca21651e3f45500b2b1a96d39c6167f02222a2b30b0e206f45b451304016b40",
+    "actual_blob": "5958734242c83788ea2feea99ec28adda3e7e3f9",
+    "pass": true
+  }
+]

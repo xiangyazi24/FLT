@@ -1,0 +1,56 @@
+[
+  {
+    "path": "Mathlib/Algebra/Group/Basic.lean",
+    "local": "/workspace/shared/flt-c13-kernel-audit/mathlib/Mathlib__Algebra__Group__Basic.lean",
+    "source_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+    "git_blob": "c5a21819126940bd185627a93e8716cbb0b6f4a5",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/Group/Basic.lean",
+    "bytes": 38176,
+    "sha256": "b297b0678d8b9c662f939533e37f3b53c015074f83b86ba2ce57b9850dbba3b1"
+  },
+  {
+    "path": "Mathlib/RingTheory/Localization/Ideal.lean",
+    "local": "/workspace/shared/flt-c13-kernel-audit/mathlib/Mathlib__RingTheory__Localization__Ideal.lean",
+    "source_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+    "git_blob": "f2cb0211365cf56a599869f288e750275b7c2900",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/RingTheory/Localization/Ideal.lean",
+    "bytes": 19530,
+    "sha256": "c4aaa6ac5790a28feb76b58c82db4d9c067a4998569a74a4e9ab1b5944223476"
+  },
+  {
+    "path": "Mathlib/RingTheory/PowerSeries/Basic.lean",
+    "local": "/workspace/shared/flt-c13-kernel-audit/mathlib/Mathlib__RingTheory__PowerSeries__Basic.lean",
+    "source_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+    "git_blob": "3cd109ae347e5d175f6ac5cd3c06ff6ab899847a",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/RingTheory/PowerSeries/Basic.lean",
+    "bytes": 31131,
+    "sha256": "96c33381033569e86b08d20977f1776160f3abba5820dda5da99d9c214c6e80f"
+  },
+  {
+    "path": "Mathlib/Algebra/Group/TypeTags/Basic.lean",
+    "local": "/workspace/shared/flt-c13-kernel-audit/mathlib/Mathlib__Algebra__Group__TypeTags__Basic.lean",
+    "source_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+    "git_blob": "07c87018aaf34463882fa9c772a400360d0271a3",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/Algebra/Group/TypeTags/Basic.lean",
+    "bytes": 18569,
+    "sha256": "ecbb53e66bc0b904fce6c874c116e212349d1d735fcbe7a00a52d6fe71ac9439"
+  },
+  {
+    "path": "Mathlib/RingTheory/Localization/FractionRing.lean",
+    "local": "/workspace/shared/flt-c13-kernel-audit/mathlib/Mathlib__RingTheory__Localization__FractionRing.lean",
+    "source_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+    "git_blob": "00659e147c0d839a222fa0b6b4005524959cdd37",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/RingTheory/Localization/FractionRing.lean",
+    "bytes": 32477,
+    "sha256": "1a923b785bc14a1973c6cf0cf61120a7358820b3d3f1a2a98ba91372dce9abde"
+  },
+  {
+    "path": "Mathlib/RingTheory/FractionalIdeal/Basic.lean",
+    "local": "/workspace/shared/flt-c13-kernel-audit/mathlib/Mathlib__RingTheory__FractionalIdeal__Basic.lean",
+    "source_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+    "git_blob": "6b00bb74fdf3a61ba037825222583a37481f0226",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/RingTheory/FractionalIdeal/Basic.lean",
+    "bytes": 25706,
+    "sha256": "fb00166246598a433f1c5ccafeed443b215760ffb2773f535ee79e2155bf0bd1"
+  }
+]

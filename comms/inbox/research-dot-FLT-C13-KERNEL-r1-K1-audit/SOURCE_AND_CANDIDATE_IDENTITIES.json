@@ -1,0 +1,1041 @@
+[
+  {
+    "source_manifest": "/workspace/shared/flt-c13-r2-input/source-validation.json",
+    "scope": "all listed source files",
+    "verified_files": 107,
+    "files": [
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13AbelFiberTwoModel.lean",
+        "sha256": "6e6c06e4eff7957214a3600ba6e21b8da78ced6fec95d3f53210edcaacdf4f95",
+        "git_blob": "4318ed3bf89fedea8076c6db5dd1f2a3adc877c0",
+        "bytes": 9325
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13ActualCechCharts.lean",
+        "sha256": "6357c306b3585b75aeeeb86b8c1d702e82de13215ebb8145e56adfb6b532332e",
+        "git_blob": "0716e95e564a16e5a8427b345b3d2dfb375fa6b7",
+        "bytes": 6293
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13ArithmeticBasics.lean",
+        "sha256": "e46de35c966537850aff38e4740309ad1bfd1f4173bd08a79ebd9858f1da6cf4",
+        "git_blob": "9707c160d986fa4476e00dc32cd433ce0dcc6435",
+        "bytes": 3438
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13BranchLocalTrivialization.lean",
+        "sha256": "5a88ad6b082a713fcfc64691d215d26ba4ea47d81a7c4ee3275409279872b889",
+        "git_blob": "c81997f8586a81d8079605293bfec97c06c81b82",
+        "bytes": 10873
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13BranchNorm.lean",
+        "sha256": "314a10cf5af45fd358c8b286bc143b0d5373ffb34f5fc2ed2318b8efcaa356de",
+        "git_blob": "cf93733938ccce5e724f2a0c60dbe31ba645b25b",
+        "bytes": 6938
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13BranchUnitCore.lean",
+        "sha256": "52daaff85a745cbada998a54244e40728b76c16038974a8725a55d192a63b94b",
+        "git_blob": "103e20205e378e77e2d4fec0085717799bd20ba5",
+        "bytes": 2525
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13CoherentChartComparison.lean",
+        "sha256": "95e83ab6c3c2c55b0c6f9d6483a87cf436a368c43e181f55d57b646d30c99406",
+        "git_blob": "83e63ad7bf23a4a3696f34d39efa49e95cd95cc3",
+        "bytes": 4885
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13CoherentChooserSpecification.lean",
+        "sha256": "a1340d359372b4b59c642335458344821ce3ba392e3d3424400e7b2e427dceda",
+        "git_blob": "7d65269f6d5774818cfa400d7d218354a5930409",
+        "bytes": 2429
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13CoherentDegreeZeroChooser.lean",
+        "sha256": "3c1bd2363313c3c3bdbd705b8d51330f7101fa95e00e256e8ee5154b57579217",
+        "git_blob": "bda4ac2be93d240aa95c9aa5473948cd1c707317",
+        "bytes": 4847
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13CoherentSpecialization.lean",
+        "sha256": "e9d0b7339a6666df6174cd34cc4a1ef66ca0b17b3a3c28e01c79c469f4c2f511",
+        "git_blob": "49c53276dfcf549034b4e256014daa4d688e51a0",
+        "bytes": 565
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13CuspCARelation.lean",
+        "sha256": "7632964ca8c3ab8b549b3fffe6e22f757a6fa69c5e90f43d933d691997229084",
+        "git_blob": "42e92c407b73513b413cbffca7e9dfa770dff880",
+        "bytes": 10282
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13DegreeOneGraphPoint.lean",
+        "sha256": "3212eb12431ac7270a6e1583d00dc3f6dd9ccd583a4a21998baa44735fc5e5a2",
+        "git_blob": "df45ea502930b7a7e64710df2e7e97e4c23bed72",
+        "bytes": 4523
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13EscapingPointPicardRealization.lean",
+        "sha256": "065e1f040d6a47a2cb5df3fc6c501651075a6c6eb1259cdeee02acd7318e8a5e",
+        "git_blob": "a1f3a47dc93f72ac952db8ede765f449281958f7",
+        "bytes": 15687
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13EscapingPointSpecialRestriction.lean",
+        "sha256": "9eb871734c189f07a0f7baca95bd4ae4a9e5bb2abda35fd907c40c0ac9fb2935",
+        "git_blob": "d693f2b5334bab95b759988cb7dffaf8a8958b5b",
+        "bytes": 7785
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FactorRigidity.lean",
+        "sha256": "40ce6c92f210d88d635e683545b88e016f50cfbfffa60fc02fbef18682786648",
+        "git_blob": "14a2b27c8e3585e6b714c869fbc8ca734591c4db",
+        "bytes": 14183
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FiniteAffinePointInfinityClosure.lean",
+        "sha256": "d7e029d21f383d653555768e7599b5e737d4b6e15f36e3b05eca03c21d1baa31",
+        "git_blob": "6595b664c6052ed16171540f65d57a203817ae26",
+        "bytes": 21577
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FiniteAffineTwoChart.lean",
+        "sha256": "e1566512bd7203eec1c3e8fa62779a73e3fbc985d2f697ac4a69c90340cd3f72",
+        "git_blob": "2dade19c5d8521bd2bb9a035820cb0c2d131ef9e",
+        "bytes": 18245
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FormalInfinityBranches.lean",
+        "sha256": "c25ecb8a8f300e45b863005e0ddecbec902e394601931324e10f9127257cef8e",
+        "git_blob": "e1afa6fcf87f4252522a5e9ac0b3a3eb0091813d",
+        "bytes": 6290
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FormalInfinityChart.lean",
+        "sha256": "4c0771c8e23a7cddfe33c679a7e59362f6b984c1e1d51281b7456b9b67580ee2",
+        "git_blob": "a346f26c2c5151208157b1e8494562aba1a12e72",
+        "bytes": 10093
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FormalInfinitySplit.lean",
+        "sha256": "462ef11c140842c115524c304d4c410ebb338ce4d75829f06a8caa26e97fb816",
+        "git_blob": "ab6ecda6af8115331e782cab3788e83e4b6e7a82",
+        "bytes": 6470
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FormalOverlapSplit.lean",
+        "sha256": "e91b80b385075c98a1dfec5efb73e0f1c01f0de028ad6f68d1891817d058291d",
+        "git_blob": "6ece7d3c6686dff8bb3c04255ddd44037cf8c582",
+        "bytes": 10769
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13FunctionConjugation.lean",
+        "sha256": "885475411c0c2842003046acb7aa0f4f5817a59019b46a3af2c5788e944708bb",
+        "git_blob": "41c87ed1d57d9680af06f990772e8148cbf7dcfb",
+        "bytes": 3278
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13GeneralizedMumfordReduction.lean",
+        "sha256": "53974ebf095e2225b5d00f4292094e102a425d0ab5e14589ac7473a1cbdd42e3",
+        "git_blob": "c245f3d05c049d827882b394f5de4ad68f4e702e",
+        "bytes": 13800
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13GoodCoordinateRingTwo.lean",
+        "sha256": "99abe3ec005f7dd30e3991428ce3cbb50571247c4eedf46ad3f26ce2e331ee85",
+        "git_blob": "a55b57b8fccdc4e2e646acbb6e22904ce9b4d8d8",
+        "bytes": 23973
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13Infinity.lean",
+        "sha256": "c122767abf79f1aace46a78f96a3ec58a38135fd8125d182e885b00f9657ebdf",
+        "git_blob": "8b7cbfe946acbb7e544ff9ecb52952126ff7df2f",
+        "bytes": 12945
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityAPI.lean",
+        "sha256": "4cdd225407278f7dbf456d55ab82e153e057608d0188f9dde371b187be48acb2",
+        "git_blob": "f7fe373b42371088f2f71708ddb4d635c09e2da0",
+        "bytes": 3917
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityLineSpecialRestriction.lean",
+        "sha256": "77222c290fd8797eb69d8e06b8f323e82fa3116937b54818c9bb20eeb28e50ae",
+        "git_blob": "439391ce6f36bba7522322367936356fc2363d53",
+        "bytes": 8178
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityMinusAPI.lean",
+        "sha256": "ba5df9e1f16ed0f4987ec6f9f9633575a643f4ec606fdfd4f59e3b175cbb7901",
+        "git_blob": "c1c566ca1ccd67f5c2a1b60d1cd23a9eacbf2eb8",
+        "bytes": 6013
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityNormCarrier.lean",
+        "sha256": "11d948036da367d3100bc02e42444c143e09823465c827c263e9a391591bee91",
+        "git_blob": "6626230b383f5074b6a5995fb4b8f58652b85c4e",
+        "bytes": 13672
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InfinityPointPicardRealization.lean",
+        "sha256": "283cbf46150d69b9c6e958dfbb9e42acb3908c845125e5c4bcd0b3ffdee017ce",
+        "git_blob": "ae1feedf4abb4bb99441276508bab3e521acc9c1",
+        "bytes": 9643
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralCurveProperties.lean",
+        "sha256": "05cbeced4c8c95fa00049955f23c8645083f551252b8fa228bbca7cb2184d059",
+        "git_blob": "6594d472799609cabd033cb2c35297d5332ab3ea",
+        "bytes": 8358
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralFormalCech.lean",
+        "sha256": "2f13ef1669fb76ac84b42e43e6a5cfba6e51b9f5a25874c2c64c06f29b0f836c",
+        "git_blob": "abdd7febc850c476efeb964b1eccd2e7c751106f",
+        "bytes": 11012
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralFractionalHull.lean",
+        "sha256": "af59413a1055cb23e91f902ecedc202f3da4ad2d281b55459a900b7bd018beb2",
+        "git_blob": "2531062bf1aeae24dbcbef968ef92c98368d11ec",
+        "bytes": 20549
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralInfinityChart.lean",
+        "sha256": "e13c950e0a4fad3fcfed6e604434b4e5fef4c181e3cd8352d28852203dce0490",
+        "git_blob": "04b6c76ed85709a5edf65ba310c548d7def731f2",
+        "bytes": 3970
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralInfinityGraphSaturation.lean",
+        "sha256": "514b2e779273c224b4c524a59365c72bbd3975c8cd152438960180833038bbea",
+        "git_blob": "9186557921025dfe5f11906b69adfeac96d4a5de",
+        "bytes": 25760
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralInfinityGraphTwoChart.lean",
+        "sha256": "26e837a2b45750f6f7e3edbeb35f6a0e8435fa12bc90005b38d2bf8a019ff599",
+        "git_blob": "ef2328016196359daf725f5fd6ed63e1ded59109",
+        "bytes": 18412
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralInfinityPointSpread.lean",
+        "sha256": "2d9682735d01a12c5995fbc4659a859e17522e86d5b371b3a54aa78e51da7413",
+        "git_blob": "b30e578241a1f4c9a0b32877c44343994564e39f",
+        "bytes": 19666
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralInfinityReduction.lean",
+        "sha256": "d5aa99172b4efb9ab44999099faa22b427379c01936f13e6c6d9cbad2533458e",
+        "git_blob": "a52972bc501a9513f20b752d69d6888890855488",
+        "bytes": 17686
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralInfinityVerticalGraphTwoChart.lean",
+        "sha256": "589f96821797fe795f1afcb3cbce1465854127a5ac89a406aaa620ff6576c821",
+        "git_blob": "b932daafeff134f074712b9bd4206c5931c90098",
+        "bytes": 18454
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralModelContraction.lean",
+        "sha256": "b75ceaed2cba30a188c0bf0ab2ba5c1f90c4cdaaa7a02a854416e55d734defe5",
+        "git_blob": "bdf0a7aab1f568eeeba916eeb302c8ac00d12e46",
+        "bytes": 11357
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IntegralPointPicardRealization.lean",
+        "sha256": "9d1d81d2aedb1090bd5685fda99a25917976ed349f2fcce0ffdd953c7c3d3e5e",
+        "git_blob": "5259f32bc1a4bf5e5dd7755e2d67b6c901583836",
+        "bytes": 8706
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InverseInfinityData.lean",
+        "sha256": "3d0734625d260d9816564e5a1c5aa403e88a4431f8b15dc2bc3a3e987d96424b",
+        "git_blob": "3ab648814833083f292f0362ca7a426cc39ebaff",
+        "bytes": 3342
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InverseInfinityWitness.lean",
+        "sha256": "e72f6a9a45dcae66f4d47c35fdb26f76fe3fa21285125d781a2586763d945b62",
+        "git_blob": "22327ce39f37be4b0419efa61ca830b1113f4dd7",
+        "bytes": 4776
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13InverseInfinityWitnessClass.lean",
+        "sha256": "3a6f466b30639f60a8d43f8265319ecf8ab2aed131ad2c1d74a38aeb0196f88e",
+        "git_blob": "f8c31ecaa3617d63b170002ac38891411d61ec33",
+        "bytes": 6421
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13IrreducibleQuadraticSpread.lean",
+        "sha256": "7bfb81fcf7f028877dc47d80a386b7c27f4976c17ffe83a8f48ed67210752fe1",
+        "git_blob": "8567ccc024311c2319b9cc5b717929d48db96f57",
+        "bytes": 16866
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13LaurentPolynomialOrder.lean",
+        "sha256": "3febfd810de3af3c156415eda7d221c36d9339a6a4ea8f69029adb7d650a1b3b",
+        "git_blob": "36f148feb9165ee238e76fe4d1de4060f514c436",
+        "bytes": 4680
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13LocalDlogRegimes.lean",
+        "sha256": "779c9eb5519af5a808e098a70c48a80995cc9959038f87789bcfd201263eda0a",
+        "git_blob": "4b5359642f8c72dd33ee2d3bfa1005fdef92ab5d",
+        "bytes": 9917
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13Mumford.lean",
+        "sha256": "2476d35e1426b98f376689858378d0d8660f908b18d3c912227c0b81bedc00aa",
+        "git_blob": "2dfd6ce5ee8784020cf1d9b5bc73dcb53f33fa15",
+        "bytes": 6016
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13MumfordAbelJacobi.lean",
+        "sha256": "5b84dbf7c63bccc53a63fed0acbd93f7840b3d6446c5680ea6a0766bf89ee8b7",
+        "git_blob": "d3b20519fd8cddc4a0f24b2f249e4feb19ac98ca",
+        "bytes": 1490
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13MumfordInfinityBalance.lean",
+        "sha256": "141c2f9cc7f31b300987f3fb720ed21376e8683862ae8759c3949096a51fb175",
+        "git_blob": "5c4155caaf42c426b601cb6db4640908398d069d",
+        "bytes": 30437
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13MumfordKummerNorm.lean",
+        "sha256": "4020f17516ed46d06c1fc03766fb3934d76658ad13c01ae866968d636fd9c012",
+        "git_blob": "855445d5bb1092558a7bf1e1702afd1ad4bd1d4f",
+        "bytes": 9209
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13MumfordKummerRelation.lean",
+        "sha256": "e874cf63a15bd59edb06f243584b982760833756675b358e4cd92f7c1846fb86",
+        "git_blob": "aa60e4a262980628ad8fe4017057df68c7560188",
+        "bytes": 28817
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13MumfordRigidity.lean",
+        "sha256": "4a44456d2935f6e9273946f341e6cf956b75096d97eb28ffa689939c30355a48",
+        "git_blob": "cc04cd89548df592e71f2ac5ecaaf7c2b12ab73c",
+        "bytes": 2343
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13OppositeInfinityClass.lean",
+        "sha256": "65986dd42af431632b3bf7764c4f0f21c9ff80e7af96001d93d1088c628e50a8",
+        "git_blob": "68bc51aa49859828de7a63267607ad32d1cd303b",
+        "bytes": 4693
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13OrdinaryCompletionCompatibility.lean",
+        "sha256": "f45323e15960f63a20d438761c03ad19673c33f5b925f7d0cc2a4a39544e7d90",
+        "git_blob": "7b024a373398dddf832807fbe8b3ce13347d9b34",
+        "bytes": 10463
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13OrdinaryCurveOverlap.lean",
+        "sha256": "4c04c991864c40827505f6a7e681d3b0560855488449fe10a85589a7564b7fe9",
+        "git_blob": "10f960c92454f06bf22f4e43607d090cdd63aed4",
+        "bytes": 18693
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13OrdinaryOverlapCore.lean",
+        "sha256": "be6479e23749f2266c0fe9ddab10a89b11921093390a3ae8ae1d0eb12712ae49",
+        "git_blob": "d001fabc759df269375516475d974049d2165a7f",
+        "bytes": 3199
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13OverlapReductionCompatibility.lean",
+        "sha256": "adca6b38cd8c9b12218c9faa2056ff273dcf2711cf22767819a4ba5c2ef0397e",
+        "git_blob": "f66ea927c162ffa320ba3541ccc1d36745851564",
+        "bytes": 14782
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13ProperCurveReduction.lean",
+        "sha256": "9bb7e5d2e09f744763e10224a99e010a54314f81b98e86d73902a39c779c0851",
+        "git_blob": "a2b88d202421a9dc93900b454c4d3c1a0a9fb834",
+        "bytes": 8170
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13QuadraticPicardRealization.lean",
+        "sha256": "99307c852ca4b74d458c383800761f9db1b13479b0673ab3083e199b888f77bb",
+        "git_blob": "0a6031cdf2d2d717a80a548560ae3f75e9408bd1",
+        "bytes": 9545
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13QuadraticTwoChartSpread.lean",
+        "sha256": "323cc23e2ad6fbbe51182f2b739e30c5811d12dd538440f46454d5c9de386941",
+        "git_blob": "da279fdd99ea3382219deb4b11edc09b5b75ad9d",
+        "bytes": 11176
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13QuadraticTwoChartSpreadSaturation.lean",
+        "sha256": "7868068c304e79d1ad987479598bc580e0482c55ce1137c2d3b35876b19f2070",
+        "git_blob": "9a3095b2c5f5882f5f22423495ff4d853a5606a4",
+        "bytes": 8187
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13RationalCurvePointPicardRealization.lean",
+        "sha256": "4da73ff1ac7268fc02f20740c129bb529dc65ccb3c68a27655e6cbfe9b61218f",
+        "git_blob": "e66fa8d0217e0c3455d9006d4451b0896ca31e31",
+        "bytes": 28758
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13RationalKernelDoublingAdapter.lean",
+        "sha256": "c7b957e195e1aff5503ccc64222b1853799418570c004d591737f9865a38ad0e",
+        "git_blob": "c0e58c34b50fda8757398e5b392cdd79af747153",
+        "bytes": 18568
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13RationalPicardSpreadExistence.lean",
+        "sha256": "99db457cab7aa318f887684378f74ad73d8d3f9f61260deb301539c374747cbd",
+        "git_blob": "464d793866eab400d992e49148ef3e02bb4597ea",
+        "bytes": 26777
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13RationalPointEndgame.lean",
+        "sha256": "8cf54292128293da74cb5411c5d667cfcbcccba743dfd6caa0e28262010f7cf0",
+        "git_blob": "b6e46eb8c216eb409f5fbbce0e978455096d771d",
+        "bytes": 5900
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13ReciprocalGraphPicardRealization.lean",
+        "sha256": "0e7aa1ca75e9c0bba0b4d1ee3b4a1e263dcc987fe895345646d1b8a350309cd1",
+        "git_blob": "c25fc8584aaed8b095473dfd92cd1ce631a0e88b",
+        "bytes": 7919
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13ReciprocalQuadraticReflection.lean",
+        "sha256": "480036102c019d83550a8989dcd53ed43d9a71afb8b342792f964021437ddb68",
+        "git_blob": "75d0081a8cff5da6c8ca0645ac5cef8158fbf422",
+        "bytes": 4380
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13ReciprocalVerticalGraphPicardRealization.lean",
+        "sha256": "4b5bbae62fb0096ec1a65c0afd44c0bfb32423cd51793d6e4263b542dde43fed",
+        "git_blob": "a62e186688c81359bc3c8277ea641ffd0aafb498",
+        "bytes": 10196
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13ReductionClassifier.lean",
+        "sha256": "c0b65f5424757043e3c0b88d9924851e7401962f187ea02b075c5188ec0cb830",
+        "git_blob": "0f36b65142aee8494b7853e1b729ad02b494cbb7",
+        "bytes": 4352
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SmallMumfordRigidity.lean",
+        "sha256": "5c0792bdc99040c603e99cac9c51737cedad104a25ef6e01b120900eb2759bc7",
+        "git_blob": "ad6cb6081c57ebfed80604d6d6138bd6806687e8",
+        "bytes": 14638
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialAbelCode.lean",
+        "sha256": "ef95b5992c1798bdd78b481ab824f23f60786fe40eb2cecd59ebe146c870a38b",
+        "git_blob": "065d48d5949a148b13276601aa67c6ca331c120a",
+        "bytes": 2189
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialAbelCodeQuotient.lean",
+        "sha256": "89aa5cc8938f8210044d169a43e5eaf363a8aa9f9bcbd2e6847e1fed9a2bd317",
+        "git_blob": "095cf293069e4a578c2be5176d05a6daa9bf9ff3",
+        "bytes": 4984
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialAffineSaturation.lean",
+        "sha256": "290295e36e7f9d1aacd0f740b86124e23a5511d310429fd45958cb25e43c9dfa",
+        "git_blob": "37925966820f6e26591f77dec49fa3f19b9720a5",
+        "bytes": 7624
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialCodeRecenter.lean",
+        "sha256": "03cb08c8ed312349b22cec93c159098d0d903ac03a66770f686a6c7bba33ccd0",
+        "git_blob": "1e92be7c820afce1825d93119c1e90eaabb7f872",
+        "bytes": 2098
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialCurveOverlap.lean",
+        "sha256": "a8642a1586b92c23d7e49c41954de8818e21e6018bc03d67025accb59df43f9e",
+        "git_blob": "8ba03b17442aeb74331adbc3888a839ed3832a4e",
+        "bytes": 17636
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialCuspCodeChecks.lean",
+        "sha256": "4a99c14eb340ecbec51f06f1582e9f695f0e73de018f270c2f9bc386cbfd5563",
+        "git_blob": "5366619097d535c1f80eb5e83aee7838c5173918",
+        "bytes": 2465
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialCuspReduction.lean",
+        "sha256": "fcb6e87c64973266493c3c076cd894d2f1125d417dca0540445d89094841649c",
+        "git_blob": "6984e6ad8228b5efe2c9324ec24a0ce09e55ef9f",
+        "bytes": 3144
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialDivisorCharts.lean",
+        "sha256": "ff44dbc85db7e79db1edc0b78d31d47af774d2884bfa979b79f8cfc807e2e594",
+        "git_blob": "97230e63578f7beceaf0db3530e8558a5daa4015",
+        "bytes": 10757
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecialInfinityChart.lean",
+        "sha256": "4e7fc57b8bf08b60cf63a54d9652f32efed66e99e9e8dd85c743450cd4016bc6",
+        "git_blob": "730992da4bf0c3e5942cbd5fe196f35debaae4fd",
+        "bytes": 3347
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SpecializationGroupHom.lean",
+        "sha256": "ba455effe1c2fcc6201d72559341b454f2ca2e99d943ab4d4e8fa06fa7d5bced",
+        "git_blob": "045c2568aa3f2d38eb53bf929bc4f4966cfe27a5",
+        "bytes": 2681
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SplitQuadraticPicardRealization.lean",
+        "sha256": "4b72bfd24b53b9bc6f2a54f8343ef7767e2efe4c4f4cd7699bfb9a0050ed0665",
+        "git_blob": "22796b56223b7f6c4cb9ed457fb6d3ff3c6661f9",
+        "bytes": 10746
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13SplitQuadraticSpecialRestriction.lean",
+        "sha256": "6b77e0099c4c75809296690a451e7b59240f7181854d45b7a42f5b92f86e5baa",
+        "git_blob": "08462aaf880bf2222cc2d197856148543c3b3625",
+        "bytes": 14017
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartData.lean",
+        "sha256": "adf61cb460436fe4c75f40cb7cd9efc80586bb50825218863668d7e21288a4be",
+        "git_blob": "809fd016a6ddbf00fa16288b0e8d71c0e930ecb8",
+        "bytes": 15059
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartPic.lean",
+        "sha256": "8fd9926056a51634a7a3c271ef864c1886ff4353dd5539abe98e47c46db8245f",
+        "git_blob": "e82bbfd3cfcc621367a9a3a7708817ef328495a5",
+        "bytes": 4008
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicAffineRestrictionCompatibility.lean",
+        "sha256": "9d1ca028333f7e440eea01a6c9079cee9040436e834e5ae67fabc0c1d55bb131",
+        "git_blob": "35c90ab8a4d8ae28115b4c415b5dda0f117639f5",
+        "bytes": 13773
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicBranchLattice.lean",
+        "sha256": "d9d87399fd3c8db1ffbc7bbbf50768de7b1d78ea94e2f5710c500dd7e1b5fbcf",
+        "git_blob": "63a7b3e838aea3fb1e94dc51dfa18998dc38937d",
+        "bytes": 9072
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoAdicInfinityCompatibility.lean",
+        "sha256": "31d52006cce68801284ae313742fc0ea2d015aef993ecc19de2edb8258a14d25",
+        "git_blob": "efefcc0fb032a134bf45e4e9d9f19c11eb60357b",
+        "bytes": 11844
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoChartLineTensor.lean",
+        "sha256": "e969baf707a84719a623b04e356461806592a19ff7bdf29958e3071e99bf0f59",
+        "git_blob": "ad6e6244fdf8664bd5ddc2dc0dfc64b896872361",
+        "bytes": 22140
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoChartPicardRealization.lean",
+        "sha256": "1c3631df108c3d64669026f0630bc25b6d8e7be52d0857ceb5ab1b1474601b9e",
+        "git_blob": "7f23367da3eba7721331f7556b89cd503e845853",
+        "bytes": 11991
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoChartSpecialRestriction.lean",
+        "sha256": "25ae97f8ecf6a95538c7aad4652701e33803eb2f8a9c3dd7399cd9f2ef06e29f",
+        "git_blob": "259f23b7a28c9a94881076f68f814665ffc9be94",
+        "bytes": 7126
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoChartTensorCompatibility.lean",
+        "sha256": "b81ba657acaa6462975218b383f7a5e4748950f0fb7879b62f05e94f381032aa",
+        "git_blob": "b6613a9cb3d38b06b3a7cd65a7b08324bcff4a38",
+        "bytes": 3749
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/N13TwoInfinityRestriction.lean",
+        "sha256": "ac204a166ace257c880020048b474a18bb7975bacc00476056f80a8acc1cf925",
+        "git_blob": "36c8aaee826ce0075c2837e9a36334891ae75b8f",
+        "bytes": 4481
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticFunctionConjugation.lean",
+        "sha256": "e3077654453603982ad437f14b81245c0337c9e4d12a89c5397ef7d87ceb917f",
+        "git_blob": "3c41ab2491ab37a08a93bc4566009eb268abcf13",
+        "bytes": 2552
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumford.lean",
+        "sha256": "41d8986cf092de90cd3c689f4a92d21dbc0fd5857ef480c0c757e4325833556b",
+        "git_blob": "5c198c75b14da93851a8b5bdf3fe08aff4cda02c",
+        "bytes": 9910
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordCantorReduction.lean",
+        "sha256": "815d6d6851bd0781aee4d507bf4e52a0755997b4b84470301a130d86bcb80323",
+        "git_blob": "d70c01c131d2d9f3eeb50ea4d8acc0538ed8ce0c",
+        "bytes": 30760
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordFixedUnit.lean",
+        "sha256": "b2370f3053f1db61ee621a84ad5ee18a66f46e7170525124efafae86cc6f14f3",
+        "git_blob": "6fade72a531ffec72251dd5fa5b573efba4873d4",
+        "bytes": 3758
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordIdeal.lean",
+        "sha256": "abb950245859ad690907d3d12448d10253802b90f0e183657fce0e98cdbafbf5",
+        "git_blob": "231bd943c9a02c8a9e59bf7c72a99ff5840e34b9",
+        "bytes": 6023
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordIdealConjugation.lean",
+        "sha256": "3d22488de29dc1efe6aa819552e7ab37d2de6ad6f79eb1053993e8241901b98f",
+        "git_blob": "f4e2c34d15ebeb08df098e5cbd981c13c4b4682a",
+        "bytes": 7024
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordNorm.lean",
+        "sha256": "da28bc91773b9b846257be1c44cbb613b593353f6e84f953a8a48674d700e4f7",
+        "git_blob": "157ac9c58fe1532448e33fa6604cfe7af3dd75fe",
+        "bytes": 3200
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordNormalForm.lean",
+        "sha256": "3b9767a6ee008ee38969ad84ab93c94b5b6622d6a1c9a8b46be3ad43af0b6ddf",
+        "git_blob": "ec6f24c4f48866af754f9e7bfe679363072909b9",
+        "bytes": 1135
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordPrincipalNumerator.lean",
+        "sha256": "e3ec5062f83a58950b2fa3a3512fdcff1e5b68f1fe24a66196629aac408b82b1",
+        "git_blob": "7a170df2e70d6f18d023b2b233eb93929d82d2ee",
+        "bytes": 5584
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordPrincipalScale.lean",
+        "sha256": "661e7bf67496baab7e21edc5cdc9fc7eafde23e1cd3167438c8ff87d06a2d084",
+        "git_blob": "f770ded878f3b32d52a4db98c06bd2d88930bf75",
+        "bytes": 4987
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordQuotientBasis.lean",
+        "sha256": "8e24969191f8a016b679cf9ec0e7ef9b33e9228431a87936d5012af25dadb917",
+        "git_blob": "81e5e809dcde97da57c2cce55620fe5901863e27",
+        "bytes": 3481
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordStructuralReduction.lean",
+        "sha256": "eab27a8e1643877df2e2d03083bd5e469a37bee28ca5649ab1702e24d1dbf9c4",
+        "git_blob": "ebc20f60c85f57cfe77a3b6f0d13850ae5be5df9",
+        "bytes": 6602
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticMumfordUnit.lean",
+        "sha256": "56b51f2a79f1b90e716d56ee49c30d231aaa293efdc424cc4a4b94366d930bfc",
+        "git_blob": "8a8a0739f09a57cc39d08f3e0dba5161a96c6f6c",
+        "bytes": 7553
+      },
+      {
+        "path": "/workspace/shared/flt-c13-r2-input/FLT/Assumptions/MazurProof/SexticOrientedPic.lean",
+        "sha256": "c6e531d9ac85bcbd74a6e28810e269fa790342f68081a9582687e7732a668a46",
+        "git_blob": "7c5785edeb3c419410b0b42220677190fdc16a3e",
+        "bytes": 3017
+      }
+    ]
+  },
+  {
+    "source_manifest": "/workspace/shared/flt-c13-delivery-final/comms/inbox/research-dot-FLT-C13-r2-deliverable-manifest.json",
+    "scope": "FLT Lean modules only",
+    "verified_files": 41,
+    "files": [
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+        "sha256": "514c47dedbefede319d8fd87d536d68d50b14790f053c3a34314629231c446c7",
+        "git_blob": "9b7939ad9b24bd828b34ead7365ed3094d13daec",
+        "bytes": 7516
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13ConstructedReductionClassifier.lean",
+        "sha256": "62a36109945be7848eef88281ee79783ca43641438d5629a698d2e0a9ad80e02",
+        "git_blob": "c20631daf122cc6a56a18294b27be21be522eb76",
+        "bytes": 3129
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13ConstructedSpecialization.lean",
+        "sha256": "49ee74c8d6aca8db3341da14b97b950f96947e4cb04c1df0349aad323c8bf536",
+        "git_blob": "31b87d7fffcc9f702b370416d25df1338af916fa",
+        "bytes": 5214
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+        "sha256": "d51692d82deb3182fe88868a75ae4868fb2c659baeea095c6876d87f98b3cd47",
+        "git_blob": "369843f51886808b7a0e274ce74a32f82f865bd2",
+        "bytes": 5958
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13EffectiveGraphData.lean",
+        "sha256": "647a2b9f0638ea0ec0817b0c86273bb36832881e65ff3015bddd016f144d2f37",
+        "git_blob": "ebc966d83706bc1d01f3ecae6409ac2964587bff",
+        "bytes": 11485
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13EffectiveInfinityRepair.lean",
+        "sha256": "721e6a9d4fcb531c87cf4d06e77cb33efeba17683d0515e4b78b3e1edb6a97ec",
+        "git_blob": "b2336672a81425fa61095eeec36444f888517b8c",
+        "bytes": 8086
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13GenericInfinityComparison.lean",
+        "sha256": "c9ea24c377870434d182d7a8a28fb244a842a6427f3955eb6a844c55f108d26f",
+        "git_blob": "ca585a7b62895aca86c8656614e3015cb21785f6",
+        "bytes": 6672
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13InfinityBranchJetLift.lean",
+        "sha256": "810f97663ffa7ff60901edd372f526788319b0729a4311988d84c030ff2f8b6d",
+        "git_blob": "f74c256d484b2284709339d770ef3a5d1fe9968b",
+        "bytes": 6544
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13InfinityBranchJets.lean",
+        "sha256": "172add8cb143b240b8c8b34da867b848d1a723e0b464acaa775e35a463a1993d",
+        "git_blob": "6e870d3c065b6a2c786df230966d952ba1ba9447",
+        "bytes": 7227
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13InfinityChartMarking.lean",
+        "sha256": "231fe2f6f1c42fc5848c3012323c06a696ef40075e23ca8beee918c5e223ce8f",
+        "git_blob": "8a611929516b3e3554c4f9528e5c1bf92991c62b",
+        "bytes": 20473
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13InfinityIdealApproximation.lean",
+        "sha256": "1910ec2ebf184998a262a104bf0800a248df889d03439d661adc796977d32e61",
+        "git_blob": "46a42ab151654d84548e41a9636934d104f85c3e",
+        "bytes": 7216
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13IntegralPrincipalComparison.lean",
+        "sha256": "848ce71863c68d2891f809d8de9b6dac09fa45df047fa5beaf07a7d5a7c51b12",
+        "git_blob": "c707f3af45705235b86bbb6489d8e30a6f99220a",
+        "bytes": 7515
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13InvertibleReductionSaturation.lean",
+        "sha256": "97cf566f264fd21898f56b1337ca806d8da8b40a2cc820efff4aa45a6d9fcb15",
+        "git_blob": "f49a12c0500b0ec0127d7cfb5d36d904fb442b11",
+        "bytes": 14314
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13LocalizationAdicPatch.lean",
+        "sha256": "83cec263181d67459b554e6dc8281101d319ca4f646826055d08771a7358bc60",
+        "git_blob": "e6d6e17fbae047177fc8c28ebedf2661f85b7dba",
+        "bytes": 3848
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13MarkedEffectiveData.lean",
+        "sha256": "a6902dffa69b47743e286adbb75760de3481ddb28917bfb15ac083029494feef",
+        "git_blob": "cd5aa83d5c853f0d676666dde18212b8fd07f280",
+        "bytes": 6732
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13MarkedQuadraticExistence.lean",
+        "sha256": "5d4400534f3623cace6bd726bcb9f49c393093440f3c1c990e85e6591e9c6032",
+        "git_blob": "29f270da22d286dbe67087d390d1a8ba9473875c",
+        "bytes": 22529
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13MarkedTensorComparison.lean",
+        "sha256": "b7cc30867e5b933f5444ed38abaf8d0be15dddf8a29f74be2d709aad54dd6e72",
+        "git_blob": "36a20ce73961c2bb4cfa4992a736f32d2d6a9d45",
+        "bytes": 8252
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13OverlapBranchCompatibility.lean",
+        "sha256": "fcf2b05cba651c3c2ac416ac708583b145184ecd8f247b331e0a6dad73050e5f",
+        "git_blob": "b7dcf6afdbd16587fbc93810456f5c526c6346dd",
+        "bytes": 9272
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13PointDataCertificates.lean",
+        "sha256": "fcf430dfdcfcd13677d6154ceab24b973f06c0ae3d430573a4be448dc0526c14",
+        "git_blob": "53ce1d852555d2035e05593ece687d34b692115d",
+        "bytes": 6730
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13PrimitiveAffineComparison.lean",
+        "sha256": "801af860d91beba906729b6cc9e2ad222dc70b4cedb336646733c0e55e0ac52e",
+        "git_blob": "5f2b6c601911518bd0f30e7f77016c669e70b3fb",
+        "bytes": 6783
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+        "sha256": "d1a4a4675ec95385061b838770ade1edc062b6a82a67d9495d6504a51a5cc1f0",
+        "git_blob": "00a50dd67e1cff5fea567200f8d4a260d2cb6811",
+        "bytes": 6603
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13PrimitiveVerticalPresentation.lean",
+        "sha256": "decd29e0ec9029031e962a56a36549847e5612c69cf3fee2aa389cb0c2edf809",
+        "git_blob": "ae6c3d9469b0683cb93d393754360d960059f5c4",
+        "bytes": 6015
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13PrincipalBranchBalance.lean",
+        "sha256": "d9f6679a94ef94f3f8b3099be3877c8bc1546a28845cf8d8afbece0e22a48a8f",
+        "git_blob": "26d3e1f6dcd8a2b22fc235b6ea931acc6110a56d",
+        "bytes": 6463
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13PrincipalBranchIdeals.lean",
+        "sha256": "b52284b2f4795e3a97dceaeeb0283bf69363198c7d198037c583b931686e978f",
+        "git_blob": "f7e2637d24467d0ba1c468dd4c78c803575b7382",
+        "bytes": 12116
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialAffineNorm.lean",
+        "sha256": "12cc00b3376a5579ace4fc7c6a676b7d456d94284ee7765eadb8708448187268",
+        "git_blob": "59a71a66567026ad714a58a434d24885c0e6a398",
+        "bytes": 5581
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialBranchFaithfulness.lean",
+        "sha256": "495229b01c9d6a902b2b5049c42842b9a3557d8a9bfd1e4ef864b30cfb638119",
+        "git_blob": "81be3c745a7228465d3b9d5e0c0ba7d3650375ca",
+        "bytes": 4085
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialCertifiedNumerator.lean",
+        "sha256": "dcbd98c8ad571d53df7c7b7824fbd9145647a37a33954ed82191a00b19a96682",
+        "git_blob": "f5143f974014ab17594574fc4b602afefbe2fcad",
+        "bytes": 3055
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialComparisonFactorPair.lean",
+        "sha256": "d12fb8b56cd658d3c022fcc50015d7bb4334c34cc69f779f988262c557247ef7",
+        "git_blob": "cad5e16b26a810098c61aa032df9c946849e80a1",
+        "bytes": 7440
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialDegreeFourCode.lean",
+        "sha256": "70558dfef24c07371c2917d630933fdb376ea1c650f07cfeb00b06adfbd2b775",
+        "git_blob": "23eef1b87cbe0b89c3d942ff6b93f58a520c9990",
+        "bytes": 8684
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialDivisorBranchOrders.lean",
+        "sha256": "3eba00f1628471619a344dc66cad85579abcc98620682165f0a2f5855f0a63e2",
+        "git_blob": "d95901362825ee4218e1adfd51e9f498e678931b",
+        "bytes": 6239
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialFiniteBranchFaithfulness.lean",
+        "sha256": "ee59a5f7120edb9541034c9827951702924720ef6f63790c06530780e58645b4",
+        "git_blob": "2cc04221d62582e1e7a270131906a5df2ed9134e",
+        "bytes": 3331
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialFiniteBranchJets.lean",
+        "sha256": "9915e8e7369bac886ad3181db07326659d07267694d9db2dfdde00732c0443ed",
+        "git_blob": "41054ada3f1dfe57e4b71be6c305bb8149cb0887",
+        "bytes": 6299
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialFinitePointOrders.lean",
+        "sha256": "124232d2561e22844c2beed3aa979a45ce07b2d69cbe88ebfb7d61dbf215148b",
+        "git_blob": "bb7866aa7a7e90cb006f63293b67c54e9c595d8f",
+        "bytes": 6629
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialInfinityBranchJets.lean",
+        "sha256": "01ce5af54b59caa26ac4f78e13ecc42b915a3bbdeeb32bc206c9619bb42995ec",
+        "git_blob": "0f42ed1e917926670eecd6bebb7412d7554557b3",
+        "bytes": 9710
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialJetOrder.lean",
+        "sha256": "350236c43f73e9f70f49455a6798dcff278ef2b4fa10c3d9621e35c27b015d12",
+        "git_blob": "3ce93e2318136eab5183fcf8d47c68eeefa34e3a",
+        "bytes": 2081
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialLaurentBranches.lean",
+        "sha256": "34fd541e9ee868243fd537d68b01b6b41b0428f7ea473b46af9744bfd09db686",
+        "git_blob": "60c22bc452409d06fbde5073f62776b45eb48d53",
+        "bytes": 11348
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialOverlapBranches.lean",
+        "sha256": "a032d4737f439d781ab00713ff0769143fdcae75e811cd1978445bbd82995123",
+        "git_blob": "2b7a9af112496018c77eab63bd3bb548865310a6",
+        "bytes": 5611
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialRootJetAgreement.lean",
+        "sha256": "5fc0914ea09a596df5c5736793e63a541a3c2279dfa48d7753856c3cbba54169",
+        "git_blob": "875a4861d749cd4910d424d475c61aa315bdb091",
+        "bytes": 3715
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialSixJetOrders.lean",
+        "sha256": "aea3ee716d09bea64be39c6c03d88b71de6a8535115ebc5969b2032a3dc3c118",
+        "git_blob": "0d941fd7c7f2e1bf525a6d1dde4277bfd64d2eeb",
+        "bytes": 7300
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialSmallFunctionCertificate.lean",
+        "sha256": "05ae0db26a4a15ddb632249406038b4bf0e1e0fd44dbd6e58a645b64059c50e6",
+        "git_blob": "f0b5a4dae13d1d49bc4d722aafb4a32b9a99b3cd",
+        "bytes": 4179
+      },
+      {
+        "path": "/workspace/shared/flt-c13-delivery-final/FLT/Assumptions/MazurProof/N13SpecialSmallNumerator.lean",
+        "sha256": "8c6ccc196c99a9b952194c7dab673e74fcc2a3e8f6a27aafcda4a6898220ecba",
+        "git_blob": "7be0029a08c1b83f03737927e1b03a3e08c795ae",
+        "bytes": 7619
+      }
+    ]
+  },
+  {
+    "source_manifest": "/workspace/shared/flt-c13-kernel-input/input-validation.json",
+    "scope": "all listed source files",
+    "verified_files": 5,
+    "files": [
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13RationalKernelDoublingAdapter.lean",
+        "sha256": "c7b957e195e1aff5503ccc64222b1853799418570c004d591737f9865a38ad0e",
+        "git_blob": "c0e58c34b50fda8757398e5b392cdd79af747153",
+        "bytes": 18568
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13MumfordFormalTransitionJet.lean",
+        "sha256": "c2efa95e21d11b91eb43e8567350e1bb6234f1538ca68e1087e16c6cea4e98f7",
+        "git_blob": "26216ed8ca6fbddb1b5275f12d2d085d5c8006e5",
+        "bytes": 16616
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13ConcreteGraphRecovery.lean",
+        "sha256": "9968e2edf8a05dea1f493b397b88c3895be553e092c079133190477beb7484ad",
+        "git_blob": "83d0b8fd3b0254809b58131c8bb2cbbec1f179b8",
+        "bytes": 23645
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13SpreadRationalPointReduction.lean",
+        "sha256": "b0dad650f1dacf71564fbe9c16848d2839351894851f40932d1bab21e217c19c",
+        "git_blob": "f817664f0e1353e4d310c07af81c170ede6aae54",
+        "bytes": 2485
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartSection.lean",
+        "sha256": "bca21651e3f45500b2b1a96d39c6167f02222a2b30b0e206f45b451304016b40",
+        "git_blob": "5958734242c83788ea2feea99ec28adda3e7e3f9",
+        "bytes": 6653
+      }
+    ]
+  },
+  {
+    "source_manifest": "/workspace/shared/flt-c13-kernel-input/extra-validation.json",
+    "scope": "all listed source files",
+    "verified_files": 9,
+    "files": [
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13SpecialQuotientBasis.lean",
+        "sha256": "84632d7cc20bc56610cff7144abb8baa86e63c117fcd9a28d65957d64203c1b9",
+        "git_blob": "2696ff5d62873de4cb517ff0f3bbf8c2f227c09e",
+        "bytes": 4294
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13CanonicalContractionQuotient.lean",
+        "sha256": "f131ee616d8c6f88fbdcff5a69bdc4fe742a051579d6297816892372d6a6d752",
+        "git_blob": "f73e1098c5e3855b0d81ef4d6f472b0c4142dad4",
+        "bytes": 5465
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartRecover.lean",
+        "sha256": "49789796c21f0ecc559694e317f7ff2ae5814f270a009d02ac16931978b65d75",
+        "git_blob": "4b46b7a097ec6f40f00642eb1df332a51a84acea",
+        "bytes": 17478
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13Jacobian.lean",
+        "sha256": "5ebe0a39be24822c485ee4671316cb6d67f41b536758c4783280901280bbd833",
+        "git_blob": "1bf85f2302691fe9ba2e48ca67b3185a30053c3d",
+        "bytes": 10570
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/GeneralizedGraphIdealCore.lean",
+        "sha256": "f40996e1937ddb018488758b374dd4c0335aa7cede7d66048782e3a21a936aab",
+        "git_blob": "3a834be87e18cb5f232fde23f27871cbb919a443",
+        "bytes": 12704
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13AbelChartBase.lean",
+        "sha256": "a5b607004e0f6d0471eaed2b87ca791601e9e21e99c573a407dd79c8a647848c",
+        "git_blob": "e229707497042e27ef8993e12dac4e9e2d73b15e",
+        "bytes": 4294
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13TwoAdicMumfordTransport.lean",
+        "sha256": "ecd55742e16f104cca0c01275f5ca5195e5ad6cc9d81547a364efcfaa43d308c",
+        "git_blob": "712c835356c3c5e08b478ebb47e6d3b5c84b78d0",
+        "bytes": 7069
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13InfinityBaseChange.lean",
+        "sha256": "51a4d66e883a76fc6d60beeda55db902721bf4d8b8123d12c3dcfe54970f7e57",
+        "git_blob": "de30c9a3b730c565e7df92c190610dd6fe5073b4",
+        "bytes": 14394
+      },
+      {
+        "path": "/workspace/shared/flt-c13-kernel-input/FLT/Assumptions/MazurProof/N13GoodSexticMumfordTransport.lean",
+        "sha256": "ea64d189b02bc651f43c9a2d611b9ab00d9a57665acd081bd2733023a2c20fd0",
+        "git_blob": "39125cba0fc036f4d0b713ec53e76a1806ebaf08",
+        "bytes": 11689
+      }
+    ]
+  },
+  {
+    "candidate_source_pin": "887d29cd9eb9b60a6e5ec438ff919a74ccda41e5",
+    "reviewed_candidates": [
+      {
+        "path": "FLT/Assumptions/MazurProof/N13ConstructedMappedSpecialFamily.lean",
+        "bytes": 2497,
+        "lines": 54,
+        "sha256": "f20ca03307778ebfae0969a9868947c41a774308f98de88406b653bc86bc1ef0"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N13KernelBaseDivisor.lean",
+        "bytes": 3542,
+        "lines": 88,
+        "sha256": "7cb59949e46450341438fec3caa7b1d3981e0320f80bb051a77a5acea35cbd1f"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N13KernelBasePic.lean",
+        "bytes": 6051,
+        "lines": 134,
+        "sha256": "2237b399608bcfc2e5a43b71afa28caaa05ed4a71a53679ecaab02026644521b"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N13KernelGraphContraction.lean",
+        "bytes": 4715,
+        "lines": 98,
+        "sha256": "c98542116f277997576f09dbf007685d45c1cb80c21e641ec474d60aedab2455"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N13KernelInfinityMultiplicity.lean",
+        "bytes": 6426,
+        "lines": 139,
+        "sha256": "fd68334a68946192e6e7a9e3495ffd53c6bc66e46c542aa58e330722bb66e5fd"
+      }
+    ],
+    "lines": 513,
+    "excluded_unreviewed_new_files": [
+      "FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean"
+    ]
+  }
+]

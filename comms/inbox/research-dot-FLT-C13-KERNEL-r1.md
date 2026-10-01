@@ -1,15 +1,72 @@
 TASK_ID: FLT-C13-KERNEL
 REVISION: 1
-TYPE: ACK
-STATUS: IN_PROGRESS
+TYPE: RESULT
+STATUS: K1_SOURCE_COMPLETE_K2_IN_PROGRESS
 NONCE: FLT-DOT-20261001
 SOURCE_COMMIT: 887d29cd9eb9b60a6e5ec438ff919a74ccda41e5
 DISPATCH_COMMIT: 05ced4c57c83858c84032b8452b8c47f30ded392
 OUTPUT_BRANCH: research-dot/flt-collaboration-20261001
-RECEIVED: October 1, 2026, 4:25 p.m. CDT (America/Chicago)
+DEPENDENCY_DELIVERY: 2561ea7c66fb30c15416934a7ae513127cb387e1
+DATE: October 1, 2026, 4:52 p.m. CDT (America/Chicago)
 
-Both K1 (MappedSpecialFamily) and K2 (FirstJetDoublingCompatibility) are accepted as assigned. All five manifest files were fetched at the exact source pin and passed byte-count, SHA-256, and Git-blob verification. The base divisor is C+B, code 8, with the raw mark -2 to balanced mark -1 shift explicit.
+## K1 result
 
-Work is source reasoning and uncompiled Lean in new modules only. Existing declarations and lead-owned source files remain unchanged. The lead owns compilation, axiom inspection, and integration. The 41-module B00/B03 delivery at 2561ea7c66fb30c15416934a7ae513127cb387e1 is a source candidate dependency, not accepted kernel evidence.
+Five new modules (513 lines) construct the exact endpoint
+`N13ConstructedMappedSpecialFamily.mappedSpecialFamily :
+N13RationalKernelDoublingAdapter.MappedSpecialFamily
+N13ConstructedSpecialization.specialization.ker`.
+The endpoint has no mapped-special, near-base, separatedness, or K2 input.
 
-The concrete first-jet boundary obstruction recorded at d360944ac79641016aea6474c82e00a522c743a8 remains in force: firstJet does not descend through arbitrary affine Cech boundaries. K2 must establish the required normalized trivialization or coordinate comparison; applying firstJet to an arbitrary cohomology equality is insufficient.
+1. Additive specialization and noncanonical code8 force the SAME translated
+   chosen witness to have literal special divisor C+B.
+2. The reduced infinity ideal contains t-1. Integral-to-special branch
+   constant-coefficient compatibility then forces both actual generic
+   infinity multiplicities to vanish. The effective graph has degree2 and
+   nInf=-1, hence raw mark-2.
+3. Vertical saturation identifies the same affine lattice with the canonical
+   contraction of its generic graph. Its reduction is exactly the adapter's
+   specialIdeal=(X²+X,Y).
+4. Balancing the graph changes the raw mark from-2 to-1. The explicit C+B
+   base pair acquires the SAME +1 raw twist, establishing the precise
+   c+basePic class required by MappedSpecialRepresentative.
+5. Existing Hensel graph recovery gives the centered NearBaseFamily.
+
+## Validation and scope
+
+Independent mathematical/source/API-shape review passed after correcting
+`sub_right_injective` to `sub_left_injective` in chosen_translated_code.
+The original review snapshot is preserved as historical metadata; current
+manifest hashes record the corrected source. All five dispatch inputs and
+additional source/API captures were verified at exact pins.
+
+Lean compilation, ordinary-decide evaluation, kernel checking, and #print
+axioms: NOT RUN. The lead owns all such checks and integration. Earlier
+B00/B03 source dependencies remain uncompiled from dot's perspective.
+No existing lead source declaration was edited. No main/PR/release/site
+action is part of this delivery.
+
+## K2 remains active
+
+FirstJetDoublingCompatibility and actual-kernel separatedness are NOT
+claimed. The exact existing N13MumfordCenteredDoublingAdapter reduces K2
+to coefficients1 and3 of u(P)^2-uBase*u(Q) lying in I(P)^2. The pinned
+GaugeFreedom module proves weightedGaugeJet is surjective; arbitrary
+Cech/Picard equality cannot justify applying firstJet.
+
+Current arithmetic work uses a regular numerator N=uBase*A+b*y, A monic
+quadratic and b linear. Four actual Hermite equations on the conjugate
+disk pair force b=0 and A=2u(P)-uBase modulo I(P)^2. An exact norm identity
+then supplies the centered cross coefficients by monic cancellation over
+the possibly nonreduced quotient R/I(P)^2. The two arithmetic candidates
+are separate from this reviewed K1 batch. Producing that normalized
+numerator, its Hermite equations, and exact norm from the actual principal
+comparison remains the substantive K2 obligation.
+
+## Files
+
+The five new Lean modules are listed in
+`comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-manifest.json`.
+The audit and source identity receipts are under
+`comms/inbox/research-dot-FLT-C13-KERNEL-r1-K1-audit/`.
+A separate subsequent commit records the immutable result commit and
+exact remote readback outcome.

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/N13ConstructedMappedSpecialFamily.lean",
+    "bytes": 2497,
+    "lines": 54,
+    "sha256": "f20ca03307778ebfae0969a9868947c41a774308f98de88406b653bc86bc1ef0"
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13KernelBaseDivisor.lean",
+    "bytes": 3543,
+    "lines": 88,
+    "sha256": "de7b8d3ed7384e9718448550a4da7bf3179c36de8526534f502fafee01710f94"
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13KernelBasePic.lean",
+    "bytes": 6051,
+    "lines": 134,
+    "sha256": "2237b399608bcfc2e5a43b71afa28caaa05ed4a71a53679ecaab02026644521b"
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13KernelGraphContraction.lean",
+    "bytes": 4715,
+    "lines": 98,
+    "sha256": "c98542116f277997576f09dbf007685d45c1cb80c21e641ec474d60aedab2455"
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13KernelInfinityMultiplicity.lean",
+    "bytes": 6426,
+    "lines": 139,
+    "sha256": "fd68334a68946192e6e7a9e3495ffd53c6bc66e46c542aa58e330722bb66e5fd"
+  }
+]

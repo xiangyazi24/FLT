@@ -1,0 +1,92 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/N13SpecialQuotientBasis.lean",
+    "encoding": "utf-8",
+    "sha": "2696ff5d62873de4cb517ff0f3bbf8c2f227c09e",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13SpecialQuotientBasis.lean",
+    "display_title": "N13SpecialQuotientBasis.lean",
+    "sha256": "84632d7cc20bc56610cff7144abb8baa86e63c117fcd9a28d65957d64203c1b9",
+    "bytes": 4294,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13CanonicalContractionQuotient.lean",
+    "encoding": "utf-8",
+    "sha": "f73e1098c5e3855b0d81ef4d6f472b0c4142dad4",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13CanonicalContractionQuotient.lean",
+    "display_title": "N13CanonicalContractionQuotient.lean",
+    "sha256": "f131ee616d8c6f88fbdcff5a69bdc4fe742a051579d6297816892372d6a6d752",
+    "bytes": 5465,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13TwoAdicAbelChartRecover.lean",
+    "encoding": "utf-8",
+    "sha": "4b46b7a097ec6f40f00642eb1df332a51a84acea",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13TwoAdicAbelChartRecover.lean",
+    "display_title": "N13TwoAdicAbelChartRecover.lean",
+    "sha256": "49789796c21f0ecc559694e317f7ff2ae5814f270a009d02ac16931978b65d75",
+    "bytes": 17478,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13Jacobian.lean",
+    "encoding": "utf-8",
+    "sha": "1bf85f2302691fe9ba2e48ca67b3185a30053c3d",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13Jacobian.lean",
+    "display_title": "N13Jacobian.lean",
+    "sha256": "5ebe0a39be24822c485ee4671316cb6d67f41b536758c4783280901280bbd833",
+    "bytes": 10570,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/GeneralizedGraphIdealCore.lean",
+    "encoding": "utf-8",
+    "sha": "3a834be87e18cb5f232fde23f27871cbb919a443",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/GeneralizedGraphIdealCore.lean",
+    "display_title": "GeneralizedGraphIdealCore.lean",
+    "sha256": "f40996e1937ddb018488758b374dd4c0335aa7cede7d66048782e3a21a936aab",
+    "bytes": 12704,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13AbelChartBase.lean",
+    "encoding": "utf-8",
+    "sha": "e229707497042e27ef8993e12dac4e9e2d73b15e",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13AbelChartBase.lean",
+    "display_title": "N13AbelChartBase.lean",
+    "sha256": "a5b607004e0f6d0471eaed2b87ca791601e9e21e99c573a407dd79c8a647848c",
+    "bytes": 4294,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13TwoAdicMumfordTransport.lean",
+    "encoding": "utf-8",
+    "sha": "712c835356c3c5e08b478ebb47e6d3b5c84b78d0",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13TwoAdicMumfordTransport.lean",
+    "display_title": "N13TwoAdicMumfordTransport.lean",
+    "sha256": "ecd55742e16f104cca0c01275f5ca5195e5ad6cc9d81547a364efcfaa43d308c",
+    "bytes": 7069,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13InfinityBaseChange.lean",
+    "encoding": "utf-8",
+    "sha": "de30c9a3b730c565e7df92c190610dd6fe5073b4",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13InfinityBaseChange.lean",
+    "display_title": "N13InfinityBaseChange.lean",
+    "sha256": "51a4d66e883a76fc6d60beeda55db902721bf4d8b8123d12c3dcfe54970f7e57",
+    "bytes": 14394,
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13GoodSexticMumfordTransport.lean",
+    "encoding": "utf-8",
+    "sha": "39125cba0fc036f4d0b713ec53e76a1806ebaf08",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/887d29cd9eb9b60a6e5ec438ff919a74ccda41e5/FLT/Assumptions/MazurProof/N13GoodSexticMumfordTransport.lean",
+    "display_title": "N13GoodSexticMumfordTransport.lean",
+    "bytes": 11689,
+    "sha256": "ea64d189b02bc651f43c9a2d611b9ab00d9a57665acd081bd2733023a2c20fd0",
+    "blob_match": true
+  }
+]
