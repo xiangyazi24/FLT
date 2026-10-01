@@ -55,8 +55,7 @@ theorem slope_relation (P : DiskPair) (j : Fin 2) :
         (5 * x P j ^ 4 + 4 * x P j ^ 3) = 0 := by
   have hi : (2 * oppositeY P j + (x P j ^ 3 + x P j + 1)) *
       (↑((vertical_derivative_unit P j).unit⁻¹) : R₂) = 1 := by
-    rw [← (vertical_derivative_unit P j).unit_spec]
-    exact Units.mul_inv _
+    exact (vertical_derivative_unit P j).mul_val_inv
   dsimp [slope]
   linear_combination
     (5 * x P j ^ 4 + 4 * x P j ^ 3 -
@@ -115,7 +114,7 @@ theorem residual_double_root
     (oppositeY_unit P j).ne_zero
   have hz := hzero
   simp only [residual, quad, lin, eval_sub, eval_mul, eval_pow, eval_add, eval_X, eval_C, eval_one] at hz
-  simp [residual, quad, lin, derivative_mul, derivative_pow, y]
+  simp [residual, quad, lin, derivative_mul, derivative_pow, y, -mul_eq_zero]
   linear_combination
     ((x P j ^ 2 + a₁ * x P j + a₀) * oppositeY P j -
       (b₀ + b₁ * x P j) * x P j ^ 3) * hd +

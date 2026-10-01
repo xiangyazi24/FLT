@@ -50,7 +50,8 @@ private theorem residueMatrix_mul_inverse (s₀ s₁ : ZMod 2) :
     residueMatrix s₀ s₁ * residueInverse s₀ s₁ = 1 := by
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [residueMatrix, residueInverse, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+    simp [residueMatrix, residueInverse, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring_nf <;>
+    simp [show (2 : ZMod 2) = 0 from rfl]
 
 private theorem reduce_matrix (P : DiskPair) (s : Fin 2 → R₂) :
     (matrix P s).map N13GeneralizedMumfordReduction.reduceBase =
@@ -59,13 +60,16 @@ private theorem reduce_matrix (P : DiskPair) (s : Fin 2 → R₂) :
   ext i j
   fin_cases i <;> fin_cases j <;>
     norm_num [matrix, residueMatrix, Matrix.map, oppositeY,
-      N13GoodModelTwo.h, map_add, map_sub, map_neg, map_mul, map_pow]
+      N13GoodModelTwo.h, map_add, map_sub, map_neg, map_mul, map_pow] <;>
+    first | rfl | decide | (ring_nf; simp [show (2 : ZMod 2) = 0 from rfl])
 
 theorem matrix_det_unit (P : DiskPair) (s : Fin 2 → R₂) :
     IsUnit (matrix P s).det := by
   let r := N13GeneralizedMumfordReduction.reduceBase
   have hunit : IsUnit (r (matrix P s).det) := by
-    rw [r.map_det, reduce_matrix]
+    rw [r.map_det]
+    change IsUnit ((matrix P s).map r).det
+    rw [reduce_matrix]
     exact Matrix.isUnit_det_of_right_inverse
       (residueMatrix_mul_inverse (r (s 0)) (r (s 1)))
   have hres : r (matrix P s).det = 1 := by

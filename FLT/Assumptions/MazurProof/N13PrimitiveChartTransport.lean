@@ -101,7 +101,12 @@ theorem exists_infinity_numerator
     exact special_affineToInfinityOverlap_injective.ne ha
   have htO := reduced_overlap_t_isUnit.ne_zero
   have hm := congrArg N13OverlapReductionCompatibility.reduceInfinityOverlap hc'
-  rw [map_mul, map_pow, reduce_infinity, hc0, map_zero] at hm
+  have hreduce_c : N13OverlapReductionCompatibility.reduceInfinityOverlap ((algebraMap B O) c) =
+      algebraMap Bs Os (N13IntegralInfinityReduction.reduceCoordinate c) := by
+    simp [N13OverlapReductionCompatibility.reduceInfinityOverlap_algebraMap]
+    rfl
+  simp only [map_mul, map_pow] at hm
+  rw [hreduce_c, hc0, map_zero] at hm
   exact (mul_ne_zero haO (pow_ne_zero n htO)) hm
 
 /-- Every affine primitive fraction admits a primitive infinity-chart

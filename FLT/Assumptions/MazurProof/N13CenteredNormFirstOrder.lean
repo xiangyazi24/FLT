@@ -53,14 +53,16 @@ theorem mapped_u_square (P : DiskPair) :
     ext a
     exact Ideal.Quotient.eq_zero_iff_mem
   have hz : (δ ^ 2).map (Ideal.Quotient.mk (I P * I P)) = 0 := by
-    apply RingHom.mem_ker.mp
-    change δ ^ 2 ∈ RingHom.ker (Polynomial.mapRingHom (Ideal.Quotient.mk (I P * I P)))
-    rw [Polynomial.ker_mapRingHom, hk]
-    exact hδ₂
-  have hid := congrArg (Polynomial.mapRingHom (Ideal.Quotient.mk (I P * I P)))
+    have hmem : δ ^ 2 ∈ RingHom.ker (Polynomial.mapRingHom (Ideal.Quotient.mk (I P * I P))) := by
+      rw [Polynomial.ker_mapRingHom, hk]
+      exact hδ₂
+    exact RingHom.mem_ker.mp hmem
+  have hid := congrArg (Polynomial.map (Ideal.Quotient.mk (I P * I P)))
     (N13MumfordCenteredDoublingJet.u_sq_sub_base_mul_centeredSquareU P)
+  rw [Polynomial.map_sub] at hid
   apply sub_eq_zero.mp
-  simpa only [map_sub, hz] using hid
+  rw [hid]
+  exact hz
 
 /-- All centered cross coefficients, including the required 1 and 3,
 follow from a normalized Hermite numerator and its exact norm. -/
@@ -93,7 +95,8 @@ theorem cross_coefficients_of_norm
     simpa only [Polynomial.map_pow, Polynomial.map_mul] using mapped_u_square P
   have he : U ^ 2 * Abar ^ 2 = C (q k) * (V ^ 2 * U * W) := by
     have h := congrArg (Polynomial.mapRingHom q) hnorm
-    simp only [map_sub, map_pow, map_mul, Polynomial.map_C, hbzero,
+    simp only [Polynomial.coe_mapRingHom, Polynomial.map_sub, Polynomial.map_pow,
+      Polynomial.map_mul, Polynomial.map_C, hbzero,
       mul_zero, zero_mul, zero_pow (by decide : (2 : ℕ) ≠ 0), sub_zero] at h
     change (U * Abar) ^ 2 = C (q k) * V ^ 2 * U * W at h
     convert h using 1 <;> ring

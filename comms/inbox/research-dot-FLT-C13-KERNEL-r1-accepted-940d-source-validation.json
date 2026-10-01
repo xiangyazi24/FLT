@@ -1,0 +1,52 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+    "encoding": "utf-8",
+    "sha": "5f6de2b80c149b468cd86e4f45fb840e857235d0",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5/FLT/Assumptions/MazurProof/N13CenteredHermiteFirstOrder.lean",
+    "display_title": "N13CenteredHermiteFirstOrder.lean",
+    "bytes": 7043,
+    "sha256": "a8f7366c0574f3d068e8360187f3b0c9bb3eeca25d089e4086326d57665a63e3",
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+    "encoding": "utf-8",
+    "sha": "d703ecb9b6984ba99615ba87e8ac90974b6e51c9",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5/FLT/Assumptions/MazurProof/N13IntegralHermiteNumerator.lean",
+    "display_title": "N13IntegralHermiteNumerator.lean",
+    "bytes": 5942,
+    "sha256": "fe2d0476062e9dbd14cb85502284c4c0ecdb37291a185008e941ef4d5f2655d5",
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+    "encoding": "utf-8",
+    "sha": "79bb3964f8a05dfec6ad6cd574f536bb66a41d82",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5/FLT/Assumptions/MazurProof/N13HermiteResidualDivisibility.lean",
+    "display_title": "N13HermiteResidualDivisibility.lean",
+    "bytes": 7134,
+    "sha256": "7ac7d80ce7e37d0b850c9c874d2b90fd99810421e95674246d321f22b3566712",
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+    "encoding": "utf-8",
+    "sha": "d11485c291f2f603734f78ccf9d20d272905a001",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5/FLT/Assumptions/MazurProof/N13CenteredNormFirstOrder.lean",
+    "display_title": "N13CenteredNormFirstOrder.lean",
+    "bytes": 5854,
+    "sha256": "eab56f03f596072421f6b3e476a0ff53ec55ec431fb6a28c3fe07f352d9d3408",
+    "blob_match": true
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+    "encoding": "utf-8",
+    "sha": "928f79b7033c97d8b5825741fa4ea812f97a57f5",
+    "display_url": "https://github.com/xiangyazi24/FLT/blob/940dc5a6b4062e8f591ddd744e4f3b8c2b562ea5/FLT/Assumptions/MazurProof/N13PrimitiveChartTransport.lean",
+    "display_title": "N13PrimitiveChartTransport.lean",
+    "bytes": 6877,
+    "sha256": "a53b19458b8fe8fb29449b1c6707179cff6e61d55770b6badd0183a794e3bfff",
+    "blob_match": true
+  }
+]
