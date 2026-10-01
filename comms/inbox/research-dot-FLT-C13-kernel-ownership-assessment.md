@@ -34,3 +34,18 @@ Next show that a certified line with this finite-only special divisor has zero a
 Passing to the balanced graph retains u and v and changes the raw mark from-2 to-1. An explicit base-pair comparison must verify that its class is c+basePic, with the correct inverse-infinity shift. Affine saturation can then identify its canonical contraction with the same actual affine lattice, whose reduced ideal is the required C+B graph ideal.
 
 The first-jet doubling comparison remains a separate substantive obligation after graph recovery. No source candidate or completion claim for either obligation is included in this delivery.
+
+## First-jet comparison: a concrete boundary on the argument
+
+At the pinned source, N13MumfordFormalTransitionJet.firstJet reads
+
+- coordinate0: minus the first Laurent component's coefficient at0
+- coordinate1: minus its coefficient at-1 plus its coefficient at0
+
+The overlap element (t^-1,0) is the image of the actual affine x-section and therefore is an affine Cech boundary. Nevertheless its firstJet is (0,-1), which is nonzero over Z2. This follows directly from the single-monomial coefficients and the displayed definition.
+
+Consequently firstJet does not annihilate arbitrary affine boundaries. The desired FirstJetDoublingCompatibility cannot be obtained merely by applying firstJet to an equality of Picard/Cech classes. It needs the actual normalized-trivialization comparison, with its permitted gauge terms controlled, or an explicit integral formal-group-coordinate calculation.
+
+This does not disprove the desired doubling law. It identifies a concrete missing justification and prevents replacing that law with an invalid general class-invariance assertion. No kernel implementation has been started or claimed.
+
+Read-only assessment update: 2026-10-01 04:20 PM CDT (America/Chicago)
