@@ -823,3 +823,8 @@ specialCuspEquiv negOnePlus) = C + A. Build OK; axioms standard. Piece 2 (generi
   Remaining for "toGenericPic = classOf (1,0,2)": genericClass caLine (-1) = 2 • classOf (1,0,2) over Q₂, i.e. the Q₂ version of
   div(Y+s) = C + A + T - 3O for this line (needs: hmap with integralToRational for caLine = mumfordIdeal Model₂ (X(X+1)) 1, and the
   ℚ cusp relation transported by picMapRatToQ₂, or redone over Q₂).
+- N13InverseInfinityWitnessClass.lean (0 sorry, axioms standard): inverseInfinityData_toGenericPic_eq_opposite —
+  inverseInfinityData.toGenericPic = classOf Model₂ O₂ (oppositeInfinityMumford Q₂) [generic raw = raw C₂ * raw A₂ via
+  map_pairLine_affineIdeal + pointY_goodY; transported from ℚ by picMapRatToQ₂]; inverseInfinityData_affineVerticallySaturated.
+  => The nInf = 2 degree-zero witness is CONSTRUCTED: saturated two-chart datum, generic class (1,0,2), special divisor
+  s(zeroPlus, negOnePlus), special class abel s(zeroPlus,negOnePlus). (Q8689's DegreeZeroTwoWitness interface must use C+A.)
