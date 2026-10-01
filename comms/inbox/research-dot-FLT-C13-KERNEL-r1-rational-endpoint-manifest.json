@@ -1,0 +1,162 @@
+{
+  "source_commit": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+  "validation": "source-only; Lean and emitted axioms NOT RUN",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+      "encoding": "utf-8",
+      "bytes": 7595,
+      "sha256": "8ca422db7b5258e3a60de1379fe0577f2250c862ddc2cecee95c0e159a53ef3f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedRationalPointTheorem.lean",
+      "encoding": "utf-8",
+      "bytes": 1628,
+      "sha256": "4ba28bc185751f81edf7f8ef1761473d2abdce49b6bdbe5f00ccafc10606a72f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+      "encoding": "utf-8",
+      "bytes": 6243,
+      "sha256": "ba152c560cc07db0b0a30ab0fe925b7cfadf4a08cdbc354bcd415dabbfdbd751"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/KERNEL_RATIONAL_ENDPOINT_VALIDATION.lean",
+      "encoding": "utf-8",
+      "bytes": 1203,
+      "sha256": "b7e9f9abe1d97bc45d6538583af09a5fb4d098a1a9279b236332835d3525b542"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/N13CalibratedChooser.patch",
+      "encoding": "utf-8",
+      "bytes": 1202,
+      "sha256": "23261dc7152509958a9d62a1d1eac12a1557c55bf2f77d921729995a7ea5e4f8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/N13EffectiveDataCompatibility.patch",
+      "encoding": "utf-8",
+      "bytes": 1557,
+      "sha256": "0828d41518a992eebf857e1e1d9d1c37dbdee7b37f516e20604011592d20ec0c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/N18-add-congr-readonly-assessment.md",
+      "encoding": "utf-8",
+      "bytes": 1599,
+      "sha256": "ea2a8d1da4e059f8f4920a79ec0935feacb7a5af46114ac37a49be500c7914a4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/BOUNDED_TRACE_RESULT.json",
+      "encoding": "utf-8",
+      "bytes": 1013,
+      "sha256": "dbda6796e0737d3795bd9a90d14a88529c7ebf11cfef4d564012474d3ac86339"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/FETCH_QUEUE.json",
+      "encoding": "utf-8",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/IMPORT_CLOSURE.json",
+      "encoding": "utf-8",
+      "bytes": 265191,
+      "sha256": "674c01f61b0ba74cde1e028a21effe194937fb8d13a6b8e5b8066879c0bdfbab"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/INDEPENDENT_ENDGAME_DEPENDENCY_REVIEW_29E8_ISOLATED.md",
+      "encoding": "utf-8",
+      "bytes": 12765,
+      "sha256": "169341530e27a2cde84572128e7e529d3c3afb769cd327eb882cfe4fa3b390e7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/ISOLATION_REVIEW_IDENTITIES.json",
+      "encoding": "utf-8",
+      "bytes": 1075,
+      "sha256": "0076aebba4cb44cbe0f4d7f5454483b7fe406601a0e29d8580cb52aaaf85c84b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/OPERATIVE_DIRECTORY.json",
+      "encoding": "utf-8",
+      "bytes": 132051,
+      "sha256": "cf369c5932efaa80caa9e9c9af5d9cc916cab3b78b3384ddc46bfc6ac4071687"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/OUTSIDE_CLOSURE_FLAG_CHECK.json",
+      "encoding": "utf-8",
+      "bytes": 957,
+      "sha256": "305969753b0ef8c51b4ac85685a2817912ffdc9fcb14d7a7936383f4fadfe466"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/PRE_ISOLATION_29E8_IMPORT_CLOSURE.json",
+      "encoding": "utf-8",
+      "bytes": 269414,
+      "sha256": "ea8f0e70ef2dd79db0479cc72354cd9bb7999be5b2c31d72799af59a188a393f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/REPIn_COMPARE_29E8.json",
+      "encoding": "utf-8",
+      "bytes": 9648,
+      "sha256": "8a803bbdd772b8cb95fadf9e9265a2293e8e21a2463f69e8b05213ad8e4139a5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/REVIEW_RECEIPT.json",
+      "encoding": "utf-8",
+      "bytes": 2362,
+      "sha256": "869792c64550d29c21689f88dfc093746d515b93bb3ceb5dce8fec5c31d69bc6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/SOURCE_AUDIT_STATUS.json",
+      "encoding": "utf-8",
+      "bytes": 1152,
+      "sha256": "28a09f25a254d209e47a4fcdecaba913596a9bc0cb8da3a839948fb7552e3538"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/TWO_SURJECTIVE_AND_TARGET_CHECK.json",
+      "encoding": "utf-8",
+      "bytes": 492,
+      "sha256": "8a1be3e9057520f7cf5154f839248c531e3fb95704873cc73a8d05894df1ca53"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/trace_imports.py",
+      "encoding": "utf-8",
+      "bytes": 5431,
+      "sha256": "7ce8d38f326f81e32e448240c5a377f0445d128498a4b0a7bc482c0d74dead48"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/audit/trace_imports_pre_isolation.py",
+      "encoding": "utf-8",
+      "bytes": 5091,
+      "sha256": "9647a9c658c3f694ef9303da922989e466d758825f0c590c261431bed46db37d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/flagged-source-validation.json",
+      "encoding": "utf-8",
+      "bytes": 947,
+      "sha256": "cf329b1d723cf848ec88eee2ccbb870e9b3a6e5a4186d37d5e846e688c736ed5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/public-statement-check.json",
+      "encoding": "utf-8",
+      "bytes": 656,
+      "sha256": "112066b1c3c9a81b4f5efdf8a45278a4ddaacf0d64ae7b5c057a7c6283d3a9dc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-C13-KERNEL-r1-rational-endpoint/review-manifest.json",
+      "encoding": "utf-8",
+      "bytes": 833,
+      "sha256": "afa335d177bb88ed8871b6738a3c747c3978be3d9d213e0e3a974090e8c33ad2"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-rational-endpoint.md",
+      "encoding": "utf-8",
+      "bytes": 5746,
+      "sha256": "775bc1c95e78b93a379eb75cfb016820b294f3ba350d9bf2fa0bd930cde033a8"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-next-scope-N18-add-congr.md",
+      "encoding": "utf-8",
+      "bytes": 1613,
+      "sha256": "9c209dc3348f542caa4b24ebf7a1649f3187b60187902716b1189bde619e74db"
+    }
+  ]
+}

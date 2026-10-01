@@ -1,0 +1,22 @@
+{
+  "source_review": "No public proposition changed; direct mapCoeffs equals old mapMumford body; private extensionality helper copied with same proof",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+      "local_path": "/workspace/shared/flt-c13-endgame-isolation/FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+      "sha256": "8ca422db7b5258e3a60de1379fe0577f2250c862ddc2cecee95c0e159a53ef3f",
+      "bytes": 7595,
+      "lines": 177,
+      "historical_sha256": "514c47dedbefede319d8fd87d536d68d50b14790f053c3a34314629231c446c7"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+      "local_path": "/workspace/shared/flt-c13-endgame-isolation/FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+      "sha256": "ba152c560cc07db0b0a30ab0fe925b7cfadf4a08cdbc354bcd415dabbfdbd751",
+      "bytes": 6243,
+      "lines": 124,
+      "historical_sha256": "d51692d82deb3182fe88868a75ae4868fb2c659baeea095c6876d87f98b3cd47"
+    }
+  ],
+  "status": "SOURCE_REVIEWED_UNCOMPILED"
+}

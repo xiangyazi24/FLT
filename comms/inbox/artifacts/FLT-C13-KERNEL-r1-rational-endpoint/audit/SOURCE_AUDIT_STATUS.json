@@ -1,0 +1,28 @@
+{
+  "status": "SOURCE_ONLY_IMPORT_AUDIT_COMPLETE_ISOLATED_OVERLAY_KERNEL_CHECKS_PENDING",
+  "operative_pin": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+  "thin_candidate": {
+    "path": "/workspace/shared/flt-c13-kernel-next/FLT/Assumptions/MazurProof/N13ConstructedRationalPointTheorem.lean",
+    "bytes": 1628,
+    "sha256": "4ba28bc185751f81edf7f8ef1761473d2abdce49b6bdbe5f00ccafc10606a72f",
+    "git_blob": "596e3b9dbde0ce3b3dc39a9c1e5eb38b44831f46"
+  },
+  "thin_candidate_lines": 40,
+  "thin_theorems": 4,
+  "resolved_project_modules": 335,
+  "missing_project_imports": [],
+  "target_axiom_file_in_closure": false,
+  "exactSpreadLine_file_in_closure": false,
+  "known_flagged_admission_files_in_closure": false,
+  "code_axiom_sorry_admit_matches_in_resolved_project_sources": [],
+  "import_cycles": [],
+  "kernel_checks_run": false,
+  "kernel_axiom_closure_certified": false,
+  "project_code_run": false,
+  "remote_writes": false,
+  "target_axiom_replaced": false,
+  "project_import_closure_resolved": true,
+  "strict_flagged_file_import_exclusion_satisfied": true,
+  "provided_target_proposition_identical": true,
+  "isolation_required": true
+}

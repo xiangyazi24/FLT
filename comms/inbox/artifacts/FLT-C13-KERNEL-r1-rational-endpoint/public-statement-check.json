@@ -1,0 +1,16 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+    "public_declaration_count": 17,
+    "same_public_statement_prefixes": true,
+    "old_sha": "514c47dedbefede319d8fd87d536d68d50b14790f053c3a34314629231c446c7",
+    "new_sha": "8ca422db7b5258e3a60de1379fe0577f2250c862ddc2cecee95c0e159a53ef3f"
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+    "public_declaration_count": 10,
+    "same_public_statement_prefixes": true,
+    "old_sha": "d51692d82deb3182fe88868a75ae4868fb2c659baeea095c6876d87f98b3cd47",
+    "new_sha": "ba152c560cc07db0b0a30ab0fe925b7cfadf4a08cdbc354bcd415dabbfdbd751"
+  }
+]

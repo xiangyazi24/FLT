@@ -1,6 +1,5 @@
 import FLT.Assumptions.MazurProof.N13PointDataCertificates
 import FLT.Assumptions.MazurProof.N13CoherentChooserSpecification
-import FLT.Assumptions.MazurProof.N13CoherentDegreeZeroChooser
 import FLT.Assumptions.MazurProof.N13SmallMumfordRigidity
 
 /-!
@@ -90,12 +89,18 @@ theorem infinityPlus_generic : N13InfinityPointPicardRealization.infinityPlusDat
   rw [N13InfinityPointPicardRealization.infinityPlusData_toGenericPic,
     SexticMumford.classOf_zero, map_zero]
 
+private theorem mumford_ext {D E : SexticMumford.Mumford Model}
+    (hu : D.u = E.u) (hv : D.v = E.v) (hn : D.nInf = E.nInf) : D = E := by
+  cases D
+  cases E
+  simp_all
+
 theorem infinityMinus_generic : N13InfinityPointPicardRealization.infinityMinusData.toGenericPic =
     N13InfinityBaseChange.picMapRatToQ₂ tClass := by
   rw [N13InfinityPointPicardRealization.infinityMinusData_toGenericPic,
     tClass_eq_classOf, N13InfinityBaseChange.picMapRatToQ₂_classOf]
   congr 1
-  apply N13CoherentDegreeZeroChooser.mumford_ext <;>
+  apply mumford_ext <;>
     simp [SexticMumford.infinityMinusMumford]
 
 theorem inverseInfinity_generic : N13InverseInfinityWitness.inverseInfinityData.toGenericPic =

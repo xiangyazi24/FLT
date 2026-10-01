@@ -1,0 +1,71 @@
+{
+  "status": "SOURCE_ONLY_IMPORT_AUDIT_COMPLETE_ISOLATED_OVERLAY_KERNEL_CHECKS_PENDING",
+  "files": [
+    {
+      "path": "BOUNDED_TRACE_RESULT.json",
+      "bytes": 1013,
+      "sha256": "dbda6796e0737d3795bd9a90d14a88529c7ebf11cfef4d564012474d3ac86339"
+    },
+    {
+      "path": "FETCH_QUEUE.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "IMPORT_CLOSURE.json",
+      "bytes": 265191,
+      "sha256": "674c01f61b0ba74cde1e028a21effe194937fb8d13a6b8e5b8066879c0bdfbab"
+    },
+    {
+      "path": "INDEPENDENT_ENDGAME_DEPENDENCY_REVIEW_29E8_ISOLATED.md",
+      "bytes": 12765,
+      "sha256": "169341530e27a2cde84572128e7e529d3c3afb769cd327eb882cfe4fa3b390e7"
+    },
+    {
+      "path": "ISOLATION_REVIEW_IDENTITIES.json",
+      "bytes": 1075,
+      "sha256": "0076aebba4cb44cbe0f4d7f5454483b7fe406601a0e29d8580cb52aaaf85c84b"
+    },
+    {
+      "path": "OPERATIVE_DIRECTORY.json",
+      "bytes": 132051,
+      "sha256": "cf369c5932efaa80caa9e9c9af5d9cc916cab3b78b3384ddc46bfc6ac4071687"
+    },
+    {
+      "path": "OUTSIDE_CLOSURE_FLAG_CHECK.json",
+      "bytes": 957,
+      "sha256": "305969753b0ef8c51b4ac85685a2817912ffdc9fcb14d7a7936383f4fadfe466"
+    },
+    {
+      "path": "PRE_ISOLATION_29E8_IMPORT_CLOSURE.json",
+      "bytes": 269414,
+      "sha256": "ea8f0e70ef2dd79db0479cc72354cd9bb7999be5b2c31d72799af59a188a393f"
+    },
+    {
+      "path": "REPIn_COMPARE_29E8.json",
+      "bytes": 9648,
+      "sha256": "8a803bbdd772b8cb95fadf9e9265a2293e8e21a2463f69e8b05213ad8e4139a5"
+    },
+    {
+      "path": "SOURCE_AUDIT_STATUS.json",
+      "bytes": 1152,
+      "sha256": "28a09f25a254d209e47a4fcdecaba913596a9bc0cb8da3a839948fb7552e3538"
+    },
+    {
+      "path": "TWO_SURJECTIVE_AND_TARGET_CHECK.json",
+      "bytes": 492,
+      "sha256": "8a1be3e9057520f7cf5154f839248c531e3fb95704873cc73a8d05894df1ca53"
+    },
+    {
+      "path": "trace_imports.py",
+      "bytes": 5431,
+      "sha256": "7ce8d38f326f81e32e448240c5a377f0445d128498a4b0a7bc482c0d74dead48"
+    },
+    {
+      "path": "trace_imports_pre_isolation.py",
+      "bytes": 5091,
+      "sha256": "9647a9c658c3f694ef9303da922989e466d758825f0c590c261431bed46db37d"
+    }
+  ],
+  "source_captures": "Per-source identities are in IMPORT_CLOSURE.json; outside-closure files have their own flag/hash receipt"
+}

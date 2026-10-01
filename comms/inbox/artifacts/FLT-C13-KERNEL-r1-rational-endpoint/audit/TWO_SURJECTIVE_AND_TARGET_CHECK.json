@@ -1,0 +1,10 @@
+{
+  "operative_pin": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+  "target_propositions_whitespace_identical": true,
+  "target_proposition": "\u2200 X Y : \u211a, N13CurveModel.C13SexticEq X Y \u2192 X = 0 \u2228 X = -1",
+  "thin_candidate_sha256": "4ba28bc185751f81edf7f8ef1761473d2abdce49b6bdbe5f00ccafc10606a72f",
+  "header_only_change_verified": true,
+  "twoSurjective_subclosure_count": 106,
+  "twoSurjective_missing": [],
+  "twoSurjective_constructed_or_spread_coherence_modules": []
+}

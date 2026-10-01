@@ -1,0 +1,31 @@
+{
+  "operative_pin": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+  "resolved_project_modules": 335,
+  "unresolved_project_modules": [],
+  "code_admission_flagged_route_or_target_flags": [],
+  "import_cycles_found": [],
+  "excluded_modules": {
+    "N13RationalPicardSpreadExistence": true,
+    "N13CoherentDegreeZeroChooser": true,
+    "N18AddCongr": true,
+    "N18ReductionHom": true,
+    "TateOrder16Cyclic": true,
+    "CyclicExclusion13": true
+  },
+  "provenance_counts": {
+    "reviewed local construction overlay": 18,
+    "29e80dbc17c5fdf3a194618d65dc0676199e19f5": 274,
+    "29e80dbc17c5fdf3a194618d65dc0676199e19f5 fetched external path": 4,
+    "source-reviewed 2561ea7c dependency overlay": 37,
+    "reviewed import-isolation overlay": 2
+  },
+  "twoSurjective_subclosure_count": 106,
+  "twoSurjective_missing": [],
+  "twoSurjective_constructed_or_spread_coherence_modules": [],
+  "separated_imports": [
+    "FLT.Assumptions.MazurProof.N18RouteC_PushPull"
+  ],
+  "pushpull_imports": [
+    "Mathlib"
+  ]
+}

@@ -1,0 +1,29 @@
+--- historical/N13EffectiveDataCompatibility.lean
++++ isolated/N13EffectiveDataCompatibility.lean
+@@ -1,5 +1,6 @@
+ import FLT.Assumptions.MazurProof.N13MarkedTensorComparison
+-import FLT.Assumptions.MazurProof.N13RationalPicardSpreadExistence
++import FLT.Assumptions.MazurProof.N13InfinityBaseChange
++import FLT.Assumptions.MazurProof.N13MumfordInfinityBalance
+ 
+ /-!
+ Source pin: 887d29cd9eb9b60a6e5ec438ff919a74ccda41e5.
+@@ -89,12 +90,16 @@
+ theorem exists_certified_realization (P : G) :
+     ∃ D : Data, Certified D ∧ D.toGenericPic = N13InfinityBaseChange.picMapRatToQ₂ P := by
+   obtain ⟨D, hD⟩ := N13MumfordInfinityBalance.classOf_surjective P
+-  let M := N13RationalPicardSpreadExistence.mapMumford D
++  let M := D.mapCoeffs N13InfinityBaseChange.ratToQ₂
++    N13InfinityBaseChange.ratToQ₂_injective
++    (N13InfinityBaseChange.map_n13_f N13InfinityBaseChange.ratToQ₂)
+   obtain ⟨W, hraw, hgeneric, hs, hm⟩ := N13MarkedEffectiveData.exists_marked_repaired_data M
+   refine ⟨W, ⟨repair M, repair_effective M, hraw, hs, hm⟩, ?_⟩
+   rw [hgeneric]
+   change SexticMumford.classOf Model (N13Infinity.positiveInfinityOrder Q₂)
+-      (N13RationalPicardSpreadExistence.mapMumford D) = _
++      (D.mapCoeffs N13InfinityBaseChange.ratToQ₂
++        N13InfinityBaseChange.ratToQ₂_injective
++        (N13InfinityBaseChange.map_n13_f N13InfinityBaseChange.ratToQ₂)) = _
+   rw [← N13InfinityBaseChange.picMapRatToQ₂_classOf, hD]
+ 
+ def chooseUncalibrated (P : G) : Data := Classical.choose (exists_certified_realization P)

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/N18AddCongr.lean",
+    "source_commit": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+    "git_blob": "10160a9e6935b4ad56fc36b224db301ff7dce839",
+    "sha256": "a0a424b6ecd2bcf1758129874be285097f30b0d4f8d4a3123de87b2800a480e2",
+    "bytes": 14074,
+    "lines": 307
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/N18ReductionHom.lean",
+    "source_commit": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+    "git_blob": "ea9ebd53a2abca3b935ddc66dd5023106b036ae8",
+    "sha256": "160d5e8de1da6ee2b9dbdb31dde73be8093c0b97e993a973558174517a61d43c",
+    "bytes": 4230,
+    "lines": 91
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/TateOrder16Cyclic.lean",
+    "source_commit": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+    "git_blob": "a8927c48811f62503e031b425f1dfc46083e093c",
+    "sha256": "781cf8345c081b78b5dca2aec13bc50efb0ddb8b8136dc83387756da4fd0d05a",
+    "bytes": 14817,
+    "lines": 306
+  }
+]
