@@ -817,3 +817,9 @@ specialCuspEquiv negOnePlus) = C + A. Build OK; axioms standard. Piece 2 (generi
   hence classOf D_CA = 2 • classOf (1,0,2) (from rawC*rawA*rawT principal), NOT classOf (1,0,2). So the proposed
   "classOf_CA_eq_opposite" with nInf = 0 is false. The coherent nInf = 2 witness must carry the cusp-pair ideal I_C·I_A with
   generic infinity integer -2 (a reoriented two-chart datum), special divisor s(zeroPlus, negOnePlus) (piece 1, 26c45a4184).
+- N13InverseInfinityWitness.lean (0 sorry, axioms standard): inverseInfinityData (cusp-pair line, generic infinity integer -2,
+  special divisor s(zeroPlus, negOnePlus)); toSpecialPic = abel s(zeroPlus,negOnePlus); genericClass_sub_one;
+  inverseInfinityData_toGenericPic = genericClass caLine (-1) - classOf (1,0,2).
+  Remaining for "toGenericPic = classOf (1,0,2)": genericClass caLine (-1) = 2 • classOf (1,0,2) over Q₂, i.e. the Q₂ version of
+  div(Y+s) = C + A + T - 3O for this line (needs: hmap with integralToRational for caLine = mumfordIdeal Model₂ (X(X+1)) 1, and the
+  ℚ cusp relation transported by picMapRatToQ₂, or redone over Q₂).
