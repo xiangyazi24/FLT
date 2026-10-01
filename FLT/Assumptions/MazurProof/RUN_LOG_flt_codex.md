@@ -808,3 +808,12 @@ Build completed successfully (8570 jobs).
 N13InverseInfinityData.lean: reducedPairDivisor_inverseInfinity — the literal reduced special divisor of the split quadratic
 u = X(X+1), v = 1 (roots 0, -1; good ordinates goodY 0 1 = 0, goodY (-1) 1 = 1) is s(specialCuspEquiv zeroPlus,
 specialCuspEquiv negOnePlus) = C + A. Build OK; axioms standard. Piece 2 (generic class = oppositeInfinityMumford class) open.
+
+### 2026-09-30 ~20:45 (coordinator sprint 8): nInf = 2 class, orientation check
+- New N13OppositeInfinityClass.lean (0 sorry, axioms standard): oppositeInfinityMumford K = (1,0,2);
+  classOf (1,0,2) + classOf (1,0,0) = 0 (any char-0 field); over ℚ classOf (1,0,2) = -AJ13 T and
+  AJ13 C + AJ13 A = classOf (1,0,2).
+- Orientation finding: the balanced datum D_CA = (X(X+1), 1, nInf = 0) has raw infinity integer -1, while rawC * rawA has -2;
+  hence classOf D_CA = 2 • classOf (1,0,2) (from rawC*rawA*rawT principal), NOT classOf (1,0,2). So the proposed
+  "classOf_CA_eq_opposite" with nInf = 0 is false. The coherent nInf = 2 witness must carry the cusp-pair ideal I_C·I_A with
+  generic infinity integer -2 (a reoriented two-chart datum), special divisor s(zeroPlus, negOnePlus) (piece 1, 26c45a4184).
