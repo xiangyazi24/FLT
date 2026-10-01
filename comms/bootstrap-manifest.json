@@ -6,20 +6,28 @@
     {
       "path": "COMMS.md",
       "encoding": "utf-8",
-      "bytes": 3687,
-      "sha256": "e55a875c645ba1b4cec14b35cb1b013ce73f214d8fe8d92589917945f67cf2c2"
+      "bytes": 5563,
+      "sha256": "a1a7b1fe5a2fe96027b8f56cfdf64e8709a6e30d62a1ba6938e14224f7d65b65"
     },
     {
       "path": "comms/ACTIVITY.md",
       "encoding": "utf-8",
-      "bytes": 167,
-      "sha256": "eb31a60714e60b12a4a4d676552df52536da158406935f6fa26eb286588636c2"
+      "bytes": 1449,
+      "sha256": "247bed629b6edaa1253f926690a167bf18fa9d614d03fba3ac563289d7284ec3"
     },
     {
       "path": "comms/inbox/research-dot-FLT-DOT-20261001-handshake.md",
       "encoding": "utf-8",
       "bytes": 586,
       "sha256": "2ddf13357219ea1abeae7e3561efa236cb532b662e392baa51896a867bdf31ec"
+    },
+    {
+      "path": "comms/inbox/dot-flt-build-responsibility-20261001-0422.md",
+      "encoding": "utf-8",
+      "bytes": 755,
+      "sha256": "838a1b889e612c42a4f0f767a6473da35663d0f6ec437268474dfaccda24b0b8"
     }
-  ]
+  ],
+  "previous_manifest_commit": "34629c9725f3b99539e7e3a1ced5bd4c58bebdd5",
+  "revision_note": "Resource/build responsibility addendum; prior receipts and immutable pins remain unchanged."
 }
