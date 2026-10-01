@@ -22,3 +22,5 @@ FLT 2026-10-01 04:20 PM CDT: Read-only kernel assessment identifies a nonzero fi
 - October 1, 2026, 6:01 p.m. CDT: Requested missing defining source N18RouteC_Separated.lean at pin 940dc5a6 (direct fetch HTTP404, absent pinned tree). Bounded K2 endpoint review continues separately from this full dependency-closure gap.
 
 - October 1, 2026, 6:05 p.m. CDT: FLT-C13-KERNEL r1 endpoint source result: twelve new modules / 1,313 lines complete exact FirstJetDoublingCompatibility and actual specialization-kernel separation, with same α,hα,n retained. Independent source review complete. New modules remain uncompiled; lead-accepted four-module support baseline is 940dc5a6. Missing N18RouteC_Separated defining source remains a separate full-closure gate.
+
+- October 1, 2026, 6:08 p.m. CDT: Exact K2 endpoint result fd65ed8d059ad3a195d2162ed87136d0a6e8fd6b verified by 58/58 immutable file readbacks and matching branch head. New endpoint is source-reviewed/uncompiled; full defining-source gate and lead validation remain open.

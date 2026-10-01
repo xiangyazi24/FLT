@@ -1,0 +1,295 @@
+{
+  "commit": "fd65ed8d059ad3a195d2162ed87136d0a6e8fd6b",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13NormalizedHermiteResidual.lean",
+      "exact_content": true,
+      "remote_git_blob": "d6d6ae39bdcf15681acabe0b39b5b1baf8a80c0e"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CenteredPrincipalNumerator.lean",
+      "exact_content": true,
+      "remote_git_blob": "2a276df66c143512441d8dc329a8f9c98aabe9b0"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CenteredNumeratorPoleBounds.lean",
+      "exact_content": true,
+      "remote_git_blob": "910427ebc3c773449ef1fee3e9bd460a0631c39e"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13GoodCenteredNumerator.lean",
+      "exact_content": true,
+      "remote_git_blob": "e2a35a7bc7a51a926f2d1ba613247cd0fc04fd5c"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13GoodPointFirstJet.lean",
+      "exact_content": true,
+      "remote_git_blob": "f7df21130d293d9abf8da190bcc662ad3ce8e491"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ActualHermiteEquations.lean",
+      "exact_content": true,
+      "remote_git_blob": "ae5ac13f15c76ca59a6557f1076386c5f07743ce"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13RationalHermiteMatrix.lean",
+      "exact_content": true,
+      "remote_git_blob": "33d8d16302e6ef0ce2b5ccb1461d5ff117b829d4"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrincipalHermiteNormalization.lean",
+      "exact_content": true,
+      "remote_git_blob": "bef5dad3c257cb2ada22c5d20dd0db8d2126827c"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ActualPrincipalNorm.lean",
+      "exact_content": true,
+      "remote_git_blob": "fadef9466ddb04e6693b7ea49f88ee2ed4a2b519"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13IntegralMatchedNorm.lean",
+      "exact_content": true,
+      "remote_git_blob": "ea5992ce196845a6dcebc2eea91dece0345e8053"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13IntegralHermiteCoefficientBounds.lean",
+      "exact_content": true,
+      "remote_git_blob": "0f7f7e3bf72a2ed82aec1c2afdea0e6425b05084"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13ConstructedKernelDoubling.lean",
+      "exact_content": true,
+      "remote_git_blob": "e8fc51c0122153d4d0d92dcfc8d83b7dcf0b73a5"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/normalization/INDEPENDENT_NORMALIZATION_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "7994919b7b95b562f2a0e5431fc7da43447ba42d"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/normalization/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "8c4462f224c5415702b153eff748764742553ebc"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/normalization/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "80eb51f9dad5398a07f934334fa0db5e011e1950"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/principal/INDEPENDENT_PRINCIPAL_NUMERATOR_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "361bb91e39d5b6e9d716c3df374c14ff36208067"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/principal/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "34db24f4d5ae8b1f13b6501245dba3d8f8926cc5"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/principal/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "e387163f6bcfa51c7119e8616c81cfe6c46c1f21"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/pole/INDEPENDENT_POLE_BOUND_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "a38e90548a9d1eb83701a446795abbfa5aaea15b"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/pole/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "b50d026910b3053b35d5bfb1b0910dfb2895180c"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/pole/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "2d0953acd004dac3f00d27153aec1cf639e7f8ad"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/good-shape/INDEPENDENT_GOOD_SHAPE_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "85ff21f1f9872c232f592f07a752e1142b38ad74"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/good-shape/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "df05e33b64890008cf91332ea2822b52404ec7ec"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/good-shape/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "3ae81e3e3af0e3107c3f002da2c361fb2b7c273e"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/good-shape/historical-671cc695/INDEPENDENT_GOOD_SHAPE_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "3b0765e9e810cdd13aa59a0320b4c1d9deb578ab"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/good-shape/historical-671cc695/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "9d2fb82adfb44e00b3127755971ebc467857f873"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/good-shape/historical-671cc695/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "a8933a8c67041b474cc8869335314c79db53ca84"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/good-shape/historical-671cc695/SUPERSEDED.txt",
+      "exact_content": true,
+      "remote_git_blob": "b0b956cc9cbe6a925cea691b714d7e2486ec669a"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/point-jet/INDEPENDENT_POINT_JET_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "b8ceb5b4e9000372d08c19bec62b203b8f464ae7"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/point-jet/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "a6c806991e450bcffcd89255e78ef4d979da96a9"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/point-jet/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "88e0d95409742de41d1f4ba65f3373018771a491"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/actual-hermite/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "6912762be7453b472c1998c16a5e3836bbdedb60"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/actual-hermite/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "5432ac869e9068d71768e8f8899053d0e68671fc"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/actual-hermite/INDEPENDENT_ACTUAL_HERMITE_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "c8def3d93b9a5c2980adccb3ea7fb185612d4af5"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/rational-matrix/INDEPENDENT_RATIONAL_MATRIX_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "e392da469030bb361856ec6fd5df874a9485abf6"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/rational-matrix/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "df5a6ca72431d404bee055f86ae8b9c0d326e858"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/rational-matrix/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "942f0990f3915738befe0b931a66d2df678562f4"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/principal-normalization/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "a3a1a3c30b68d4c8391be3bb11c1179fcb53f047"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/principal-normalization/INDEPENDENT_PRINCIPAL_NORMALIZATION_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "abcfda39cc36d15feaa190dbce24b5ba8862c518"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/principal-normalization/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "16c0834c081ae19bad2bf6b0c8573e8f3670bd62"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/actual-norm/INDEPENDENT_ACTUAL_NORM_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "c42ef1fb5e4691ae2f9b6116bdb731921e87598e"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/actual-norm/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "84eaad03731e220f6260e2398b001ca36ee5c95e"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/actual-norm/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "3c2ddff96746cd3f5387ba848b2224bb112d9467"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/integral-norm/INDEPENDENT_INTEGRAL_MATCHED_NORM_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "4ab27b322e31c583737edc62925b27944480dcdb"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/integral-norm/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "30c743596998db355e2459f60929b8d4f786fd6d"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/integral-norm/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "7e0c4a3138f67016361de483482629f2dac916e5"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/endpoint/K2_CHAIN_FROZEN_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "4278caf6ff831dc569377113d51a9303f27002e1"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/endpoint/MISSING_SEPARATED_SOURCE.json",
+      "exact_content": true,
+      "remote_git_blob": "f95372d70cd2ac1d6b397f9f29738f6bddeb80b0"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/endpoint/REVIEW_RECEIPT.json",
+      "exact_content": true,
+      "remote_git_blob": "5ce43a63388a4b035ebedb04533fe8aea8b4a0b3"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/endpoint/INDEPENDENT_K2_ENDPOINT_REVIEW.md",
+      "exact_content": true,
+      "remote_git_blob": "f4b257aa7cadf7892dd157a5bcce8ed885f46204"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/endpoint/SOURCE_IDENTITIES.json",
+      "exact_content": true,
+      "remote_git_blob": "9d7425310f59492e67457d60ea51772c86bbcd8d"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1.md",
+      "exact_content": true,
+      "remote_git_blob": "f578037e3b5fdc46ca98f98ba1235a2848f8dc6b"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "exact_content": true,
+      "remote_git_blob": "21d50a92494f3e8316ce7dc3325f687a9d5d686f"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-validation.lean",
+      "exact_content": true,
+      "remote_git_blob": "b754c83cbffba0ec6ad10d17687db3b1bec73173"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/accepted-940d/source-validation-five.json",
+      "exact_content": true,
+      "remote_git_blob": "19fb011332788de3c2695740471d87596ca816b8"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/accepted-940d/accepted-delta.patch",
+      "exact_content": true,
+      "remote_git_blob": "b0c4221eebb37bb00fd4178ab1a6192580659bf6"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-audits/accepted-940d/lead-receipt.md",
+      "exact_content": true,
+      "remote_git_blob": "129d0d323b1583243975410ad6c1a18f2c8d763d"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-KERNEL-r1-endpoint-manifest.json",
+      "exact_content": true,
+      "remote_git_blob": "281f11aa7b89725617b3a3e807f2719b7cbac9a1"
+    }
+  ]
+}
