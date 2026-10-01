@@ -1,0 +1,26 @@
+[
+  {
+    "path": "comms/candidates/N13CoherentChartComparison.lean",
+    "encoding": "utf-8",
+    "bytes": 4885,
+    "sha256": "95e83ab6c3c2c55b0c6f9d6483a87cf436a368c43e181f55d57b646d30c99406"
+  },
+  {
+    "path": "comms/candidates/N13CoherentDegreeZeroChooser.lean",
+    "encoding": "utf-8",
+    "bytes": 4847,
+    "sha256": "3c1bd2363313c3c3bdbd705b8d51330f7101fa95e00e256e8ee5154b57579217"
+  },
+  {
+    "path": "comms/candidates/N13CoherentChooserSpecification.lean",
+    "encoding": "utf-8",
+    "bytes": 2429,
+    "sha256": "a1340d359372b4b59c642335458344821ce3ba392e3d3424400e7b2e427dceda"
+  },
+  {
+    "path": "notes/B00-coherent-chooser-design.md",
+    "encoding": "utf-8",
+    "bytes": 10969,
+    "sha256": "fbe3c70a3d5f51c06f71fbf6ced252ba4e721ba09b89872140b2a3530fe30200"
+  }
+]

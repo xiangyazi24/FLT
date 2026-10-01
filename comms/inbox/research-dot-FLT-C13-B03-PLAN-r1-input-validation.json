@@ -1,0 +1,219 @@
+{
+  "source_commit": "a6290bc36c3549d89239da82b13b1f59ebd0388e",
+  "status": "PASS",
+  "input_manifest_files": 16,
+  "additional_config_files": 3,
+  "manifest_total_bytes": 161433,
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialAbelCode.lean",
+      "encoding": "utf-8",
+      "bytes": 2189,
+      "sha256": "ef95b5992c1798bdd78b481ab824f23f60786fe40eb2cecd59ebe146c870a38b",
+      "git_blob_sha": "065d48d5949a148b13276601aa67c6ca331c120a",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13SpecialAbelCode.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialAbelCodeQuotient.lean",
+      "encoding": "utf-8",
+      "bytes": 4984,
+      "sha256": "89aa5cc8938f8210044d169a43e5eaf363a8aa9f9bcbd2e6847e1fed9a2bd317",
+      "git_blob_sha": "095cf293069e4a578c2be5176d05a6daa9bf9ff3",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13SpecialAbelCodeQuotient.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13AbelFiberTwoModel.lean",
+      "encoding": "utf-8",
+      "bytes": 9325,
+      "sha256": "6e6c06e4eff7957214a3600ba6e21b8da78ced6fec95d3f53210edcaacdf4f95",
+      "git_blob_sha": "4318ed3bf89fedea8076c6db5dd1f2a3adc877c0",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13AbelFiberTwoModel.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SymmetricSquareTwo.lean",
+      "encoding": "utf-8",
+      "bytes": 4991,
+      "sha256": "d078c1db6498782841c59f411007cbf8b9198d94afb995e292be4a4ca4f14114",
+      "git_blob_sha": "e9bf7c6d146fc14404c1d5bc2e61b10f476f2501",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13SymmetricSquareTwo.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecializationGroupHom.lean",
+      "encoding": "utf-8",
+      "bytes": 2681,
+      "sha256": "ba455effe1c2fcc6201d72559341b454f2ca2e99d943ab4d4e8fa06fa7d5bced",
+      "git_blob_sha": "045c2568aa3f2d38eb53bf929bc4f4966cfe27a5",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13SpecializationGroupHom.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13TwoChartPicardRealization.lean",
+      "encoding": "utf-8",
+      "bytes": 11991,
+      "sha256": "1c3631df108c3d64669026f0630bc25b6d8e7be52d0857ceb5ab1b1474601b9e",
+      "git_blob_sha": "7f23367da3eba7721331f7556b89cd503e845853",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13TwoChartPicardRealization.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13TwoChartLineTensor.lean",
+      "encoding": "utf-8",
+      "bytes": 22140,
+      "sha256": "e969baf707a84719a623b04e356461806592a19ff7bdf29958e3071e99bf0f59",
+      "git_blob_sha": "ad6e6244fdf8664bd5ddc2dc0dfc64b896872361",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13TwoChartLineTensor.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13RationalPicardSpreadExistence.lean",
+      "encoding": "utf-8",
+      "bytes": 26777,
+      "sha256": "99db457cab7aa318f887684378f74ad73d8d3f9f61260deb301539c374747cbd",
+      "git_blob_sha": "464d793866eab400d992e49148ef3e02bb4597ea",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13RationalPicardSpreadExistence.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityPointPicardRealization.lean",
+      "encoding": "utf-8",
+      "bytes": 9643,
+      "sha256": "283cbf46150d69b9c6e958dfbb9e42acb3908c845125e5c4bcd0b3ffdee017ce",
+      "git_blob_sha": "ae1feedf4abb4bb99441276508bab3e521acc9c1",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13InfinityPointPicardRealization.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InverseInfinityWitness.lean",
+      "encoding": "utf-8",
+      "bytes": 4776,
+      "sha256": "e72f6a9a45dcae66f4d47c35fdb26f76fe3fa21285125d781a2586763d945b62",
+      "git_blob_sha": "22327ce39f37be4b0419efa61ca830b1113f4dd7",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13InverseInfinityWitness.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InverseInfinityWitnessClass.lean",
+      "encoding": "utf-8",
+      "bytes": 6421,
+      "sha256": "3a6f466b30639f60a8d43f8265319ecf8ab2aed131ad2c1d74a38aeb0196f88e",
+      "git_blob_sha": "f8c31ecaa3617d63b170002ac38891411d61ec33",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13InverseInfinityWitnessClass.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13OppositeInfinityClass.lean",
+      "encoding": "utf-8",
+      "bytes": 4693,
+      "sha256": "65986dd42af431632b3bf7764c4f0f21c9ff80e7af96001d93d1088c628e50a8",
+      "git_blob_sha": "68bc51aa49859828de7a63267607ad32d1cd303b",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13OppositeInfinityClass.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CoherentPointReduction.lean",
+      "encoding": "utf-8",
+      "bytes": 5594,
+      "sha256": "a5453dfdddabef0f2fba26161ce8073ccf57157ac503d84030f9d29a4eedd79f",
+      "git_blob_sha": "f19139455c10a437ec28137920dfa9f1c77b9a5e",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13CoherentPointReduction.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13RationalPointEndgame.lean",
+      "encoding": "utf-8",
+      "bytes": 5900,
+      "sha256": "8cf54292128293da74cb5411c5d667cfcbcccba743dfd6caa0e28262010f7cf0",
+      "git_blob_sha": "b6e46eb8c216eb409f5fbbce0e978455096d771d",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13RationalPointEndgame.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13RationalCurvePointPicardRealization.lean",
+      "encoding": "utf-8",
+      "bytes": 28758,
+      "sha256": "4da73ff1ac7268fc02f20740c129bb529dc65ccb3c68a27655e6cbfe9b61218f",
+      "git_blob_sha": "e66fa8d0217e0c3455d9006d4451b0896ca31e31",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13RationalCurvePointPicardRealization.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13Jacobian.lean",
+      "encoding": "utf-8",
+      "bytes": 10570,
+      "sha256": "5ebe0a39be24822c485ee4671316cb6d67f41b536758c4783280901280bbd833",
+      "git_blob_sha": "1bf85f2302691fe9ba2e48ca67b3185a30053c3d",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/FLT/Assumptions/MazurProof/N13Jacobian.lean",
+      "manifest_check": "PASS",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "lean-toolchain",
+      "encoding": "utf-8",
+      "bytes": 28,
+      "sha256": "71c46c6d6420351cccb5765129bf9609c4a7970a23e2f6ec6b6355504042d708",
+      "git_blob_sha": "6af09a891ee363335ff8f38a59dcfec7ae0d27c3",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/lean-toolchain",
+      "manifest_check": "ADDITIONAL_PINNED_FILE",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "lake-manifest.json",
+      "encoding": "utf-8",
+      "bytes": 3471,
+      "sha256": "3ce7bf3049d61e0da0f94594dcfacf91d95b617b86ba648da08b01d0acc973c5",
+      "git_blob_sha": "17cfed7317a28e1d6d06631f1cc7b8eed28f3de7",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/lake-manifest.json",
+      "manifest_check": "ADDITIONAL_PINNED_FILE",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "lakefile.toml",
+      "encoding": "utf-8",
+      "bytes": 1110,
+      "sha256": "72f206901e66a61625bbdafd29bb96052a5d7e37be4676197e6f148c2b20bc5d",
+      "git_blob_sha": "d210bc0ec907787b22a599cd3617ca241db6e730",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a6290bc36c3549d89239da82b13b1f59ebd0388e/lakefile.toml",
+      "manifest_check": "ADDITIONAL_PINNED_FILE",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "flt-c13-request.md",
+      "encoding": "utf-8",
+      "bytes": 6300,
+      "sha256": "a96f1068762e9b0280d9f971d2128ffb80b6670d60f7d1b4e10f955b5543e153",
+      "url": "https://github.com/xiangyazi24/FLT/blob/4870aa5a727ab0de9c843106a0fa562210898714/comms/outbox/research-dot-FLT-C13-B03-PLAN-r1.md",
+      "git_blob_sha": "ff8830b8d391f8383dfd4a0230a2ee019e867dae",
+      "git_blob_check": "PASS"
+    },
+    {
+      "path": "flt-c13-approval.md",
+      "encoding": "utf-8",
+      "bytes": 1427,
+      "sha256": "83d2ddcd6dc371d14fa682c839b3165bab6a73d0953de48241814ac6edf7f788",
+      "url": "https://github.com/xiangyazi24/FLT/blob/a1143cd9318eac5194dfd499d42f0f4d84c7c874/comms/outbox/research-dot-FLT-DOT-20261001-r2.md",
+      "git_blob_sha": "0301029f5ea5982dfc858e3bcc113e1fd0885af2",
+      "git_blob_check": "PASS"
+    }
+  ],
+  "compiler_checks": "NOT RUN",
+  "clone_cache_build": "NOT RUN"
+}

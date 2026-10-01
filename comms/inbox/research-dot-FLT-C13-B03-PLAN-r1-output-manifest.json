@@ -1,0 +1,88 @@
+{
+  "task_id": "FLT-C13-B03-PLAN",
+  "revision": 1,
+  "source_commit": "a6290bc36c3549d89239da82b13b1f59ebd0388e",
+  "request_commit": "4870aa5a727ab0de9c843106a0fa562210898714",
+  "lean_checks": "NOT RUN",
+  "manifest_scope": "All published output files except this manifest itself; activity log append preserves preceding bytes",
+  "outputs": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 2042,
+      "sha256": "b004ce07a14586f4eb0b007c21e28c955d018c4b35db1f08bc263dc6e9801e4e"
+    },
+    {
+      "path": "comms/candidates/N13CoherentChartComparison.lean",
+      "encoding": "utf-8",
+      "bytes": 4885,
+      "sha256": "95e83ab6c3c2c55b0c6f9d6483a87cf436a368c43e181f55d57b646d30c99406"
+    },
+    {
+      "path": "comms/candidates/N13CoherentChooserSpecification.lean",
+      "encoding": "utf-8",
+      "bytes": 2429,
+      "sha256": "a1340d359372b4b59c642335458344821ce3ba392e3d3424400e7b2e427dceda"
+    },
+    {
+      "path": "comms/candidates/N13CoherentDegreeZeroChooser.lean",
+      "encoding": "utf-8",
+      "bytes": 4847,
+      "sha256": "3c1bd2363313c3c3bdbd705b8d51330f7101fa95e00e256e8ee5154b57579217"
+    },
+    {
+      "path": "comms/candidates/N13SpecialCodeRecenter.lean",
+      "encoding": "utf-8",
+      "bytes": 2098,
+      "sha256": "03cb08c8ed312349b22cec93c159098d0d903ac03a66770f686a6c7bba33ccd0"
+    },
+    {
+      "path": "comms/candidates/N13SpecialCuspCodeChecks.lean",
+      "encoding": "utf-8",
+      "bytes": 2469,
+      "sha256": "c55c37bdf8f5c3eb3608b4bec2f45f03a6d6572ac6f2283c2f3d74bb38b619da"
+    },
+    {
+      "path": "comms/candidates/N13TwoChartTensorCompatibility.lean",
+      "encoding": "utf-8",
+      "bytes": 3749,
+      "sha256": "b81ba657acaa6462975218b383f7a5e4748950f0fb7879b62f05e94f381032aa"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-B03-PLAN-r1-input-validation.json",
+      "encoding": "utf-8",
+      "bytes": 10495,
+      "sha256": "7fad5c8da67268258c41fe574081b3ba75bece6010996af4d96aff3278c69357"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-B03-PLAN-r1.md",
+      "encoding": "utf-8",
+      "bytes": 7235,
+      "sha256": "cf24dd7407cad6b33551ae551ca0b3554e19253e702409752d58173f2b06ae02"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-B03-lane-manifest.json",
+      "encoding": "utf-8",
+      "bytes": 948,
+      "sha256": "637b9f381f2fff7a86d0962b0f6349bc3ee3c6f9bcb3f315a62171e88f7fdb3e"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-C13-B03-lane.md",
+      "encoding": "utf-8",
+      "bytes": 11825,
+      "sha256": "e12458ed361d8f6e643a00d49b8149d033327a0449c0de7c5dca2780e491fbb1"
+    },
+    {
+      "path": "notes/B00-coherent-chooser-design.md",
+      "encoding": "utf-8",
+      "bytes": 10969,
+      "sha256": "fbe3c70a3d5f51c06f71fbf6ced252ba4e721ba09b89872140b2a3530fe30200"
+    },
+    {
+      "path": "notes/B00-output-manifest.json",
+      "encoding": "utf-8",
+      "bytes": 791,
+      "sha256": "65df9b38ac4c47cbb3c9e8eded8a1bf66dfe9c87787067c2172682d0725ede1a"
+    }
+  ]
+}
