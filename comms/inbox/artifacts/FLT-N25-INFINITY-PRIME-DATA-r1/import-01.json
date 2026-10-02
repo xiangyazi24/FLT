@@ -1,0 +1,10 @@
+{
+  "name": "import-01",
+  "args": [
+    "/workspace/shared/flt-n25-boundary-algebras/ScopeAlgebraImportCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 2.454528570997354,
+  "peak_child_rss_kib": 2098068,
+  "source_sha256": "e39bc128bc556d4a109da149209ebda1284fc2972d2a4804dede49c43ab884a1"
+}

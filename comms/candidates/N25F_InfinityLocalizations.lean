@@ -15,6 +15,14 @@ open RationalPointsN25QuotientTwoWBoundaryYZLocal
 open RationalPointsN25QuotientTwoWBoundaryZLocal
 open N25F_XLocalFractionEmbedding N25F_YZLocalFractionEmbedding N25F_ZBoundaryOrder
 local notation "CurveField" => FractionRing N25F_NonBoundaryPrincipalDivisor.W
+open N25F_RationalBaseInversion N25F_InfinityBaseMaps
+attribute [local instance] infinityPolynomialAlgebra
+local instance : Algebra BasePolynomial XLocalRing :=
+  infinityBaseToX.toRingHom.toAlgebra
+local instance : Algebra BasePolynomial YZLocalRing :=
+  infinityBaseToYZ.toRingHom.toAlgebra
+local instance : Algebra BasePolynomial ZLocalRing :=
+  infinityBaseToZ.toRingHom.toAlgebra
 
 /-- The actual X boundary ring is the normalization localized at its center. -/
 def xInfinityLocalizationEquiv :

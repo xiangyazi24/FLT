@@ -1,0 +1,14 @@
+{
+  "name": "export-01",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-boundary-algebras",
+    "-o",
+    "/workspace/shared/flt-n25-boundary-algebras/ScopeAlgebraExports.olean",
+    "/workspace/shared/flt-n25-boundary-algebras/ScopeAlgebraExports.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 2.769123114005197,
+  "peak_child_rss_kib": 2098068,
+  "source_sha256": "a81a4efe7a7a469a0d7083b6669915d201a46c3d42caa8aa0e3af460f4b873a8"
+}

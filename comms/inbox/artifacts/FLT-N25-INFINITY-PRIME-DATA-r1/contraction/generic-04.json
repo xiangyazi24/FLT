@@ -1,0 +1,10 @@
+{
+  "name": "generic-04",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-contraction/GenericContractionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 11.894055643002503,
+  "peak_child_rss_kib": 2189040,
+  "source_sha256": "8d40feb3e34beb9173cccff40e5cf54a14f30065cd61b7c0fd7fc71297007bbb"
+}

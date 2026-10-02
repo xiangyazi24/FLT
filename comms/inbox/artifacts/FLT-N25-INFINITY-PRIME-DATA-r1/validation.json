@@ -1,0 +1,73 @@
+{
+  "source_commit": "e0f728a3c0149389d6dcc9f0053dc6991ccb687b",
+  "accepted_files": [
+    {
+      "file": "N25F_CenterLocalization.lean",
+      "sha": "b90b79bff039050985faf5541aaf4863410a405b",
+      "equal": true
+    },
+    {
+      "file": "N25F_InfinityLocalizations.lean",
+      "sha": "5662a1bd04f60e008ab7f94263178094a2715541",
+      "equal": false
+    },
+    {
+      "file": "N25F_OrderRingEquiv.lean",
+      "sha": "0df13983fa47a513bb3b4c835a9e79f06724bde7",
+      "equal": true
+    }
+  ],
+  "accepted_localizations_change": "exactly the eight-line addition in r28",
+  "production_full_imports": "NOT RUN: compiled FLT dependency closure not present in bounded local sandbox",
+  "production_additional_hypotheses": [],
+  "scope_export": {
+    "name": "export-01",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-boundary-algebras",
+      "-o",
+      "/workspace/shared/flt-n25-boundary-algebras/ScopeAlgebraExports.olean",
+      "/workspace/shared/flt-n25-boundary-algebras/ScopeAlgebraExports.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 2.769123114005197,
+    "peak_child_rss_kib": 2098068,
+    "source_sha256": "a81a4efe7a7a469a0d7083b6669915d201a46c3d42caa8aa0e3af460f4b873a8"
+  },
+  "scope_import": {
+    "name": "import-01",
+    "args": [
+      "/workspace/shared/flt-n25-boundary-algebras/ScopeAlgebraImportCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 2.454528570997354,
+    "peak_child_rss_kib": 2098068,
+    "source_sha256": "e39bc128bc556d4a109da149209ebda1284fc2972d2a4804dede49c43ab884a1"
+  },
+  "contraction": {
+    "name": "generic-04",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-contraction/GenericContractionCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 11.894055643002503,
+    "peak_child_rss_kib": 2189040,
+    "source_sha256": "8d40feb3e34beb9173cccff40e5cf54a14f30065cd61b7c0fd7fc71297007bbb"
+  },
+  "parameter_orders": {
+    "name": "generic-01",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-orders/GenericParameterOrderCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 4.1222508549981285,
+    "peak_child_rss_kib": 2443780,
+    "source_sha256": "26b5c3f142f69e1de89314acef33442e33c5f4af958dfe65ba8032f2a8c2f12f"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "new_public_declarations": 23
+}

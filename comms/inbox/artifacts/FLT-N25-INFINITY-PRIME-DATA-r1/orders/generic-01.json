@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-orders/GenericParameterOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 4.1222508549981285,
+  "peak_child_rss_kib": 2443780,
+  "source_sha256": "26b5c3f142f69e1de89314acef33442e33c5f4af958dfe65ba8032f2a8c2f12f"
+}
