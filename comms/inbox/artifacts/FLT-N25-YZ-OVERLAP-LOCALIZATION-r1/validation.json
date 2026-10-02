@@ -1,0 +1,35 @@
+{
+  "source_pin": "1eab90d583a58211846c1b69e24e5ed73a59ce4d",
+  "fixture_base": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "check_kind": "generic commutative Y-chart algebra with unit Z/Y image",
+  "actual_YZ_local_specialization_compiled": false,
+  "full_FLT_imports_compiled": false,
+  "production_added_premises": false,
+  "check": {
+    "name": "generic-02",
+    "args": [
+      "/workspace/shared/flt-n25-yz-overlap-localization/GenericYZOverlapLocalizationCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 7.587414345001889,
+    "peak_child_rss_kib": 2451940,
+    "source_sha256": "d0a0cdfd5c8fb074af7954629484646be1879504ad112f0d2c1791affe095330"
+  },
+  "new_public_declarations_audited": 3,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "parameters": [
+    "commutative F2/YChartRing algebra L with scalar tower",
+    "IsUnit(algebraMap YChartRing L yZ), supplied as Fact in fixture"
+  ],
+  "candidate_sha256": "18d1b89f2815fc6a04ad62fab4916c52b1c88ae3cd005ce3c56a9b855dca43a2",
+  "harness_sha256": "d0a0cdfd5c8fb074af7954629484646be1879504ad112f0d2c1791affe095330",
+  "import_environment": {
+    "LEAN_PATH": "/workspace/shared/flt-n25-zfield-equivalence:/workspace/shared/flt-n25-zfraction-injective"
+  }
+}

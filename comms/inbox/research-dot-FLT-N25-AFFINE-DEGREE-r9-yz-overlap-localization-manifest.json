@@ -1,0 +1,83 @@
+{
+  "source_commit": "1eab90d583a58211846c1b69e24e5ed73a59ce4d",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 20482,
+      "sha256": "bbda80fd814b92e4fbcc3f8068c20aa317a2dc0638656ceb04dd08d7bfa9b777"
+    },
+    {
+      "path": "comms/candidates/N25F_YZOverlapLocalization.lean",
+      "encoding": "utf-8",
+      "bytes": 1920,
+      "sha256": "18d1b89f2815fc6a04ad62fab4916c52b1c88ae3cd005ce3c56a9b855dca43a2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/ActualYZOverlapLocalizationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 417,
+      "sha256": "5e51e6b28a829dc6ad0f19814bd906419c3e41d7e42b442af108bc860090cf73"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/GenericYZOverlapLocalizationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 10117,
+      "sha256": "d0a0cdfd5c8fb074af7954629484646be1879504ad112f0d2c1791affe095330"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 1993,
+      "sha256": "d49263b67acb7468fcdf87ec34e467cc9fab9a72cb0ed318f3c16e369ab097d9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 309,
+      "sha256": "3b00e855e555854ec82e906c51f265e69f7930a58212cfb67e15015198f35c92"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 11207,
+      "sha256": "8052c4b0d8c98a451eb3f7fcf277ae4b3e9f7dcc4ecdc39198adbe4f9162159f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 309,
+      "sha256": "9467ef94ce5aea9221cfd23cf32f08038d51da62d0b392907089a87b12c53364"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 10908,
+      "sha256": "18209ed14f91907382ae2615804b86154fb56559bbee01c330527f4bf053d353"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 1610,
+      "sha256": "b4de3125e98f43687fc294b06b530d4a5046634e0f93b25d4893af8ec5156391"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 885,
+      "sha256": "8013669099bfbcf243ad579cdff9624e15b975793ff1909257a85539df87afaa"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-OVERLAP-LOCALIZATION-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1336,
+      "sha256": "93fdeaf7cc7cac8beb0a74995e36f49d6bdee9296056743df175adf510dfe9f8"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r9-yz-overlap-localization.md",
+      "encoding": "utf-8",
+      "bytes": 2008,
+      "sha256": "a5693b83c1f87cc8c0f45e4c7c2abe9fcae2a1f0b0b48e78b95d315b5ca1f86d"
+    }
+  ]
+}

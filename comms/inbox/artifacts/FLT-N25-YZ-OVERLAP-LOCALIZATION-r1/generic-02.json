@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-yz-overlap-localization/GenericYZOverlapLocalizationCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 7.587414345001889,
+  "peak_child_rss_kib": 2451940,
+  "source_sha256": "d0a0cdfd5c8fb074af7954629484646be1879504ad112f0d2c1791affe095330"
+}
