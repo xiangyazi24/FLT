@@ -1,0 +1,5 @@
+import FLT.Assumptions.MazurProof.N25F_InfinityPrincipalNormOrder
+
+#print axioms MazurProof.N25F_LocalFactorOrder.local_length_eq_factor_count
+#print axioms MazurProof.N25F_LocalFactorOrder.ord_algebraMap_eq_factor_count
+#print axioms MazurProof.N25F_InfinityPrincipalNormOrder.infinity_intNorm_local_order

@@ -1,0 +1,10 @@
+{
+  "name": "principal-01",
+  "args": [
+    "/workspace/shared/flt-n25-local-factor-order/PrincipalNormOrderFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 4.617910202003259,
+  "peak_child_rss_kib": 2899596,
+  "source_sha256": "fac5eccca0152624c0f6c5da3a01943695f278a6abedcdd34be127e202acf9d7"
+}

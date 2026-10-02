@@ -1,0 +1,10 @@
+{
+  "name": "production-02",
+  "args": [
+    "/workspace/shared/flt-n25-local-factor-order/LocalFactorOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 4.075163410001551,
+  "peak_child_rss_kib": 2752656,
+  "source_sha256": "ffaa42eb19e1dd289f8243769deee79e7d7491df9b4a4752af70a2d23ef5ce33"
+}
