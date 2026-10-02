@@ -1,0 +1,93 @@
+@MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2]
+      FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction_algebraMap : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  (r : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing),
+  MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction
+      ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+          (FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing))
+        r) =
+    MazurProof.N25F_ZChartFractionMap.zChartToFraction r
+'MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.fraction_qz_mem_range : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz ∈
+    MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction.fieldRange
+'MazurProof.N25F_ZChartFractionEquiv.fraction_qz_mem_range' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.fraction_qx_mem_range : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qx ∈
+    MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction.fieldRange
+'MazurProof.N25F_ZChartFractionEquiv.fraction_qx_mem_range' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.fraction_qy_mem_range : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qy ∈
+    MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction.fieldRange
+'MazurProof.N25F_ZChartFractionEquiv.fraction_qy_mem_range' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.wChart_algebraMap_mem_range : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  (w : MazurProof.N25F_NonBoundaryPrincipalDivisor.W),
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      w ∈
+    MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction.fieldRange
+'MazurProof.N25F_ZChartFractionEquiv.wChart_algebraMap_mem_range' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction_surjective : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Function.Surjective ⇑MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction
+'MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction_surjective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction_injective : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Function.Injective ⇑MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction
+'MazurProof.N25F_ZChartFractionEquiv.zFractionToFraction_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.zChartFractionAlgEquiv : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing ≃ₐ[ZMod 2]
+      FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_ZChartFractionEquiv.zChartFractionAlgEquiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.zChartFractionAlgEquiv_algebraMap : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  (r : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing),
+  MazurProof.N25F_ZChartFractionEquiv.zChartFractionAlgEquiv
+      ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+          (FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing))
+        r) =
+    MazurProof.N25F_ZChartFractionMap.zChartToFraction r
+'MazurProof.N25F_ZChartFractionEquiv.zChartFractionAlgEquiv_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZChartFractionEquiv.zChartToFraction_isFractionRing : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsFractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+    (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)
+'MazurProof.N25F_ZChartFractionEquiv.zChartToFraction_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

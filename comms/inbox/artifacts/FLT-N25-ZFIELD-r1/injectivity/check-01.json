@@ -1,0 +1,10 @@
+{
+  "name": "check-01",
+  "args": [
+    "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 33.799427865000325,
+  "peak_child_rss_kib": 2522096,
+  "source_sha256": "b7a62cef95d2d8a9c82db58eac6a866767feb1b7abe1dac883833936d5b3bdb4"
+}

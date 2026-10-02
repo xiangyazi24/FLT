@@ -1,0 +1,14 @@
+{
+  "name": "check-01",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-zfield-equivalence",
+    "-o",
+    "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.olean",
+    "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 18.858386970001447,
+  "peak_child_rss_kib": 2469712,
+  "source_sha256": "f25ea10e112b5959eed4b18113a25056d4563ae1f4e4221811ebaf37c54fe24c"
+}

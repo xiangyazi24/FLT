@@ -1,0 +1,77 @@
+{
+  "accepted_source": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "production_added_premises": false,
+  "full_FLT_imports_compiled": false,
+  "harness_parameters": [
+    "Module.IsTorsionFree (Polynomial (ZMod 2)) W represents accepted canonicalWChart_isTorsionFree",
+    "IsDedekindDomain W represents accepted canonicalWChart_isDedekindDomain"
+  ],
+  "injectivity_check": {
+    "name": "check-02",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-zfraction-injective",
+      "-o",
+      "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.olean",
+      "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 30.58407584499946,
+    "peak_child_rss_kib": 2553612,
+    "source_sha256": "525985ce211f4c05c0b916949c026346d266f060263dfcbda296c28dc3daed17"
+  },
+  "equivalence_check": {
+    "name": "check-01",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-zfield-equivalence",
+      "-o",
+      "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.olean",
+      "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 18.858386970001447,
+    "peak_child_rss_kib": 2469712,
+    "source_sha256": "f25ea10e112b5959eed4b18113a25056d4563ae1f4e4221811ebaf37c54fe24c"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "public_declarations_checked": 13,
+  "files": [
+    {
+      "path": "/workspace/shared/flt-n25-zfraction-injective/N25F_ZChartFractionInjective.lean",
+      "bytes": 3094,
+      "sha256": "cb41282f78134c09c6dc34850ca3aabebba7658f4c6d88194758ed253005b38e"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean",
+      "bytes": 47083,
+      "sha256": "525985ce211f4c05c0b916949c026346d266f060263dfcbda296c28dc3daed17"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.olean",
+      "bytes": 2455112,
+      "sha256": "244000f7f98bb99214bb655d62ef27a55c7886825ac5477d25abe170be3f0844"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfield-equivalence/N25F_ZChartFractionEquiv.lean",
+      "bytes": 6603,
+      "sha256": "30385e97e762506be42ad77698bbf2d8f025463f0044271ea5f30a9612732ad4"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.lean",
+      "bytes": 7837,
+      "sha256": "f25ea10e112b5959eed4b18113a25056d4563ae1f4e4221811ebaf37c54fe24c"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.olean",
+      "bytes": 347248,
+      "sha256": "6037a2b6b4a9e7c353e2aca8036595f8bfb3cfe2c8290063c59b474b714662ef"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+import FLT.Assumptions.MazurProof.N25F_ZChartFractionEquiv
+
+#check @MazurProof.N25F_ZChartFractionInjective.qz_pow_ne_one
+#check @MazurProof.N25F_ZChartFractionInjective.zChartToFraction_injective
+#check @MazurProof.N25F_ZChartFractionEquiv.zChartFractionAlgEquiv
+#check @MazurProof.N25F_ZChartFractionEquiv.zChartToFraction_isFractionRing
+#print axioms MazurProof.N25F_ZChartFractionInjective.qz_pow_ne_one
+#print axioms MazurProof.N25F_ZChartFractionInjective.zChartToFraction_injective
+#print axioms MazurProof.N25F_ZChartFractionEquiv.zChartFractionAlgEquiv
+#print axioms MazurProof.N25F_ZChartFractionEquiv.zChartToFraction_isFractionRing

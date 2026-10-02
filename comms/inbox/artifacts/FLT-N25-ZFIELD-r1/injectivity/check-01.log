@@ -1,0 +1,94 @@
+/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean:729:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZChartFractionMap.wChartPoint_eq`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean:749:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZChartFractionMap.zFractionPoint_quadric`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean:753:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZChartFractionMap.zFractionPoint_cubic`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean:761:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+MazurProof.N25F_ZChartFractionMap.algebraMap_Rz_X : (algebraMap (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W)
+    Polynomial.X =
+  MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz
+'MazurProof.N25F_ZChartFractionMap.algebraMap_Rz_X' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionMap.qz_ne_zero : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz ≠ 0
+'MazurProof.N25F_ZChartFractionMap.qz_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionMap.fraction_qz_ne_zero : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz ≠
+    0
+'MazurProof.N25F_ZChartFractionMap.fraction_qz_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionMap.zFractionPoint_z : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst : IsDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.N25F_ZChartFractionMap.zFractionPoint.z = 1
+'MazurProof.N25F_ZChartFractionMap.zFractionPoint_z' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionMap.zChartToFraction : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2]
+      FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_ZChartFractionMap.zChartToFraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionMap.zChartToFraction_zX : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.N25F_ZChartFractionMap.zChartToFraction MazurProof.N25F_ZChartWChartEquiv.zX =
+    (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+          (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+        MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qx /
+      (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+          (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+        MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz
+'MazurProof.N25F_ZChartFractionMap.zChartToFraction_zX' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionMap.zChartToFraction_zY : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.N25F_ZChartFractionMap.zChartToFraction MazurProof.N25F_ZChartWChartEquiv.zY =
+    (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+          (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+        MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qy /
+      (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+          (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+        MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz
+'MazurProof.N25F_ZChartFractionMap.zChartToFraction_zY' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionMap.zChartToFraction_zW : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.N25F_ZChartFractionMap.zChartToFraction MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW =
+    1 /
+      (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+          (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+        MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz
+'MazurProof.N25F_ZChartFractionMap.zChartToFraction_zW' depends on axioms: [propext, Classical.choice, Quot.sound]
+/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean:822:85: error: unexpected token '/--'; expected 'lemma'
+/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean:1115:2: warning: Try `simp at hzero` instead of `simpa using hzero`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+@MazurProof.N25F_ZChartFractionInjective.qz_pow_ne_one : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W] (n : ℕ),
+  0 < n → MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz ^ n ≠ 1
+'MazurProof.N25F_ZChartFractionInjective.qz_pow_ne_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartFractionInjective.zChartToFraction_injective : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Function.Injective ⇑MazurProof.N25F_ZChartFractionMap.zChartToFraction
+'MazurProof.N25F_ZChartFractionInjective.zChartToFraction_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
