@@ -1,0 +1,114 @@
+/workspace/shared/flt-n25-yz-overlap-map/GenericYZOverlapMapCheck.lean:111:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_YZOverlapMap.yzZUnit_val`:
+  [Algebra (ZMod 2) L]
+  [IsScalarTower (ZMod 2) YChartRing L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (ZMod 2) L] [IsScalarTower (ZMod 2) YChartRing L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-yz-overlap-map/GenericYZOverlapMapCheck.lean:124:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_YZOverlapMap.yzZPoint_quadric`:
+  [Algebra (ZMod 2) L]
+  [IsScalarTower (ZMod 2) YChartRing L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (ZMod 2) L] [IsScalarTower (ZMod 2) YChartRing L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-yz-overlap-map/GenericYZOverlapMapCheck.lean:128:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_YZOverlapMap.yzZPoint_cubic`:
+  [Algebra (ZMod 2) L]
+  [IsScalarTower (ZMod 2) YChartRing L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (ZMod 2) L] [IsScalarTower (ZMod 2) YChartRing L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-yz-overlap-map/GenericYZOverlapMapCheck.lean:135:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+@MazurProof.N25F_YZOverlapMap.yzZUnit : {L : Type u_1} →
+  [inst : CommRing L] →
+    [inst_1 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L] →
+      [Fact
+            (IsUnit
+              ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+                MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))] →
+        Lˣ
+'MazurProof.N25F_YZOverlapMap.yzZUnit' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_YZOverlapMap.yzZUnit_val : ∀ {L : Type u_1} [inst : CommRing L] [inst_1 : Algebra (ZMod 2) L]
+  [inst_2 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [IsScalarTower (ZMod 2) MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_4 :
+    Fact
+      (IsUnit
+        ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+          MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))],
+  ↑MazurProof.N25F_YZOverlapMap.yzZUnit =
+    (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+      MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ
+'MazurProof.N25F_YZOverlapMap.yzZUnit_val' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_YZOverlapMap.yzZPoint_z : ∀ {L : Type u_1} [inst : CommRing L] [inst_1 : Algebra (ZMod 2) L]
+  [inst_2 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [IsScalarTower (ZMod 2) MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_4 :
+    Fact
+      (IsUnit
+        ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+          MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))],
+  MazurProof.N25F_YZOverlapMap.yzZPoint.z = 1
+'MazurProof.N25F_YZOverlapMap.yzZPoint_z' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_YZOverlapMap.zChartToYZLocal : {L : Type u_1} →
+  [inst : CommRing L] →
+    [inst_1 : Algebra (ZMod 2) L] →
+      [inst_2 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L] →
+        [IsScalarTower (ZMod 2) MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L] →
+          [Fact
+                (IsUnit
+                  ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+                    MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))] →
+            MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] L
+'MazurProof.N25F_YZOverlapMap.zChartToYZLocal' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zX : ∀ {L : Type u_1} [inst : CommRing L] [inst_1 : Algebra (ZMod 2) L]
+  [inst_2 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_3 : IsScalarTower (ZMod 2) MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_4 :
+    Fact
+      (IsUnit
+        ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+          MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))],
+  MazurProof.N25F_YZOverlapMap.zChartToYZLocal MazurProof.N25F_ZChartWChartEquiv.zX =
+    ↑MazurProof.N25F_YZOverlapMap.yzZUnit⁻¹ *
+      (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+        MazurProof.N25F_YZOverlapMap.yX
+'MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zX' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zY : ∀ {L : Type u_1} [inst : CommRing L] [inst_1 : Algebra (ZMod 2) L]
+  [inst_2 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_3 : IsScalarTower (ZMod 2) MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_4 :
+    Fact
+      (IsUnit
+        ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+          MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))],
+  MazurProof.N25F_YZOverlapMap.zChartToYZLocal MazurProof.N25F_ZChartWChartEquiv.zY =
+    ↑MazurProof.N25F_YZOverlapMap.yzZUnit⁻¹
+'MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zY' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zW : ∀ {L : Type u_1} [inst : CommRing L] [inst_1 : Algebra (ZMod 2) L]
+  [inst_2 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_3 : IsScalarTower (ZMod 2) MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_4 :
+    Fact
+      (IsUnit
+        ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+          MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))],
+  MazurProof.N25F_YZOverlapMap.zChartToYZLocal MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW =
+    ↑MazurProof.N25F_YZOverlapMap.yzZUnit⁻¹ *
+      (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+        MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yzW
+'MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zW' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zY_isUnit : ∀ {L : Type u_1} [inst : CommRing L]
+  [inst_1 : Algebra (ZMod 2) L]
+  [inst_2 : Algebra MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_3 : IsScalarTower (ZMod 2) MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L]
+  [inst_4 :
+    Fact
+      (IsUnit
+        ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing L)
+          MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ))],
+  IsUnit (MazurProof.N25F_YZOverlapMap.zChartToYZLocal MazurProof.N25F_ZChartWChartEquiv.zY)
+'MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zY_isUnit' depends on axioms: [propext, Classical.choice, Quot.sound]

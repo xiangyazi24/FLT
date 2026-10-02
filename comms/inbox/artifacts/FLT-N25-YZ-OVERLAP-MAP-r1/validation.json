@@ -1,0 +1,54 @@
+{
+  "observed_source": "1eab90d583a58211846c1b69e24e5ed73a59ce4d",
+  "fixture_source_base": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "source_transition": "Only N25F_XChartFractionMap added; all Y/Z model definitions unchanged",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "check_kind": "generic commutative Y-chart algebra target in which Z/Y is a unit",
+  "actual_YZ_local_specialization_compiled": false,
+  "full_FLT_imports_compiled": false,
+  "production_added_premises": false,
+  "harness_parameters": [
+    "L : Type with CommRing L",
+    "Algebra F2 L and Algebra YChartRing L with the scalar tower",
+    "Fact(IsUnit(algebraMap YChartRing L yZ))"
+  ],
+  "candidate_sha256": "de28ed3e7d886f5a4db2077891b319c74c5b6a456202ae6292b486858b4018df",
+  "harness_sha256": "531c12368b7e980dac7add3daa2dc54b31ba42e902687fe845fe41bace39a43c",
+  "check": {
+    "name": "generic-02",
+    "args": [
+      "/workspace/shared/flt-n25-yz-overlap-map/GenericYZOverlapMapCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 5.214964979000797,
+    "peak_child_rss_kib": 2445992,
+    "source_sha256": "531c12368b7e980dac7add3daa2dc54b31ba42e902687fe845fe41bace39a43c"
+  },
+  "audited_declarations": 8,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "import_environment": {
+    "LEAN_PATH": "/workspace/shared/flt-n25-zfield-equivalence:/workspace/shared/flt-n25-zfraction-injective"
+  },
+  "source_y_definitions": [
+    {
+      "declaration": "YChartRing",
+      "first_line": 32,
+      "sha256": "c5e14d881be7a009388a1f36f6a0addc040dd9de4f52e050175a1eaf2a30797a"
+    },
+    {
+      "declaration": "yZ",
+      "first_line": 36,
+      "sha256": "d443cd29c0e2b237c69f160a9d2826ba0761b1eeb136a2dc9f54a67b3d9d24a5"
+    },
+    {
+      "declaration": "yzW",
+      "first_line": 38,
+      "sha256": "6e49f968cf4e25c9077b790c8f16b1f7411dc0ffa5eb7b37f4bc4d266caaa0c8"
+    }
+  ]
+}

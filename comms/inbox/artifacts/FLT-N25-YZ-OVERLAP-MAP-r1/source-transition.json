@@ -1,0 +1,13 @@
+{
+  "base": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "tip": "1eab90d583a58211846c1b69e24e5ed73a59ce4d",
+  "total_commits": 1,
+  "ahead_by": 1,
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_XChartFractionMap.lean",
+      "sha": "fff302ef924a9e8d97f7c57299da3bbfd34018c3",
+      "status": "added"
+    }
+  ]
+}

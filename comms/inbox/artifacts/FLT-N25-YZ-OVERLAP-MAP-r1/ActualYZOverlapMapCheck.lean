@@ -1,0 +1,11 @@
+import FLT.Assumptions.MazurProof.N25F_YZOverlapMap
+
+#check MazurProof.N25F_YZOverlapMap.zChartToYZLocal
+#check MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zY
+#check MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zW
+#print axioms MazurProof.N25F_YZOverlapMap.yzZUnit
+#print axioms MazurProof.N25F_YZOverlapMap.zChartToYZLocal
+#print axioms MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zX
+#print axioms MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zY
+#print axioms MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zW
+#print axioms MazurProof.N25F_YZOverlapMap.zChartToYZLocal_zY_isUnit
