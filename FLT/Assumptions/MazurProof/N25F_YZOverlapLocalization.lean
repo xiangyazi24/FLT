@@ -4,6 +4,7 @@ import Mathlib.RingTheory.Localization.Away.Basic
 /-! Extend the actual Z-chart map across the Y/Z overlap by inverting Y/Z.
 The inverse coordinate maps back to the existing germ Z/Y. -/
 
+set_option synthInstance.maxHeartbeats 200000
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 noncomputable section
