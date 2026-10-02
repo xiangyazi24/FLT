@@ -1,0 +1,3 @@
+'N25PrincipalAssemblyCheck.principal' depends on axioms: [propext, Quot.sound]
+'N25PrincipalAssemblyCheck.split' depends on axioms: [propext, Quot.sound]
+'N25PrincipalAssemblyCheck.degree_base' depends on axioms: [propext, Quot.sound]

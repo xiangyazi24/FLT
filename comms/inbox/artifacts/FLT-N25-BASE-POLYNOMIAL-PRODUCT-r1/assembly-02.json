@@ -1,0 +1,10 @@
+{
+  "name": "assembly-02",
+  "args": [
+    "/workspace/shared/flt-n25-base-polynomial-product/PrincipalAssemblyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 42.19174039599966,
+  "peak_child_rss_kib": 1665600,
+  "source_sha256": "59845a8329bbaf9dfead958378230f11d05c61a8c2f592ac9d090260b38933a0"
+}

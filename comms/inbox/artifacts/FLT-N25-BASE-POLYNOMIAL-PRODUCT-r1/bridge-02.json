@@ -1,0 +1,10 @@
+{
+  "name": "bridge-02",
+  "args": [
+    "/workspace/shared/flt-n25-base-polynomial-product/PolynomialMapBridge.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 51.244742603001214,
+  "peak_child_rss_kib": 2034740,
+  "source_sha256": "e10e87f1944bd889cbcc00fe8b6c78463af0ab7d4873037130e4088b3934bf49"
+}

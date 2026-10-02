@@ -1,0 +1,14 @@
+[
+  {
+    "name": "N25F_NonBoundaryPrincipalDivisor.lean",
+    "git_blob_sha": "4cb645a429c94c736267ff2ec7f7e77463eb493d"
+  },
+  {
+    "name": "N25F_ProjectiveDivisorSplit.lean",
+    "git_blob_sha": "c3ab045b8c87ebf90b5af37e3ebc6369cbb00c34"
+  },
+  {
+    "name": "N25F_ProjectiveDivisorDegree.lean",
+    "git_blob_sha": "30b90a32ee153c3c7eedb0b4746a882d25be34b4"
+  }
+]
