@@ -1,0 +1,34 @@
+/workspace/shared/flt-n25-section-fibre/SectionClassFiberFamilyCheck.lean:535:2: error: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  b ≥ 0
+  a ≥ 0
+  a - b ≥ 1
+where
+ a := ↑(2 ^ Module.finrank (ZMod 2) ↥(fullRiemannRochSpace25Two C principal hmin D) - 1)
+ b := ↑(Nat.card (NonzeroSection25Two C principal hmin D))
+'MazurProof.N25F_SectionClassFiber.FullEffectiveClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_surjective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionEquivFullClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.fullRiemannRochSpace25Two_card' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSection25Two_card' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.fullEffectiveClassFiber25Two_card' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

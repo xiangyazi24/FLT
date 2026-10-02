@@ -1,0 +1,10 @@
+{
+  "name": "family-02",
+  "args": [
+    "/workspace/shared/flt-n25-section-fibre/SectionClassFiberFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 8.109800254002039,
+  "peak_child_rss_kib": 2240096,
+  "source_sha256": "9061bdae63980b90047fa98dcceef7e76106703a6919ca9cb5f58cde68996e91"
+}

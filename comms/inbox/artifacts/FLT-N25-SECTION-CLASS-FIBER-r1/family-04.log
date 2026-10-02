@@ -1,0 +1,22 @@
+'MazurProof.N25F_SectionClassFiber.FullEffectiveClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_surjective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionEquivFullClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.fullRiemannRochSpace25Two_card' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSection25Two_card' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_SectionClassFiber.fullEffectiveClassFiber25Two_card' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

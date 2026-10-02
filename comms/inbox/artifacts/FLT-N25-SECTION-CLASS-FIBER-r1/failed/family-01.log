@@ -1,0 +1,50 @@
+/workspace/shared/flt-n25-section-fibre/SectionClassFiberFamilyCheck.lean:447:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_SectionClassFiber.class_eq_iff`:
+  [Algebra (ZMod 2) L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (ZMod 2) L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-section-fibre/SectionClassFiberFamilyCheck.lean:532:6: error(lean.unknownIdentifier): Unknown constant `Nat.card_option`
+/workspace/shared/flt-n25-section-fibre/SectionClassFiberFamilyCheck.lean:528:88: error: unsolved goals
+C : ClosedPointGrading
+L : Type u_1
+inst✝¹ : Field L
+inst✝ : Algebra (ZMod 2) L
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+hzero : ∀ (f : Additive Lˣ), C.divisorDegree (principal f) = 0
+hinj : Function.Injective ⇑principal
+D : C.Divisor
+this : Finite (NonzeroSection25Two C principal hmin D) := nonzeroSection25Two_finite C principal hmin hzero hinj D
+h : Nat.card (Option { b // b ≠ 0 }) = Nat.card ↥(fullRiemannRochSpace25Two C principal hmin D)
+⊢ Nat.card (NonzeroSection25Two C principal hmin D) =
+    2 ^ Module.finrank (ZMod 2) ↥(fullRiemannRochSpace25Two C principal hmin D) - 1
+'MazurProof.N25F_SectionClassFiber.FullEffectiveClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_surjective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSectionEquivFullClassFiber25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.fullRiemannRochSpace25Two_card' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.nonzeroSection25Two_card' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionClassFiber.fullEffectiveClassFiber25Two_card' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

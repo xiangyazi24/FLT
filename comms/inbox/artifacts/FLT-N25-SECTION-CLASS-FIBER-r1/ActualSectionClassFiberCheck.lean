@@ -1,0 +1,10 @@
+import FLT.Assumptions.MazurProof.N25F_SectionClassFiber
+
+#print axioms MazurProof.N25F_SectionClassFiber.FullEffectiveClassFiber25Two
+#print axioms MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two
+#print axioms MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_injective
+#print axioms MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two_surjective
+#print axioms MazurProof.N25F_SectionClassFiber.nonzeroSectionEquivFullClassFiber25Two
+#print axioms MazurProof.N25F_SectionClassFiber.fullRiemannRochSpace25Two_card
+#print axioms MazurProof.N25F_SectionClassFiber.nonzeroSection25Two_card
+#print axioms MazurProof.N25F_SectionClassFiber.fullEffectiveClassFiber25Two_card
