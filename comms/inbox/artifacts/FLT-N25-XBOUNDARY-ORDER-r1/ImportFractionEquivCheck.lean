@@ -1,0 +1,6 @@
+import XChartFractionEquivCheck
+
+#check MazurProof.N25F_XChartFractionEquiv.xChartFractionAlgEquiv
+#check MazurProof.N25F_XChartFractionEquiv.xChartToFraction_isFractionRing
+#print axioms MazurProof.N25F_XChartFractionEquiv.xFractionToFraction_surjective
+#print axioms MazurProof.N25F_XChartFractionEquiv.xChartToFraction_isFractionRing

@@ -1,0 +1,62 @@
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:101:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_XLocalDVR.xW_mem_xPrime`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:229:64: error: unsolved goals
+inst✝⁷ : IsDedekindDomain W
+R : Type u_1
+L : Type u_2
+inst✝⁶ : CommRing R
+inst✝⁵ : IsDomain R
+inst✝⁴ : IsNoetherianRing R
+inst✝³ : Ring.KrullDimLE 1 R
+inst✝² : Field L
+inst✝¹ : Algebra R L
+inst✝ : IsFractionRing R L
+a : R
+ha : a ≠ 0
+n : ℕ
+hord : Ring.ord R a = ↑n
+⊢ ↑(Multiplicative.ofAdd ↑n) = WithZero.exp ↑n
+@MazurProof.N25F_XBoundaryOrder.xLocalToFraction_isFractionRing : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsFractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.XLocalRing
+    (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)
+'MazurProof.N25F_XBoundaryOrder.xLocalToFraction_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder : [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W →*₀ WithZero (Multiplicative ℤ)
+'MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XBoundaryOrder.xBoundaryOrder : [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  Additive (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)ˣ →+ ℤ
+'MazurProof.N25F_XBoundaryOrder.xBoundaryOrder' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder_xWGerm : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Ring.ord MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.XLocalRing
+        MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xWGerm =
+      3 →
+    MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder
+        (MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction
+          MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xWGerm) =
+      WithZero.exp 3
+'MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder_xWGerm' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XBoundaryOrder.xBoundaryOrder_qx : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Ring.ord MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.XLocalRing
+        MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xWGerm =
+      3 →
+    MazurProof.N25F_XBoundaryOrder.xBoundaryOrder
+        (Additive.ofMul
+          (Units.mk0
+            ((algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+                (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+              MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qx)
+            ⋯)) =
+      -3
+'MazurProof.N25F_XBoundaryOrder.xBoundaryOrder_qx' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]

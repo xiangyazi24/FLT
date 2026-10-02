@@ -1,0 +1,17 @@
+/workspace/shared/flt-n25-xboundary-order/GenericOrderCheck.lean:28:71: error: unsolved goals
+R : Type u_1
+K : Type u_2
+inst✝⁶ : CommRing R
+inst✝⁵ : IsDomain R
+inst✝⁴ : IsNoetherianRing R
+inst✝³ : Ring.KrullDimLE 1 R
+inst✝² : Field K
+inst✝¹ : Algebra R K
+inst✝ : IsFractionRing R K
+a : R
+ha : a ≠ 0
+n : ℕ
+hord : Ring.ord R a = ↑n
+⊢ -(↑(Multiplicative.ofAdd ↑n)).log = -↑n
+'N25BoundaryOrderCheck.orderOnUnits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25BoundaryOrderCheck.log_ordFrac_inverse' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]

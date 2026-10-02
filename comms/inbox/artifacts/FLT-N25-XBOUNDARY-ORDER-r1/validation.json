@@ -1,0 +1,46 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "accepted_source": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "full_FLT_imports_compiled": false,
+  "production_added_premises": false,
+  "candidate_sha256": "53b8a670cd8111e21c7d99bc72f47122b55deb4e46d6b3555d0a6f3c5cad84c9",
+  "harness_sha256": "55e47150fc5d8fc502a9f1d52ef4523f15cc0aa9f820921b662abdc021552044",
+  "harness_parameters": [
+    "IsDedekindDomain W stands for accepted canonicalWChart_isDedekindDomain",
+    "Ring.ord XLocalRing xWGerm = 3 stands for accepted RationalPointsN25QuotientTwoWBoundaryXLocal.xWGerm_ord_eq_three; this parameter is included only in the last two audited theorems"
+  ],
+  "imported_harness_module": "XChartFractionEquivCheck",
+  "import_environment": {
+    "LEAN_PATH": "/workspace/shared/flt-n25-field-equivalence"
+  },
+  "check": {
+    "name": "actual-04",
+    "args": [
+      "/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 18.390843485000005,
+    "peak_child_rss_kib": 2765412,
+    "source_sha256": "55e47150fc5d8fc502a9f1d52ef4523f15cc0aa9f820921b662abdc021552044"
+  },
+  "generic_check": {
+    "name": "generic-02",
+    "args": [
+      "/workspace/shared/flt-n25-xboundary-order/GenericOrderCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 2.88376965200041,
+    "peak_child_rss_kib": 2480244,
+    "source_sha256": "755c4f01eb6cb50bc72a138b120432500c78b40ae2fed7f1f061c394ee40a7eb"
+  },
+  "allowed_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "public_declarations_audited": 5,
+  "added_exact_source_declarations": 13,
+  "predecessor_exact_source_declarations": 51
+}

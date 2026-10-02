@@ -1,0 +1,89 @@
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:101:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_XLocalDVR.xW_mem_xPrime`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:209:33: error: expected token
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:216:26: error: Application type mismatch: The argument
+  xLocalFractionOrder ↑(Additive.toMul f)
+has type
+  ℤ
+but is expected to have type
+  WithZero (Multiplicative ℤ)
+in the application
+  WithZero.log (xLocalFractionOrder ↑(Additive.toMul f))
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:217:38: error: Application type mismatch: The argument
+  xLocalFractionOrder 1
+has type
+  ℤ
+but is expected to have type
+  WithZero (Multiplicative ?m.22)
+in the application
+  WithZero.log (xLocalFractionOrder 1)
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:217:15: error: unsolved goals
+inst✝ : IsDedekindDomain W
+⊢ (sorry ()).log = 0
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:219:24: error: Application type mismatch: The argument
+  xLocalFractionOrder (↑(Additive.toMul f) * ↑(Additive.toMul g))
+has type
+  ℤ
+but is expected to have type
+  WithZero (Multiplicative ?m.33)
+in the application
+  WithZero.log (xLocalFractionOrder (↑(Additive.toMul f) * ↑(Additive.toMul g)))
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:230:52: error: Type mismatch
+  WithZero.exp 3
+has type
+  WithZero (Multiplicative ℤ)
+but is expected to have type
+  ℤ
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:233:9: error: Type mismatch
+  (Ring.ordFrac XLocalRing) ((algebraMap XLocalRing K) xWGerm) = ?m.53
+has type
+  Prop
+of sort `Type` but is expected to have type
+  Sort u_1
+of sort `Type u_1`
+/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean:243:22: error: Application type mismatch: The argument
+  xLocalFractionOrder ((algebraMap W K) qx)
+has type
+  ℤ
+but is expected to have type
+  WithZero (Multiplicative ?m.23)
+in the application
+  WithZero.log (xLocalFractionOrder ((algebraMap W K) qx))
+@MazurProof.N25F_XBoundaryOrder.xLocalToFraction_isFractionRing : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsFractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.XLocalRing
+    (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)
+'MazurProof.N25F_XBoundaryOrder.xLocalToFraction_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder : FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W →*₀ ℤ
+'MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+MazurProof.N25F_XBoundaryOrder.xBoundaryOrder : Additive
+    (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)ˣ →+
+  ℤ
+'MazurProof.N25F_XBoundaryOrder.xBoundaryOrder' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+@MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder_xWGerm : [IsDedekindDomain
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  Ring.ord MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.XLocalRing
+        MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xWGerm =
+      3 →
+    sorry
+'MazurProof.N25F_XBoundaryOrder.xLocalFractionOrder_xWGerm' does not depend on any axioms
+@MazurProof.N25F_XBoundaryOrder.xBoundaryOrder_qx : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Ring.ord MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.XLocalRing
+        MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xWGerm =
+      3 →
+    MazurProof.N25F_XBoundaryOrder.xBoundaryOrder
+        (Additive.ofMul
+          (Units.mk0
+            ((algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+                (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+              MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qx)
+            ⋯)) =
+      -3
+'MazurProof.N25F_XBoundaryOrder.xBoundaryOrder_qx' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]

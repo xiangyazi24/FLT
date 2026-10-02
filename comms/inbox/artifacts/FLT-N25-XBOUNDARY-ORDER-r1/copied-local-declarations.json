@@ -1,0 +1,67 @@
+[
+  {
+    "declaration": "XAffineRing",
+    "first_line": 30,
+    "sha256": "f7d2b798be6d70fe73df6701657a88c1f5c6f8f493a755b2752307f96a956d49"
+  },
+  {
+    "declaration": "xAffineEval",
+    "first_line": 32,
+    "sha256": "f74e5a58e00eeb55df9308d74934cf6e1d141099f56f14e104e46a3cdeb2bba9"
+  },
+  {
+    "declaration": "xAffineEvalAlg",
+    "first_line": 35,
+    "sha256": "76a393011c42c30f348b613783afa9fa83d163b0e4547a3bd8aac11ffb96a801"
+  },
+  {
+    "declaration": "xAffineEval_quadric",
+    "first_line": 39,
+    "sha256": "6059a53936b91048c67c5645e0cceed1bb6d94be94b69661ae3a6afd7b9a02ac"
+  },
+  {
+    "declaration": "xAffineEval_cubic",
+    "first_line": 44,
+    "sha256": "f82e735f18a8e1c72ce2d9181a2381f0c5b46814d2a05b56f15e7fa7289c0a39"
+  },
+  {
+    "declaration": "xEquationIdeal_le_ker",
+    "first_line": 49,
+    "sha256": "a53fa9b87fccfc1cf87477775cdd04cc94dd03839f88f0044c06e6183aef6277"
+  },
+  {
+    "declaration": "xChartEval",
+    "first_line": 58,
+    "sha256": "846fbd8e5b0f7ec1b099d6076c2725edf87262002c1542e977ed8d1f12df3367"
+  },
+  {
+    "declaration": "xChartEval_surjective",
+    "first_line": 63,
+    "sha256": "14e75498f4d02963756d3865e3ef15b98fb0c8a1438246c0f84a5d6684251e68"
+  },
+  {
+    "declaration": "xPrime",
+    "first_line": 69,
+    "sha256": "826bc4fe4b169ce8b4e08bab93546df6ebf28f77d51790a29027116bdf6ad00a"
+  },
+  {
+    "declaration": "xPrime_isMaximal",
+    "first_line": 71,
+    "sha256": "ec4c3306529adc733e25d1e5bc25e782d415c52f76676889fba433b8d5af37f0"
+  },
+  {
+    "declaration": "xChartEval_xW",
+    "first_line": 78,
+    "sha256": "a95ac287e1291ed87b3087e34df5a4798e8bc0f3157a64871bf7aa417bb262dd"
+  },
+  {
+    "declaration": "XLocalRing",
+    "first_line": 234,
+    "sha256": "293e55a12bedbb5384fbae48a8e894f5f2b2fc9548213b9ec55f9dc0258ade71"
+  },
+  {
+    "declaration": "xWGerm",
+    "first_line": 310,
+    "sha256": "3955882b2da85c209d86299e195b08623b7102f263fcc5b4b5095a62b39aefde"
+  }
+]

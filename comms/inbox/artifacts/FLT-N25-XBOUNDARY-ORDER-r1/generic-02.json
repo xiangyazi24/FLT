@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-xboundary-order/GenericOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 2.88376965200041,
+  "peak_child_rss_kib": 2480244,
+  "source_sha256": "755c4f01eb6cb50bc72a138b120432500c78b40ae2fed7f1f061c394ee40a7eb"
+}

@@ -1,0 +1,54 @@
+{
+  "emission": {
+    "name": "check-04-emit",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-field-equivalence",
+      "-o",
+      "/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.olean",
+      "/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 49.16374698800064,
+    "peak_child_rss_kib": 2539796,
+    "source_sha256": "f57fe127aafc8f04721675974801c323eba429977c69e55f8547d944ff20355b"
+  },
+  "source_identical_to_successful_check_03": true,
+  "module_name": "XChartFractionEquivCheck",
+  "outputs": [
+    {
+      "path": "/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.olean",
+      "bytes": 2011216,
+      "sha256": "719dfca2f146f2e12053b52784a786bbc395da32369bf2da73aa36adaee22e9e"
+    }
+  ],
+  "import_smoke_check": {
+    "name": "check-05-import",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-field-equivalence",
+      "/workspace/shared/flt-n25-field-equivalence/ImportFractionEquivCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 3.150824915001067,
+    "peak_child_rss_kib": 2421004,
+    "source_sha256": "ceca11a51315e295f3fd4e0e8f3d619be21e62be6a9eececdae95d241781a129"
+  },
+  "import_environment": {
+    "LEAN_PATH": "/workspace/shared/flt-n25-field-equivalence"
+  },
+  "import_statement": "import XChartFractionEquivCheck",
+  "full_FLT_import_check": false,
+  "compilation_bounds": {
+    "timeout_seconds": 60,
+    "memory_MiB": 3072,
+    "compiler_threads": 1,
+    "CPUs": 1
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "gate_note": "Emission and import smoke were launched before the new shared flock gate instruction arrived; run_check.py now prepends that gate for future checks."
+}

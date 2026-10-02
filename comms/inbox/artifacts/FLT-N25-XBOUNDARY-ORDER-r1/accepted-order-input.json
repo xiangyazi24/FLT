@@ -1,0 +1,9 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryXLocal.lean",
+  "git_blob_sha": "8fcf421cd1d897766c2126af96c9c11f6a25135a",
+  "first_line": 399,
+  "declaration": "theorem xWGerm_ord_eq_three : Ring.ord XLocalRing xWGerm = 3 := by\n  unfold Ring.ord\n  change Module.length XLocalRing (XLocalRing \u29f8 xWGermIdeal) = 3\n  exact xLocalBoundary_local_length",
+  "declaration_sha256": "894ff3c37cd72a5139e6f27b32fd8e4f148950258728faa77c1cdc882ece67cd"
+}

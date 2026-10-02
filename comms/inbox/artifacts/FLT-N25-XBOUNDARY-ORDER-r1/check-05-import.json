@@ -1,0 +1,12 @@
+{
+  "name": "check-05-import",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-field-equivalence",
+    "/workspace/shared/flt-n25-field-equivalence/ImportFractionEquivCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 3.150824915001067,
+  "peak_child_rss_kib": 2421004,
+  "source_sha256": "ceca11a51315e295f3fd4e0e8f3d619be21e62be6a9eececdae95d241781a129"
+}

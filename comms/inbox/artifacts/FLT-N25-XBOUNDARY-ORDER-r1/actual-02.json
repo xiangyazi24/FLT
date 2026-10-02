@@ -1,0 +1,10 @@
+{
+  "name": "actual-02",
+  "args": [
+    "/workspace/shared/flt-n25-xboundary-order/XBoundaryOrderCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 37.46138519699889,
+  "peak_child_rss_kib": 2763860,
+  "source_sha256": "621d92898e4205a53c24340949ca97b89985e3bd9fa9d325ff8aa6ebc77a5d20"
+}
