@@ -1,0 +1,93 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependencies": [
+    "f5796e424266adb887c59a14696cdb6b13f64d40",
+    "8517a259e9d16fd5fc88635294bea0a964de01f8"
+  ],
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 35335,
+      "sha256": "19e1b398b45a16fe07cc895360d22a5f20439c2f9d949edd88837d5c617a03ee"
+    },
+    {
+      "path": "comms/candidates/N25F_RiemannRochSpace.lean",
+      "encoding": "utf-8",
+      "bytes": 4287,
+      "sha256": "df4916eea48a7b3679b8a9e398b611a531cfa5886c44551f322407002d9ecac4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/ActualRiemannRochSpaceCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 377,
+      "sha256": "29de07ff819d3cba76750d9dc2d099e87dffba526930a881c107c68f606e3181"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/RiemannRochSpaceFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 5016,
+      "sha256": "30c1b5264b9f0865a0fb90b630b8666df3d78bac371f2e44477d722a623e8a44"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/effective-source.lean",
+      "encoding": "utf-8",
+      "bytes": 8187,
+      "sha256": "e978466206274f2441e6a26a27489cfbe6378bcdddf5deb6a0ba53cff1bc1440"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/failed/family-01.json",
+      "encoding": "utf-8",
+      "bytes": 297,
+      "sha256": "616623eba3359ad1e07a3db75e11f98253f3e4cba0a29a3bb4b71e504f97905f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/failed/family-01.log",
+      "encoding": "utf-8",
+      "bytes": 6059,
+      "sha256": "c2c7abaf414efc02fa7f3347cc8e39b6b70ddd657641ea1efc1ccb0a3bdcf571"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/family-02.json",
+      "encoding": "utf-8",
+      "bytes": 297,
+      "sha256": "f9d39dcab17dc173ec2a74f4ccc4295a0f0d190e9cd5f5ba82b2ba066326efff"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/family-02.log",
+      "encoding": "utf-8",
+      "bytes": 514,
+      "sha256": "2864b53b8a1e948abbd73113faee486d53a9ad804513ea58448a3fd7e36a5147"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/make_family.py",
+      "encoding": "utf-8",
+      "bytes": 2719,
+      "sha256": "4aea440a1d62f1c9fb1b8496be0fd6d812819e44605595ce28dd2c3b1e5fe01a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/picard-source.lean",
+      "encoding": "utf-8",
+      "bytes": 8088,
+      "sha256": "a0000a5b3ee6b87bd3393129f4d5f0240f261de25063826821f07cf1e16650b5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 880,
+      "sha256": "f5c004c78f725b606773a19a8f75054e1c63cdd148a40baf4f485e9e989bc5cb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RIEMANN-ROCH-SPACE-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1329,
+      "sha256": "73ddb9d5642bb7e04e01ac81c3070124142a0a9cb3dbdbf81cb0db0f9e2a06ea"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-RIEMANN-ROCH-SPACE-r1.md",
+      "encoding": "utf-8",
+      "bytes": 3454,
+      "sha256": "a5116231640ad52d6536c393b680a70c9b86dc10f1796e9bd99eac3eb1bf9ebf"
+    }
+  ]
+}

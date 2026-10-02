@@ -1,0 +1,63 @@
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:50:4: error: Type mismatch: After simplification, term
+  h
+ has type
+  @Eq ℕ a.val 1
+but is expected to have type
+  @Eq ℕ a.val (ZMod.val 1)
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:53:57: error(lean.unknownIdentifier): Unknown identifier `Algebra`
+
+Note: It is not possible to treat `Algebra` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:54:31: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:54:37: error(lean.unknownIdentifier): Unknown identifier `C.Divisor`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:55:36: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:55:36: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:55:36: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:56:13: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:56:29: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:56:45: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:58:33: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:58:37: error(lean.unknownIdentifier): Unknown identifier `C.divisorDegree`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:61:35: error(lean.unknownIdentifier): Unknown identifier `C.Divisor`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:61:67: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:97:43: error(lean.unknownIdentifier): Unknown identifier `C.Divisor`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:97:59: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:98:34: error(lean.unknownIdentifier): Unknown identifier `C`
+
+Note: It is not possible to treat `C` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:104:42: error(lean.unknownIdentifier): Unknown identifier `C.Divisor`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:104:58: error(lean.unknownIdentifier): Unknown identifier `L`
+
+Note: It is not possible to treat `L` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:105:40: error(lean.unknownIdentifier): Unknown identifier `C`
+
+Note: It is not possible to treat `C` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:106:8: error(lean.unknownIdentifier): Unknown identifier `C.divisorDegree`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:122:60: error(lean.unknownIdentifier): Unknown identifier `C.Divisor`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:123:10: error(lean.unknownIdentifier): Unknown identifier `C.divisorDegree`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:124:30: error(lean.unknownIdentifier): Unknown identifier `C`
+
+Note: It is not possible to treat `C` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+'MazurProof.N25F_RiemannRochSpace.fullRiemannRochSpace25Two' depends on axioms: [sorryAx]
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:134:14: error(lean.unknownIdentifier): Unknown constant `mem_fullRiemannRochSpace25Two`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:135:14: error(lean.unknownIdentifier): Unknown constant `degree_nonneg_of_nonzero_mem`
+/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean:136:14: error(lean.unknownIdentifier): Unknown constant `fullRiemannRochSpace25Two_eq_bot_of_degree_neg`

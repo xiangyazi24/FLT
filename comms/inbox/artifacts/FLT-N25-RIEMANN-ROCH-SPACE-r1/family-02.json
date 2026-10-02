@@ -1,0 +1,10 @@
+{
+  "name": "family-02",
+  "args": [
+    "/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 38.09827390999999,
+  "peak_child_rss_kib": 1955056,
+  "source_sha256": "30c1b5264b9f0865a0fb90b630b8666df3d78bac371f2e44477d722a623e8a44"
+}

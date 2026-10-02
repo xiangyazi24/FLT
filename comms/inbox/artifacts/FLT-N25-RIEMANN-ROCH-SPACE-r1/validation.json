@@ -1,0 +1,43 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependencies": [
+    "f5796e424266adb887c59a14696cdb6b13f64d40",
+    "8517a259e9d16fd5fc88635294bea0a964de01f8"
+  ],
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "fullRiemannRochSpace25Two",
+    "mem_fullRiemannRochSpace25Two",
+    "degree_nonneg_of_nonzero_mem",
+    "fullRiemannRochSpace25Two_eq_bot_of_degree_neg"
+  ],
+  "production_additional_hypotheses": [],
+  "passed": {
+    "name": "family-02",
+    "args": [
+      "/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 38.09827390999999,
+    "peak_child_rss_kib": 1955056,
+    "source_sha256": "30c1b5264b9f0865a0fb90b630b8666df3d78bac371f2e44477d722a623e8a44"
+  },
+  "failed": {
+    "name": "family-01",
+    "args": [
+      "/workspace/shared/flt-n25-riemann-roch-space/RiemannRochSpaceFamilyCheck.lean"
+    ],
+    "exit_code": 1,
+    "seconds": 18.62127228900499,
+    "peak_child_rss_kib": 1913996,
+    "source_sha256": "92d8332733f6a0cb08d228b2d227c6e8610cfa25ac43e5c97bee8d2810699835"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "finite_dimensionality": "NOT CLAIMED",
+  "riemann_roch_rank_identity": "OPEN"
+}

@@ -1,0 +1,6 @@
+import FLT.Assumptions.MazurProof.N25F_RiemannRochSpace
+
+#print axioms MazurProof.N25F_RiemannRochSpace.fullRiemannRochSpace25Two
+#print axioms MazurProof.N25F_RiemannRochSpace.mem_fullRiemannRochSpace25Two
+#print axioms MazurProof.N25F_RiemannRochSpace.degree_nonneg_of_nonzero_mem
+#print axioms MazurProof.N25F_RiemannRochSpace.fullRiemannRochSpace25Two_eq_bot_of_degree_neg
