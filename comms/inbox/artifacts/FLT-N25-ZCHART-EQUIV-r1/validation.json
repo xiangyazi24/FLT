@@ -1,0 +1,40 @@
+{
+  "verified_at_utc": "2026-10-02T08:25:13.644724+00:00",
+  "accepted_flt_source_pin": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "mathlib_pin": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "lean_version": "4.31.0-rc2",
+  "production_candidate": "N25F_ZChartWChartEquiv.lean",
+  "production_sha256": "6058bc2512b100dafc39a4c25356ed66c2491ede1ab8e73e45810979f6adbd23",
+  "harness": "ZChartEquivCheck.lean",
+  "harness_sha256": "feae2ebd3182e949d8d606b893fae077146f27b5a63d932ebf4411c124461486",
+  "source_files": 11,
+  "copied_verbatim_declarations": 49,
+  "all_source_git_blob_hashes_verified": true,
+  "harness_change": "A single [IsDedekindDomain W] ordinary variable is inserted immediately before the final domain and Dedekind instances; no change to the unconditional algebra-equivalence proof.",
+  "check": {
+    "name": "check-01",
+    "args": [
+      "/workspace/shared/flt-n25-zchart-equiv/ZChartEquivCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 13.586770934000015,
+    "peak_child_rss_kib": 2428904,
+    "source_sha256": "feae2ebd3182e949d8d606b893fae077146f27b5a63d932ebf4411c124461486"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "axiom_scope": "Exact-source harness, including unconditional equivalence and parameterized existing-W-instance transports; production imports are not compiled here.",
+  "warnings": [],
+  "bounds": {
+    "compiler_threads": 1,
+    "cpu_affinity_count": 1,
+    "memory_mib": 3072,
+    "timeout_seconds": 60,
+    "shared_flock_wait_seconds": 180
+  },
+  "production_full_import_compile": "not_run",
+  "remote_writes": "none"
+}

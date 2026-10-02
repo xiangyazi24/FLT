@@ -1,0 +1,10 @@
+{
+  "name": "check-01",
+  "args": [
+    "/workspace/shared/flt-n25-zchart-equiv/ZChartEquivCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 13.586770934000015,
+  "peak_child_rss_kib": 2428904,
+  "source_sha256": "feae2ebd3182e949d8d606b893fae077146f27b5a63d932ebf4411c124461486"
+}

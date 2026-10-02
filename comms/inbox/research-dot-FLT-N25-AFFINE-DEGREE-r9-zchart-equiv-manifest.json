@@ -1,0 +1,89 @@
+{
+  "source_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 17281,
+      "sha256": "9d6f05e130a1645ec559872e3b70cd8e50d886064c6db8fa237a941c3c3808a1"
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartWChartEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 12764,
+      "sha256": "6058bc2512b100dafc39a4c25356ed66c2491ede1ab8e73e45810979f6adbd23"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/ActualZChartEquivCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 448,
+      "sha256": "4f3907bd8b842a2e7d4c1901b242d0e80c9d8644901879f7de6460ac51344c54"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 4190,
+      "sha256": "d4b2fb5a62a258a286d437cafa27e0918a414b2ce457efbdacfdd9d8f76383d5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/ZChartEquivCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 26131,
+      "sha256": "feae2ebd3182e949d8d606b893fae077146f27b5a63d932ebf4411c124461486"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/check-01.json",
+      "encoding": "utf-8",
+      "bytes": 280,
+      "sha256": "7cb957edc5a90f7577dd43bdb6429d6d5f4d7a23be6e942a10f36fb5c3a88de8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/check-01.log",
+      "encoding": "utf-8",
+      "bytes": 3162,
+      "sha256": "a56d905fe01ae9175621f221a4e95c866d91660f6c8f3cb94a52860823e22b60"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/copied-declarations.json",
+      "encoding": "utf-8",
+      "bytes": 11618,
+      "sha256": "835867eb2cd98da0fed3c950c10755709ae55ebd6c24986d47073f2002cd07d6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 3974,
+      "sha256": "d3f17ed3ef859e279953c27cea03eab91374c66913f3db5864917229f7bfbf0f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 874,
+      "sha256": "6362f046719c31c7968246cc71fc8a06daf937d396d0b401f8a9c0f0549f3015"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/source-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 5435,
+      "sha256": "5b6dcdefea6f3a23394a4dab03fb3a70387de01d2909dc74bcccaab33fba726e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1618,
+      "sha256": "f1924bf19a317553d984927f51c99a6c64ec3ccc7d59fe428ffa0597d8ec9eba"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZCHART-EQUIV-r1/zlocal-source-meta.json",
+      "encoding": "utf-8",
+      "bytes": 363,
+      "sha256": "1466606663f131da0637b0b2f2c78937d067cfe6f2c7ad9f8db395d26e43a2e2"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r9-zchart-equiv.md",
+      "encoding": "utf-8",
+      "bytes": 2833,
+      "sha256": "25b3e0f50adf962bbb79ac6c2a53d73cb0e3a762291f72b62649271143546b7f"
+    }
+  ]
+}

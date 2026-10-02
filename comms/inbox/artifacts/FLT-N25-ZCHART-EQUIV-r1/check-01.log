@@ -1,0 +1,40 @@
+@MazurProof.N25F_ZChartWChartEquiv.quadric_linearTransform : ∀ {A : Type u_1} [inst : CommRing A] [Algebra (ZMod 2) A]
+  (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo
+      (MazurProof.N25F_ZChartWChartEquiv.linearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_ZChartWChartEquiv.quadric_linearTransform' depends on axioms: [propext, Quot.sound]
+@MazurProof.N25F_ZChartWChartEquiv.cubic_linearTransform : ∀ {A : Type u_1} [inst : CommRing A] [Algebra (ZMod 2) A]
+  (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo
+      (MazurProof.N25F_ZChartWChartEquiv.linearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo P +
+      P.x * MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_ZChartWChartEquiv.cubic_linearTransform' depends on axioms: [propext, Quot.sound]
+@MazurProof.N25F_ZChartWChartEquiv.quadric_inverseLinearTransform : ∀ {A : Type u_1} [inst : CommRing A]
+  [Algebra (ZMod 2) A] (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo
+      (MazurProof.N25F_ZChartWChartEquiv.inverseLinearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_ZChartWChartEquiv.quadric_inverseLinearTransform' depends on axioms: [propext, Quot.sound]
+@MazurProof.N25F_ZChartWChartEquiv.cubic_inverseLinearTransform : ∀ {A : Type u_1} [inst : CommRing A]
+  [Algebra (ZMod 2) A] (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo
+      (MazurProof.N25F_ZChartWChartEquiv.inverseLinearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo P +
+      P.z * MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_ZChartWChartEquiv.cubic_inverseLinearTransform' depends on axioms: [propext, Quot.sound]
+MazurProof.N25F_ZChartWChartEquiv.zChartAlgEquivWChart : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing ≃ₐ[ZMod
+    2]
+  MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_ZChartWChartEquiv.zChartAlgEquivWChart' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartWChartEquiv.zChartRing_isDomain : ∀
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsDomain MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+'MazurProof.N25F_ZChartWChartEquiv.zChartRing_isDomain' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZChartWChartEquiv.zChartRing_isDedekindDomain : ∀
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsDedekindDomain MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+'MazurProof.N25F_ZChartWChartEquiv.zChartRing_isDedekindDomain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
