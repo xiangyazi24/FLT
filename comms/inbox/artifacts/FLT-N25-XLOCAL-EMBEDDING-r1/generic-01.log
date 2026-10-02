@@ -1,0 +1,28 @@
+/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean:17:27: error(lean.unknownIdentifier): Unknown identifier `hf`
+/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean:23:45: error: Application type mismatch: The argument
+  hf
+has type
+  Function.Injective ⇑f
+of sort `Prop` but is expected to have type
+  ↥p.primeCompl
+of sort `Type u_2` in the application
+  primeCompl_isUnit p f hf
+/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean:26:21: error: Application type mismatch: The argument
+  hf
+has type
+  Function.Injective ⇑f
+of sort `Prop` but is expected to have type
+  Localization.AtPrime p
+of sort `Type u_2` in the application
+  (localToField p f) hf
+/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean:27:50: error(lean.unknownIdentifier): Unknown identifier `p`
+/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean:27:54: error(lean.unknownIdentifier): Unknown identifier `hf`
+/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean:29:70: error: Application type mismatch: The argument
+  hf
+has type
+  Function.Injective ⇑f
+of sort `Prop` but is expected to have type
+  Localization.AtPrime p
+of sort `Type u_2` in the application
+  (localToField p f) hf
+/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean:41:14: error(lean.unknownIdentifier): Unknown constant `localToField_injective`

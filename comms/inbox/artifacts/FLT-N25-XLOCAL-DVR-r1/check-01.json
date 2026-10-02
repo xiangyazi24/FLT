@@ -1,0 +1,10 @@
+{
+  "name": "check-01",
+  "args": [
+    "/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 40.8413676070013,
+  "peak_child_rss_kib": 2772196,
+  "source_sha256": "4bc627a1b8df28f3bf710a946deaf9c039efbbc358a87a54b0c36567eb43d985"
+}

@@ -1,0 +1,45 @@
+{
+  "status": "bounded actual-definition check passed; full FLT integration not run",
+  "timestamp_utc": "2026-10-02T08:04:53.187747+00:00",
+  "repository": "xiangyazi24/FLT",
+  "accepted_ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "mathlib_ref": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "compiler": "Lean 4.31.0-rc2",
+  "production_file": "N25F_XLocalDVR.lean",
+  "production_sha256": "0d777634f8bddeaf55250e1ab0b1cccdf54641eff167b86d9b2f134e0928adb3",
+  "harness_file": "XLocalDVRCheck.lean",
+  "harness_sha256": "46e3df0732e97859f1ebcdfb247a7caf79a6985cb5280f76f469a3dd259e6a82",
+  "check": {
+    "name": "check-02",
+    "args": [
+      "/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 31.941217579000295,
+    "peak_child_rss_kib": 2761568,
+    "source_sha256": "46e3df0732e97859f1ebcdfb247a7caf79a6985cb5280f76f469a3dd259e6a82"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "fixture_parameters": [
+    "[IsDedekindDomain W] at three scoped points representing the accepted canonicalWChart_isDedekindDomain instance"
+  ],
+  "copied_source_declarations": 66,
+  "copied_source_local_instances": 3,
+  "full_import_check": "ActualXLocalDVRCheck.lean (not run)",
+  "prerequisite_candidates": [
+    {
+      "path": "/workspace/shared/flt-n25-xchart-iso/N25F_XChartWChartEquiv.lean",
+      "sha256": "b002466dc2e6dcf6de5197bc5f21714da13d259793d7cba9acf68aa3dcc743fd",
+      "modified_by_this_task": false
+    },
+    {
+      "path": "/workspace/shared/flt-n25-xchart-map/N25F_XChartFractionMap.lean",
+      "sha256": "cde468020a66eba45f0648fc4a8accabcce31bd6a67fb4aef7ce9566a8eb3134",
+      "modified_by_this_task": false
+    }
+  ]
+}

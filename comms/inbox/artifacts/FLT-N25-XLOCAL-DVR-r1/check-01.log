@@ -1,0 +1,119 @@
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:386:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartWChartEquiv.two_eq_zero`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:444:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartWChartEquiv.affinePointEval_comp_dehomogenize`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:459:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartWChartEquiv.mappedAmbientPoint_eval`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:506:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartWChartEquiv.xChartPoint_eq`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:510:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartWChartEquiv.wChartPoint_eq`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:561:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartWChartEquiv.chartAlgHom_ext`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:595:43: warning: This simp argument is unused:
+  map_one
+
+Hint: Omit it from the simp argument list.
+  simp only [wChartToXChart_qz, map_add, m̵a̵p̵_̵o̵n̵e̵,̵ ̵xChartToWChart_xY,
+  ̵  ̵ ̵ ̵ ̵ ̵xChartToWChart_xZ, xChartToWChart_xW]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:649:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartFractionMap.affinePointEval_comp_dehomogenize`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:664:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartFractionMap.mappedAmbientPoint_eval`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:726:2: warning: Try `simp at heq` instead of `simpa using heq`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:733:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartFractionMap.wChartPoint_eq`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:763:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:813:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xAffineEval_quadric`:
+  [IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:818:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xAffineEval_cubic`:
+  [IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:846:2: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  DivisionRing k₂
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-xlocal-dvr/XLocalDVRCheck.lean:892:37: error: Application type mismatch: The argument
+  XChartRing
+has type
+  Type
+but is expected to have type
+  ?m.29 ≃+* ?m.30
+in the application
+  Ring.DimensionLEOne.of_ringEquiv XChartRing
+@MazurProof.N25F_XLocalDVR.xChartRing_isDedekindDomain : ∀
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsDedekindDomain MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing
+'MazurProof.N25F_XLocalDVR.xChartRing_isDedekindDomain' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XLocalDVR.xW_ne_zero : ∀ [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.xW ≠ 0
+'MazurProof.N25F_XLocalDVR.xW_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XLocalDVR.xW_mem_xPrime : ∀ [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.xW ∈
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xPrime
+'MazurProof.N25F_XLocalDVR.xW_mem_xPrime' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XLocalDVR.xPrime_ne_bot : ∀ [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xPrime ≠ ⊥
+'MazurProof.N25F_XLocalDVR.xPrime_ne_bot' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XLocalDVR.xLocalRing_isDiscreteValuationRing : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsDiscreteValuationRing MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.XLocalRing
+'MazurProof.N25F_XLocalDVR.xLocalRing_isDiscreteValuationRing' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XLocalDVR.xWGerm_ne_zero : ∀ [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal.xWGerm ≠ 0
+'MazurProof.N25F_XLocalDVR.xWGerm_ne_zero' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]

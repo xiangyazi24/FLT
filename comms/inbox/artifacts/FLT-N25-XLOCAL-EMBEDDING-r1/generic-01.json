@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-xlocal-fraction/GenericLocalEmbedding.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 4.503164108999044,
+  "peak_child_rss_kib": 2128568,
+  "source_sha256": "2595122a8e8d1083e7817c9646379994ae2dd1d514fd47c80cd57c2d033c128a"
+}

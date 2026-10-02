@@ -1,0 +1,26 @@
+{
+  "source_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "full_FLT_imports_compiled": false,
+  "production_additional_premises": false,
+  "harness_structural_parameter": "IsDedekindDomain W represents existing accepted instance; prerequisites also use IsDomain W as already disclosed",
+  "exact_original_declarations": 63,
+  "candidate_sha256": "f1cc3d83be175dbeb8388836f4e1546f0d0b658b7267f599b0d68faa2a2d548d",
+  "check_sha256": "fff0739f770eb78ceb704890fc32112728e32f3bd6c62166d67c8df8f2866738",
+  "check": {
+    "name": "actual-01",
+    "args": [
+      "/workspace/shared/flt-n25-xlocal-fraction/XLocalFractionCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 31.4410967040003,
+    "peak_child_rss_kib": 2509768,
+    "source_sha256": "fff0739f770eb78ceb704890fc32112728e32f3bd6c62166d67c8df8f2866738"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "actual-01",
+  "args": [
+    "/workspace/shared/flt-n25-xlocal-fraction/XLocalFractionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 31.4410967040003,
+  "peak_child_rss_kib": 2509768,
+  "source_sha256": "fff0739f770eb78ceb704890fc32112728e32f3bd6c62166d67c8df8f2866738"
+}

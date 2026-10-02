@@ -1,0 +1,197 @@
+{
+  "source_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 16247,
+      "sha256": "79cac41d85e9e3dce99a8b26b68f98dd268333f5796164d5c807483616a84e55"
+    },
+    {
+      "path": "comms/candidates/N25F_XLocalDVR.lean",
+      "encoding": "utf-8",
+      "bytes": 2873,
+      "sha256": "0d777634f8bddeaf55250e1ab0b1cccdf54641eff167b86d9b2f134e0928adb3"
+    },
+    {
+      "path": "comms/candidates/N25F_XLocalFractionEmbedding.lean",
+      "encoding": "utf-8",
+      "bytes": 2633,
+      "sha256": "f1cc3d83be175dbeb8388836f4e1546f0d0b658b7267f599b0d68faa2a2d548d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/ActualXLocalDVRCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 907,
+      "sha256": "35b25226aff714e28f83fe46b41861a268c270a2dab1f56ae9896afec3f9518b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 4545,
+      "sha256": "502925667f5f1bc5f65ec86a8a2bc9e9589bab258a53e53b35113cbc5b6e48a2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/XLocalDVRCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 37869,
+      "sha256": "46e3df0732e97859f1ebcdfb247a7caf79a6985cb5280f76f469a3dd259e6a82"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/check-01.json",
+      "encoding": "utf-8",
+      "bytes": 274,
+      "sha256": "610c22fe21a96a3f8b08866a7a90d65640bc0b11a365b4efb53babf09fa1d15f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/check-01.log",
+      "encoding": "utf-8",
+      "bytes": 8662,
+      "sha256": "1d0c0469b83e0f2bc65f195d1fb87543ec598a511446d2fc36ff7adb1a79df82"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/check-02.json",
+      "encoding": "utf-8",
+      "bytes": 276,
+      "sha256": "08ea7a52bf2db79fb404a66ab043ab7f2d7d52d90078fae5bb7eefd78fb9f88b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/check-02.log",
+      "encoding": "utf-8",
+      "bytes": 4033,
+      "sha256": "5c1332719b5c24238c6bcbd3952660416301f4458eaa6bf8a3069c9b313b900a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/copied-declarations.json",
+      "encoding": "utf-8",
+      "bytes": 12668,
+      "sha256": "1cb3c225a7692ec486a432ca6425950c1b81fc42134921598f146df2a3bd35be"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 3034,
+      "sha256": "03ba56d754601206d15196782366b9f90b789c0ba1ad39afcb9e900ca8709446"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 727,
+      "sha256": "d648de651a980bc686b523b187b4d23369a0d2701e02cb4c74b1f59d46e8c8d9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/source-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 7470,
+      "sha256": "d7af2dd23dcedde8172f7a51f1a65ce74cb95315c867a62fd477653fcd0a5371"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1730,
+      "sha256": "3b5af25314d57b69139bd6ea3f1914ca178409d67929f7934aea3f33dff27580"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-DVR-r1/xlocal-source-meta.json",
+      "encoding": "utf-8",
+      "bytes": 384,
+      "sha256": "0e306d3a930048e6a2bcc5797ed44531d17b9fa69da398f16c19a06dfbb1ec4b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/ActualXLocalFractionCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 585,
+      "sha256": "21816e1036f5f4ae9e3183f990473b15bca02405df312534c93e748edfca0747"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/GenericLocalEmbedding.lean",
+      "encoding": "utf-8",
+      "bytes": 1481,
+      "sha256": "edb6beb74b6f9a854fb9a5aa24ab70a50a990b31ff701ad6b5d98c5e04369c56"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 2898,
+      "sha256": "98a16ff912308b0eb22230c5378a63397e640f278cd4cb235f98d124d34d6c8d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/XLocalFractionCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 43673,
+      "sha256": "fff0739f770eb78ceb704890fc32112728e32f3bd6c62166d67c8df8f2866738"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/actual-01.json",
+      "encoding": "utf-8",
+      "bytes": 285,
+      "sha256": "927e8e7d874afa270b075108073c3f44a4b56f5d2c82693eaf00536518266f1d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/actual-01.log",
+      "encoding": "utf-8",
+      "bytes": 5114,
+      "sha256": "bb8430992e89cc8915265020034bd1d1a39fd3656eff96ffba99dc541760daeb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/copied-local-declarations.json",
+      "encoding": "utf-8",
+      "bytes": 1787,
+      "sha256": "40e26b910ca1723fa40b46b2ce1b660f9fdada7e66b7062e36266cf073100dcc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 289,
+      "sha256": "bf3c7bed93f6b0ef31c3fdf5fb7b32568fd8ac7f93b332d946274bb70b3c4c80"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 1419,
+      "sha256": "c3724c022b84868b081df62f26cfdca8fca8873a13cd6789e2c026e79f5d1d7f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 288,
+      "sha256": "02a589fbbe85c100101d516cfe1993cf79b7d457e0e99235329aa9565cd4c022"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 107,
+      "sha256": "434f68c21830982d09a66b017d0af1124e3fc874eca4be376d352981fab97830"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 2183,
+      "sha256": "186129c38eb02403f105b4db458bfcba92d75a22fb741f7726bf63d7e406a8d6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 824,
+      "sha256": "675e4a80f4a13afe3ce09f70c19f8a616213929fe91b292495e71d483b6882cc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/source-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 7470,
+      "sha256": "d7af2dd23dcedde8172f7a51f1a65ce74cb95315c867a62fd477653fcd0a5371"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XLOCAL-EMBEDDING-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 981,
+      "sha256": "38a548bcbb9ff24d93da32a4409d92b2514a076898a19b587032488029c93407"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r9-local-embedding.md",
+      "encoding": "utf-8",
+      "bytes": 3876,
+      "sha256": "afaead9b74cbc8a0549c3031de0ab7300b0d992653574d0743c642a0d62fa307"
+    }
+  ]
+}

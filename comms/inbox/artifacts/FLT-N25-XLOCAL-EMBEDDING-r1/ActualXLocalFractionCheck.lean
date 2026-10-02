@@ -1,0 +1,9 @@
+import FLT.Assumptions.MazurProof.N25F_XLocalFractionEmbedding
+
+#check MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction
+#check MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction_injective
+#check MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction_xWGerm
+#print axioms MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction
+#print axioms MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction_algebraMap
+#print axioms MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction_injective
+#print axioms MazurProof.N25F_XLocalFractionEmbedding.xLocalToFraction_xWGerm
