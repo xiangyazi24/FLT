@@ -1,0 +1,39 @@
+/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean:457:12: error: Function expected at
+  le_sup_left
+but this term has type
+  ?m.258 ≤ ?m.258 ⊔ ?m.259
+
+Note: Expected a function because this term is being applied to the argument
+  hbn
+/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean:461:6: error: Function expected at
+  le_sup_right
+but this term has type
+  ?m.295 ≤ ?m.294 ⊔ ?m.295
+
+Note: Expected a function because this term is being applied to the argument
+  (Submodule.subset_span (Set.mem_singleton a))
+/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean:463:28: error: Function expected at
+  le_sup_left
+but this term has type
+  ?m.309 ≤ ?m.309 ⊔ ?m.310
+
+Note: Expected a function because this term is being applied to the argument
+  hba
+/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean:465:48: error: Type mismatch: After simplification, term
+  ha
+ has type
+  a ∈ fullRiemannRochSpace25Two C principal hmin D
+but is expected to have type
+  a ∈ ↑(fullRiemannRochSpace25Two C principal hmin D)
+'MazurProof.N25F_XSectionDimension.fullRiemannRochSpace25Two_eq_sub_X_sup_span' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionDimension.finrank_fullRiemannRochSpace25Two_le_sub_X_add_one' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionDimension.finrank_fullRiemannRochSpace25Two_le_degree_add_one' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

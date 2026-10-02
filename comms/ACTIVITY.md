@@ -158,3 +158,5 @@ FLT 2026-10-02T19:00:00Z Deliver actual section finiteness for every signed divi
 FLT 2026-10-02T19:10:00Z Deliver exact nonzero actual-section/full-class-fibre equivalence and cardinality 2^finrank(L(D))-1. Eight final audits standard-only; bounded family PASS 22.286 seconds. Full named acceptance pending. Continue genuine principal-function linear transport and descended actual class rank.
 
 FLT 2026-10-02T19:19:00Z Deliver actual principal-function linear transport, representative-independent section rank on the full Picard quotient, and the exact existing effectiveClass fibre formula in linearSystemCard form for every degree. Nine final audits standard-only; bounded families PASS 8.431 and 12.237 seconds. Full named gate pending. Continue actual X-local filtration and one-step dimension bound.
+
+FLT 2026-10-02T19:35:00Z Deliver genuine X-local binary leading-term cancellation, actual L(D-X) filtration, one-step and quotient dimension<=1, and dim L(D)<=(deg D+1).toNat. Nine final standard-only audits; bounded checks PASS. Full named gate pending. Continue actual uniformizer-scaled residue functional; RR lower bound and Picard finiteness stay open.

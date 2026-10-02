@@ -1,0 +1,10 @@
+{
+  "name": "filtration-01",
+  "args": [
+    "/workspace/shared/flt-n25-x-filtration/XSectionFiltrationFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 59.28200511599425,
+  "peak_child_rss_kib": 2922700,
+  "source_sha256": "f6414b41d7b20f3fb5c6f6c9baf98639b5a0a935765535dcfe85926b55cec56f"
+}

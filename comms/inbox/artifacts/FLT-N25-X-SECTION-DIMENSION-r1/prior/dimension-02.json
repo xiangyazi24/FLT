@@ -1,0 +1,10 @@
+{
+  "name": "dimension-02",
+  "args": [
+    "/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 8.624181004001002,
+  "peak_child_rss_kib": 2263880,
+  "source_sha256": "f001b997ef95f7b5a8c2cae146836b25eac56f535c52d6c2a141c2c816bd6cd3"
+}

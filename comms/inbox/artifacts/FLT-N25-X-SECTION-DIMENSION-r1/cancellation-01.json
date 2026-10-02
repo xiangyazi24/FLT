@@ -1,0 +1,10 @@
+{
+  "name": "cancellation-01",
+  "args": [
+    "/workspace/shared/flt-n25-x-filtration/BinaryResidueCancellationCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 6.478932088997681,
+  "peak_child_rss_kib": 2879756,
+  "source_sha256": "dd88968ea17e258d7f49ac6ed15ed2d99ddf4155cd10be11cfc2b0f091e9a246"
+}

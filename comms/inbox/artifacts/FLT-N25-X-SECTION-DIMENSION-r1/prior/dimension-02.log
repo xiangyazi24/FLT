@@ -1,0 +1,9 @@
+'MazurProof.N25F_XSectionDimension.fullRiemannRochSpace25Two_eq_sub_X_sup_span' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionDimension.finrank_fullRiemannRochSpace25Two_le_sub_X_add_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionDimension.finrank_fullRiemannRochSpace25Two_le_degree_add_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

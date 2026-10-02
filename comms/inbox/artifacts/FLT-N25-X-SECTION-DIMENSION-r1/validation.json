@@ -1,0 +1,81 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "6680617d4e0b866d1dad5ff6d246436df4ab7a6e",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_BinaryResidueCancellation.log_ordFrac_sub_gt_of_log_eq",
+    "MazurProof.N25F_XSectionFiltration.fullRiemannRochSpace25Two_sub_X_le",
+    "MazurProof.N25F_XSectionFiltration.mem_fullRiemannRochSpace25Two_sub_X_iff",
+    "MazurProof.N25F_XSectionFiltration.xBoundaryOrder_eq_neg_of_not_mem_sub_X",
+    "MazurProof.N25F_XSectionFiltration.sub_mem_fullRiemannRochSpace25Two_sub_X",
+    "MazurProof.N25F_XSectionDimension.fullRiemannRochSpace25Two_eq_sub_X_sup_span",
+    "MazurProof.N25F_XSectionDimension.finrank_fullRiemannRochSpace25Two_le_sub_X_add_one",
+    "MazurProof.N25F_XSectionDimension.finrank_fullRiemannRochSpace25Two_le_degree_add_one",
+    "MazurProof.N25F_XSectionDimension.finrank_fullRiemannRochSpace25Two_X_quotient_le_one"
+  ],
+  "passed": [
+    {
+      "name": "cancellation-01",
+      "args": [
+        "/workspace/shared/flt-n25-x-filtration/BinaryResidueCancellationCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 6.478932088997681,
+      "peak_child_rss_kib": 2879756,
+      "source_sha256": "dd88968ea17e258d7f49ac6ed15ed2d99ddf4155cd10be11cfc2b0f091e9a246"
+    },
+    {
+      "name": "filtration-01",
+      "args": [
+        "/workspace/shared/flt-n25-x-filtration/XSectionFiltrationFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 59.28200511599425,
+      "peak_child_rss_kib": 2922700,
+      "source_sha256": "f6414b41d7b20f3fb5c6f6c9baf98639b5a0a935765535dcfe85926b55cec56f"
+    },
+    {
+      "name": "dimension-03",
+      "args": [
+        "/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 11.549075130002166,
+      "peak_child_rss_kib": 2266516,
+      "source_sha256": "1b391a9e4dc49a75971528e1871d9cee60b98ac18c77a63aa7df3b7026db9254"
+    }
+  ],
+  "failed": [
+    {
+      "name": "dimension-01",
+      "args": [
+        "/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 7.394227377000789,
+      "peak_child_rss_kib": 2266172,
+      "source_sha256": "81ea032d0c08a853b1297cce7e81aca6581dfb2f6fc8d53ba511eb8647bd1f75"
+    }
+  ],
+  "prior": [
+    {
+      "name": "dimension-02",
+      "args": [
+        "/workspace/shared/flt-n25-x-filtration/XSectionDimensionFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 8.624181004001002,
+      "peak_child_rss_kib": 2263880,
+      "source_sha256": "f001b997ef95f7b5a8c2cae146836b25eac56f535c52d6c2a141c2c816bd6cd3"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "actual_upper_bound": "PROVED IN CANDIDATE CHAIN",
+  "picard_finiteness": "OPEN",
+  "riemann_roch_rank_identity": "OPEN"
+}

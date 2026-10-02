@@ -1,0 +1,12 @@
+'MazurProof.N25F_XSectionFiltration.fullRiemannRochSpace25Two_sub_X_le' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionFiltration.mem_fullRiemannRochSpace25Two_sub_X_iff' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionFiltration.xBoundaryOrder_eq_neg_of_not_mem_sub_X' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionFiltration.sub_mem_fullRiemannRochSpace25Two_sub_X' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
