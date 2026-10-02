@@ -1,0 +1,156 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "9c8eb020ae3b1f50a2d8192516343c4f7aec844d",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 37602,
+      "sha256": "47d4dca806a252f986aa2988fe1dfd0a8f3afeade0634469bb5310a884e9afa8"
+    },
+    {
+      "path": "comms/candidates/N25F_DVRIntegralLift.lean",
+      "encoding": "utf-8",
+      "bytes": 2899,
+      "sha256": "b14bb2974dc3b9d17f1621df1121e1c7c16879c97cd1041d1e1b6aad4fc1137b"
+    },
+    {
+      "path": "comms/candidates/N25F_XSectionResidue.lean",
+      "encoding": "utf-8",
+      "bytes": 7754,
+      "sha256": "4101fb54f3b5431eec07ed06986d5e54cc51b957f46b57cc6e0ce5ac870eaa82"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/ActualXSectionResidueCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 676,
+      "sha256": "c14f21c660692128321931b0ceb006a55a042dfad4d514d53ba4e65f704341af"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/DVRIntegralLiftCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 3072,
+      "sha256": "f590f27096d8dc526aec454cfa28810dd50ad1fc0b0756cf514a9ecabaeedfe6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/XSectionFiltrationFamilyInput.lean",
+      "encoding": "utf-8",
+      "bytes": 14888,
+      "sha256": "f6414b41d7b20f3fb5c6f6c9baf98639b5a0a935765535dcfe85926b55cec56f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/XSectionResidueFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 26078,
+      "sha256": "3186310ec241ee2ee2fc27b25b862969ee4c9544cf41e3a79ceca8a7fe5508d0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/accepted-N25F_InfinityResidueFields.lean",
+      "encoding": "utf-8",
+      "bytes": 6947,
+      "sha256": "61871a9d017523174fa875ff5f6f709d4ce719bced5455f25eb7a99ece4a523e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/accepted-N25F_XBoundaryOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 4327,
+      "sha256": "5e2435a1504aa6a19f34f1477798126c9fdd123c0be835b9b541468d1f34a5a7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/accepted-N25F_XInfinityGerm.lean",
+      "encoding": "utf-8",
+      "bytes": 2706,
+      "sha256": "9570e8962e38e7816a08d78468376c17690c4f817126b5f3c4bb719903a6b7ac"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/failed/XSectionResidueFamilyCheck-failed-01.lean",
+      "encoding": "utf-8",
+      "bytes": 25735,
+      "sha256": "59b5577f8f37abe8acfa34506a56e0d95f87b2a32195e7696c0a9aac73fd1934"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/failed/XSectionResidueFamilyCheck-failed-02.lean",
+      "encoding": "utf-8",
+      "bytes": 25928,
+      "sha256": "e54151ca88a56d1beec0a1cc9ad5d8d2f39d13988bcb91c7bc7489ef5eb6ce88"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/failed/residue-family-01.json",
+      "encoding": "utf-8",
+      "bytes": 306,
+      "sha256": "da619acaac00da5d3369247713abf11578d0398a0685a132a7cd3cb79a39ce0c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/failed/residue-family-01.log",
+      "encoding": "utf-8",
+      "bytes": 6875,
+      "sha256": "2ae1dfd12497d4ad49b4588d284e44f6d00f14135e93714226aaf5265bec0143"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/failed/residue-family-02.json",
+      "encoding": "utf-8",
+      "bytes": 306,
+      "sha256": "14a3269b9866bdbf88fd7229c21740697c9ac4e2f18aba33cf89e06b5b4c7281"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/failed/residue-family-02.log",
+      "encoding": "utf-8",
+      "bytes": 3126,
+      "sha256": "3f4dc3241417d4caba49a44cd7f4da23b4319755ecf2c3c2a8ef493de466f058"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/lift-01.json",
+      "encoding": "utf-8",
+      "bytes": 291,
+      "sha256": "16b5912d1dbc1ac8a027fcd3a97c86960ae9ac0f0a9d53991115c9c23b76eee6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/lift-01.log",
+      "encoding": "utf-8",
+      "bytes": 270,
+      "sha256": "af72b5be481906247ab59d1081450f94783271f78961064b97d6c0ea030723d9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/make_family.py",
+      "encoding": "utf-8",
+      "bytes": 4009,
+      "sha256": "1dda280fc0e8ee325c1f5a1e3e55a08d146cb146b4fb94a59215c2b5d5a42761"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/make_lift.py",
+      "encoding": "utf-8",
+      "bytes": 320,
+      "sha256": "991facdf98d34fdb07bfee3c4ec250b49c5609c2e28baa3f1a98733950a430bd"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/residue-family-03.json",
+      "encoding": "utf-8",
+      "bytes": 307,
+      "sha256": "78b2d8608f1fbe3f6dcc5d4a1eac7e6027a24b432dda0e4442cf7c7276a43007"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/residue-family-03.log",
+      "encoding": "utf-8",
+      "bytes": 977,
+      "sha256": "7b289070e94370b88e0f1703f61799c2fba89b426b9dbf6617486dba33f6f8cf"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 882,
+      "sha256": "88dbe11265e648bf8da14a92053702e9157da04ff53fb5086b6209dde553b665"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-SECTION-RESIDUE-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2536,
+      "sha256": "7fe2c739466f51166556d97870562a3b81e728d98f1834bf90dc79b081aa4856"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-X-SECTION-RESIDUE-r1.md",
+      "encoding": "utf-8",
+      "bytes": 4720,
+      "sha256": "b1fae37a45e88ca12f648f343568739bdac1194a49f20dd74c83ab3a5d0d36de"
+    }
+  ]
+}

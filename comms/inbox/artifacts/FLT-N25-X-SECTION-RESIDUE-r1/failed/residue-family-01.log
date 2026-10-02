@@ -1,0 +1,136 @@
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:429:56: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Field ℕ
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:429:56: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Algebra R ℕ
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:430:65: error(lean.unknownIdentifier): Unknown identifier `L`
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:434:19: error: typeclass instance problem is stuck
+  IsFractionRing R ?m.78
+
+Note: Lean will not try to resolve this typeclass instance problem because the third, fourth, and fifth type arguments to `IsFractionRing` contain metavariables. These arguments must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:453:30: error(lean.unknownIdentifier): Unknown identifier `xSectionScale_ne_zero`
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:453:5: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  MonoidHomClass (?m.174 →*₀ WithZero (Multiplicative ℤ)) ?m.174 (WithZero (Multiplicative ℤ))
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:448:88: error: unsolved goals
+case inr
+C : ClosedPointGrading
+L : Type u_1
+inst✝⁶ : Field L
+inst✝⁵ : Algebra (ZMod 2) L
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+R : Type u_2
+inst✝⁴ : CommRing R
+inst✝³ : IsDomain R
+inst✝² : IsDiscreteValuationRing R
+inst✝¹ : Algebra R L
+inst✝ : IsFractionRing R L
+XPoint : C.Atom
+hcoeff : ∀ (f : Additive Lˣ), (principal f) XPoint = boundaryOrder R f
+tau : R
+htaune : tau ≠ 0
+htauorder : Ring.ord R tau = 1
+D : C.Divisor
+f : ↥(fullRiemannRochSpace25Two C principal hmin D)
+hf : ↑f ≠ 0
+hb : ∀ (A : C.Atom), 0 ≤ D A + (principal (Additive.ofMul (Units.mk0 (↑f) hf))) A
+⊢ 0 ≤ ((Ring.ordFrac R) (xSectionScale C R XPoint tau D * ↑f)).log
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:511:4: error: unsolved goals
+case inr
+C : ClosedPointGrading
+L : Type u_1
+inst✝⁶ : Field L
+inst✝⁵ : Algebra (ZMod 2) L
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+R : Type u_2
+inst✝⁴ : CommRing R
+inst✝³ : IsDomain R
+inst✝² : IsDiscreteValuationRing R
+inst✝¹ : Algebra R L
+inst✝ : IsFractionRing R L
+XPoint : C.Atom
+hcoeff : ∀ (f : Additive Lˣ), (principal f) XPoint = boundaryOrder R f
+e : IsLocalRing.ResidueField R ≃+* ZMod 2
+tau : R
+htaune : tau ≠ 0
+htauorder : Ring.ord R tau = 1
+D : C.Divisor
+f : ↥(fullRiemannRochSpace25Two C principal hmin D)
+⊢ e ((IsLocalRing.residue R) (xScaledSectionGerm25Two C principal hmin R XPoint hcoeff tau htaune htauorder D f)) =
+    (RingHom.id (ZMod 2)) 1 •
+      e ((IsLocalRing.residue R) (xScaledSectionGerm25Two C principal hmin R XPoint hcoeff tau htaune htauorder D f))
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:526:24: error(lean.unknownIdentifier): Unknown identifier `xSectionScale_ne_zero`
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:532:30: error(lean.unknownIdentifier): Unknown identifier `xSectionScale_ne_zero`
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:532:5: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  MonoidHomClass (?m.263 →*₀ WithZero (Multiplicative ℤ)) ?m.263 (WithZero (Multiplicative ℤ))
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean:517:92: error: unsolved goals
+case neg
+C : ClosedPointGrading
+L : Type u_1
+inst✝⁶ : Field L
+inst✝⁵ : Algebra (ZMod 2) L
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+R : Type u_2
+inst✝⁴ : CommRing R
+inst✝³ : IsDomain R
+inst✝² : IsDiscreteValuationRing R
+inst✝¹ : Algebra R L
+inst✝ : IsFractionRing R L
+XPoint : C.Atom
+hcoeff : ∀ (f : Additive Lˣ), (principal f) XPoint = boundaryOrder R f
+e : IsLocalRing.ResidueField R ≃+* ZMod 2
+tau : R
+htaune : tau ≠ 0
+htauorder : Ring.ord R tau = 1
+D : C.Divisor
+f : ↥(fullRiemannRochSpace25Two C principal hmin D)
+hf : ¬↑f = 0
+hg : xScaledSectionGerm25Two C principal hmin R XPoint hcoeff tau htaune htauorder D f ≠ 0
+⊢ 0 <
+      ((Ring.ordFrac R)
+          ((algebraMap R L) (xScaledSectionGerm25Two C principal hmin R XPoint hcoeff tau htaune htauorder D f))).log ↔
+    ↑f ∈ fullRiemannRochSpace25Two C principal hmin (D - Finsupp.single XPoint 1)
+'MazurProof.N25F_XSectionResidue.xScaledSectionGerm25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionResidue.xLocalToFraction_xScaledSectionGerm25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionResidue.xScaledSectionGerm25Two_add' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionResidue.xLeadingResidue25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionResidue.xLeadingResidue25Two_eq_zero_iff' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XSectionResidue.ker_xLeadingResidue25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

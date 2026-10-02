@@ -1,0 +1,10 @@
+import FLT.Assumptions.MazurProof.N25F_XSectionResidue
+
+#print axioms MazurProof.N25F_DVRIntegralLift.existsUnique_algebraMap_eq_of_log_nonneg
+#print axioms MazurProof.N25F_DVRIntegralLift.residue_eq_zero_iff_eq_zero_or_log_pos
+#print axioms MazurProof.N25F_XSectionResidue.xScaledSectionGerm25Two
+#print axioms MazurProof.N25F_XSectionResidue.xLocalToFraction_xScaledSectionGerm25Two
+#print axioms MazurProof.N25F_XSectionResidue.xScaledSectionGerm25Two_add
+#print axioms MazurProof.N25F_XSectionResidue.xLeadingResidue25Two
+#print axioms MazurProof.N25F_XSectionResidue.xLeadingResidue25Two_eq_zero_iff
+#print axioms MazurProof.N25F_XSectionResidue.ker_xLeadingResidue25Two

@@ -1,0 +1,10 @@
+{
+  "name": "residue-family-02",
+  "args": [
+    "/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 39.05932954700256,
+  "peak_child_rss_kib": 2784888,
+  "source_sha256": "e54151ca88a56d1beec0a1cc9ad5d8d2f39d13988bcb91c7bc7489ef5eb6ce88"
+}

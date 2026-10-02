@@ -1,0 +1,69 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "9c8eb020ae3b1f50a2d8192516343c4f7aec844d",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_DVRIntegralLift.existsUnique_algebraMap_eq_of_log_nonneg",
+    "MazurProof.N25F_DVRIntegralLift.residue_eq_zero_iff_eq_zero_or_log_pos",
+    "MazurProof.N25F_XSectionResidue.xScaledSectionGerm25Two",
+    "MazurProof.N25F_XSectionResidue.xLocalToFraction_xScaledSectionGerm25Two",
+    "MazurProof.N25F_XSectionResidue.xScaledSectionGerm25Two_add",
+    "MazurProof.N25F_XSectionResidue.xLeadingResidue25Two",
+    "MazurProof.N25F_XSectionResidue.xLeadingResidue25Two_eq_zero_iff",
+    "MazurProof.N25F_XSectionResidue.ker_xLeadingResidue25Two"
+  ],
+  "passed": [
+    {
+      "name": "lift-01",
+      "args": [
+        "/workspace/shared/flt-n25-x-residue-functional/DVRIntegralLiftCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 38.869226606002485,
+      "peak_child_rss_kib": 2909792,
+      "source_sha256": "f590f27096d8dc526aec454cfa28810dd50ad1fc0b0756cf514a9ecabaeedfe6"
+    },
+    {
+      "name": "residue-family-03",
+      "args": [
+        "/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 27.343548748001922,
+      "peak_child_rss_kib": 2894564,
+      "source_sha256": "3186310ec241ee2ee2fc27b25b862969ee4c9544cf41e3a79ceca8a7fe5508d0"
+    }
+  ],
+  "failed": [
+    {
+      "name": "residue-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 39.74656897500245,
+      "peak_child_rss_kib": 2896012,
+      "source_sha256": "59b5577f8f37abe8acfa34506a56e0d95f87b2a32195e7696c0a9aac73fd1934"
+    },
+    {
+      "name": "residue-family-02",
+      "args": [
+        "/workspace/shared/flt-n25-x-residue-functional/XSectionResidueFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 39.05932954700256,
+      "peak_child_rss_kib": 2784888,
+      "source_sha256": "e54151ca88a56d1beec0a1cc9ad5d8d2f39d13988bcb91c7bc7489ef5eb6ce88"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "linter_warning": "One redundant change tactic after generic substitution in residue-family-03",
+  "portable_generator_exact_reproduction": true,
+  "actual_residue_kernel": "PROVED IN CANDIDATE CHAIN",
+  "picard_finiteness": "OPEN",
+  "riemann_roch_rank_identity": "OPEN"
+}

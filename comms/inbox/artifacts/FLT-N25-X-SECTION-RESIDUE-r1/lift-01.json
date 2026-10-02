@@ -1,0 +1,10 @@
+{
+  "name": "lift-01",
+  "args": [
+    "/workspace/shared/flt-n25-x-residue-functional/DVRIntegralLiftCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 38.869226606002485,
+  "peak_child_rss_kib": 2909792,
+  "source_sha256": "f590f27096d8dc526aec454cfa28810dd50ad1fc0b0756cf514a9ecabaeedfe6"
+}
