@@ -1,0 +1,10 @@
+{
+  "name": "twist-05",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-field/GenericTwistedBase.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 29.22215422500085,
+  "peak_child_rss_kib": 2202948,
+  "source_sha256": "1f93fceb656fdac5ee3fbf5185e3e62460cababdba5fd0375310127fc41b55af"
+}

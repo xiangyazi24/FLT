@@ -1,0 +1,71 @@
+{
+  "accepted_source_commit": "0b59e35689c95d2a5823e2a40f9a148353d2538b",
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "checks": [
+    {
+      "name": "twist-05",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-field/GenericTwistedBase.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 29.22215422500085,
+      "peak_child_rss_kib": 2202948,
+      "source_sha256": "1f93fceb656fdac5ee3fbf5185e3e62460cababdba5fd0375310127fc41b55af"
+    },
+    {
+      "name": "actual-02",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-field/InfinityFunctionFieldCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 16.315572553001402,
+      "peak_child_rss_kib": 2499260,
+      "source_sha256": "87783b448ce33a86c618d6c36a5e3da4315fdd5cb07667c6feec4e41e007179e"
+    }
+  ],
+  "public_declarations": [
+    "affinePolynomialBaseToField",
+    "affinePolynomialBaseToField_injective",
+    "affineRationalBaseToField",
+    "affineRationalBaseToField_algebraMap",
+    "affineRationalBaseToField_variable",
+    "infinityRationalBaseToField",
+    "infinityRationalBaseToField_comp_algebraMap",
+    "infinityRationalBaseToField_algebraMap",
+    "affineRationalBaseToField_finrank",
+    "infinityRationalBaseToField_finite_finrank"
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "imports": [
+    {
+      "path": "/workspace/shared/flt-n25-infinity-base/InfinityFieldCheck.lean",
+      "source_sha256": "12ab66ee717c47c84d7a55ad2d5e7eb9501a2033450dfdff2337272139f047ed",
+      "olean_sha256": "3afd978cb9e959a94e9f782504e678ee87acc4ea9c0bf8b99ce0d32dd3b912f8"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-base-inversion/N25F_RationalBaseInversion.lean",
+      "source_sha256": "da686b7db9b7cdf4129fcddabb1575cb9ff6f7ffe34a08ca94d37ebc35d5d9ce",
+      "olean_sha256": "30eb39eb13e0d6a31a75616406b5ecfc80974d25102088b00b744700afbaf5cb"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.lean",
+      "source_sha256": "f25ea10e112b5959eed4b18113a25056d4563ae1f4e4221811ebaf37c54fe24c",
+      "olean_sha256": "6037a2b6b4a9e7c353e2aca8036595f8bfb3cfe2c8290063c59b474b714662ef"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean",
+      "source_sha256": "525985ce211f4c05c0b916949c026346d266f060263dfcbda296c28dc3daed17",
+      "olean_sha256": "244000f7f98bb99214bb655d62ef27a55c7886825ac5477d25abe170be3f0844"
+    }
+  ],
+  "accepted_inversion_byte_check": {
+    "name": "N25F_RationalBaseInversion.lean",
+    "sha": "fd91633415b572fc0233f35e54ae6ac8f580017d",
+    "byte_equal": true
+  }
+}

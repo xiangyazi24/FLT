@@ -1,0 +1,101 @@
+{
+  "source_commit": "0b59e35689c95d2a5823e2a40f9a148353d2538b",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 25838,
+      "sha256": "99abab781644d4613dce23586fc951a2439c96cef1844fd15fb681af82d51230"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityFunctionField.lean",
+      "encoding": "utf-8",
+      "bytes": 6084,
+      "sha256": "12d54733ab3cc9a5bc89476414fff9ed5c5c468ad6c8e79b0ad23dd31ccce8b1"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/ActualInfinityFunctionFieldCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 934,
+      "sha256": "be0f10a6467a177991365d85c545425e281db406612e0f1065ef0dfc8f77d6c9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/GenericTwistedBase.lean",
+      "encoding": "utf-8",
+      "bytes": 1309,
+      "sha256": "1f93fceb656fdac5ee3fbf5185e3e62460cababdba5fd0375310127fc41b55af"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/InfinityFunctionFieldCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 7113,
+      "sha256": "87783b448ce33a86c618d6c36a5e3da4315fdd5cb07667c6feec4e41e007179e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/actual-02.json",
+      "encoding": "utf-8",
+      "bytes": 293,
+      "sha256": "95962f13453ced2c9d5ce6332f0de22059eb0780cf3edce52ab3474dac5fd549"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/actual-02.log",
+      "encoding": "utf-8",
+      "bytes": 4556,
+      "sha256": "a10e107dd48325f568648bf49069ff42528611067bffe99ac0d1e0e103669932"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/inputs/field-emit.json",
+      "encoding": "utf-8",
+      "bytes": 423,
+      "sha256": "7884c201236a7eeddb1f281b9d60f8b607184b447ddc38b143f210399285446b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/inputs/field-emit.log",
+      "encoding": "utf-8",
+      "bytes": 976,
+      "sha256": "bb6f3e14b3ed142b76330fafc851856d29b72be7b2f1b2252d686019b3808ff7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/make_actual_check.py",
+      "encoding": "utf-8",
+      "bytes": 1502,
+      "sha256": "b669d8beb752dbf410e465ef8b3b1266928281b7ac01e7ffc6ed2fe969eef226"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/receipt_r22.md",
+      "encoding": "utf-8",
+      "bytes": 442,
+      "sha256": "f6f907edf4b2ed9a93843c3bea5a904114fdc5398b759a76d8b6977c72316c95"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 876,
+      "sha256": "cd3793a33c32f2157752c591f360957df9e27c97c93a1224671f5a3894482896"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/twist-05.json",
+      "encoding": "utf-8",
+      "bytes": 283,
+      "sha256": "4ebe2075c2d3541df507d94bfe891b2f95977946acca6083b3c63c2de4668df8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/twist-05.log",
+      "encoding": "utf-8",
+      "bytes": 102,
+      "sha256": "c4a94086abf58cda7e947117e985ee87e3d3a7c9b5489e3002d8d83beee6c0c4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-FUNCTION-FIELD-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2671,
+      "sha256": "260f5d1cf1cd7cee35a4a596a60ef32ce3dc7101c23ac1dc155e1cdc0f63f5fc"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-RATIONAL-BASE-INVERSION-r22.md",
+      "encoding": "utf-8",
+      "bytes": 5062,
+      "sha256": "c13d8d77d18bcb518a9acb2134bb3797e31d213b3440e103e96fcbd3467636ed"
+    }
+  ]
+}

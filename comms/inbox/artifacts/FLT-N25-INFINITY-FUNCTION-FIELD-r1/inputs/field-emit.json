@@ -1,0 +1,14 @@
+{
+  "name": "field-emit",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-infinity-base",
+    "-o",
+    "/workspace/shared/flt-n25-infinity-base/InfinityFieldCheck.olean",
+    "/workspace/shared/flt-n25-infinity-base/InfinityFieldCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 8.542389263999212,
+  "peak_child_rss_kib": 2511616,
+  "source_sha256": "12ab66ee717c47c84d7a55ad2d5e7eb9501a2033450dfdff2337272139f047ed"
+}

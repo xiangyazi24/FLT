@@ -1,0 +1,10 @@
+{
+  "name": "actual-02",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-field/InfinityFunctionFieldCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 16.315572553001402,
+  "peak_child_rss_kib": 2499260,
+  "source_sha256": "87783b448ce33a86c618d6c36a5e3da4315fdd5cb07667c6feec4e41e007179e"
+}
