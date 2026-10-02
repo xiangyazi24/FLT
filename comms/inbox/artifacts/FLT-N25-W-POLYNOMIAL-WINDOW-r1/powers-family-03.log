@@ -1,0 +1,15 @@
+'MazurProof.N25F_WBasisPoleSections.fullRiemannRochSpace25Two_mono' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.mul_mem_fullRiemannRochSpace25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.qz_mem_basePole_section_space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.qz_pow_mem_basePole_section_space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

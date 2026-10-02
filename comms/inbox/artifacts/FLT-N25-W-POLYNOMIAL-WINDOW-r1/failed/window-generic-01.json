@@ -1,0 +1,10 @@
+{
+  "name": "window-generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-polynomial-window/PolynomialBasisWindowCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 23.625248416006798,
+  "peak_child_rss_kib": 1949512,
+  "source_sha256": "c18df60d7c4ec9b57aa7dd8f1d7025a259d257b1f40d62e254f4a0d0ca8da1af"
+}

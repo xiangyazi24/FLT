@@ -1,0 +1,10 @@
+{
+  "name": "powers-family-01",
+  "args": [
+    "/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 45.1309168709995,
+  "peak_child_rss_kib": 2714244,
+  "source_sha256": "46f59454816fbdac5cc687a15bca1cb296123f75f4e2ebbdd27f384388b1479d"
+}

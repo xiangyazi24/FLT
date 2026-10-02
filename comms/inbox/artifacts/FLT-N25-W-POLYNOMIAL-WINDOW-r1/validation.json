@@ -1,0 +1,115 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "8f549b054f5b43b3137220d58b72726fb09c6cc9",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_PolynomialBasisWindow.polynomial_basis_window_linearIndependent",
+    "MazurProof.N25F_SectionMultiplication.fullRiemannRochSpace25Two_mono",
+    "MazurProof.N25F_SectionMultiplication.mul_mem_fullRiemannRochSpace25Two",
+    "MazurProof.N25F_BasePolePowers.basePoleDivisor25Two_nonneg",
+    "MazurProof.N25F_BasePolePowers.qz_mem_basePole_section_space",
+    "MazurProof.N25F_BasePolePowers.qz_pow_mem_basePole_section_space",
+    "MazurProof.N25F_WPolynomialWindow.wPolynomialWindow25Two",
+    "MazurProof.N25F_WPolynomialWindow.wPolynomialWindow25Two_linearIndependent",
+    "MazurProof.N25F_WPolynomialWindow.wPolynomialWindow25Two_mem",
+    "MazurProof.N25F_WPolynomialWindow.four_mul_succ_le_finrank_basePole_space",
+    "MazurProof.N25F_WPolynomialWindow.four_mul_le_finrank_basePole_add_constant"
+  ],
+  "passed": [
+    {
+      "name": "window-generic-03",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/PolynomialBasisWindowCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 7.7224173590002465,
+      "peak_child_rss_kib": 1823648,
+      "source_sha256": "708ca4f183911e847949370aae3ace660d83b19cc363e8bdfd4ffe79c09a7181"
+    },
+    {
+      "name": "powers-family-03",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 18.485453733999748,
+      "peak_child_rss_kib": 2719008,
+      "source_sha256": "cb15c62a81da0fabd35520744051d7f71a2bae31c5bdc1a7a0d4c90c532edb93"
+    },
+    {
+      "name": "window-family-02",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 25.24369786799798,
+      "peak_child_rss_kib": 2295940,
+      "source_sha256": "13606b61c9fbd7d7f77ed60bcdf3d8d5ea8d27f6ec84e0f3b89ae611cf74c90d"
+    }
+  ],
+  "failed": [
+    {
+      "name": "window-generic-01",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/PolynomialBasisWindowCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 23.625248416006798,
+      "peak_child_rss_kib": 1949512,
+      "source_sha256": "c18df60d7c4ec9b57aa7dd8f1d7025a259d257b1f40d62e254f4a0d0ca8da1af"
+    },
+    {
+      "name": "window-generic-02",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/PolynomialBasisWindowCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 12.175068835000275,
+      "peak_child_rss_kib": 1898600,
+      "source_sha256": "d29f9d19fdff83ec595d74500d597adc15d65165418472c2b379c41b773b8896"
+    },
+    {
+      "name": "powers-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 45.1309168709995,
+      "peak_child_rss_kib": 2714244,
+      "source_sha256": "46f59454816fbdac5cc687a15bca1cb296123f75f4e2ebbdd27f384388b1479d"
+    },
+    {
+      "name": "powers-family-02",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 12.859153822995722,
+      "peak_child_rss_kib": 2711520,
+      "source_sha256": "7fe76611843069d4fdc103c925e6717d23ed80d7a933c4f06e1e63f1152d9447"
+    },
+    {
+      "name": "window-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 12.564246538997395,
+      "peak_child_rss_kib": 2275324,
+      "source_sha256": "9d093de2f5ed89f828aef405402288c316ccd516cb8f353d27897386e0cf0e90"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "linter_warnings": [
+    "Two unused generic IsDomain instances in window-family-02"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "uniform_H_lower_bound": "PROVED IN CANDIDATE CHAIN",
+  "general_divisor_lower_bound": "OPEN",
+  "picard_finiteness": "OPEN",
+  "sharp_rr_identity": "OPEN"
+}

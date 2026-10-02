@@ -1,0 +1,59 @@
+/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean:452:2: error: Type mismatch: After simplification, term
+  regular_function_mem_basePole_space C A principal hmin boundaryAtom hbinj xOrder yzOrder zOrder hxcoeff hyzcoeff
+    hzcoeff prime haff 1 qz hq (Additive.ofMul (Units.mk0 ((algebraMap A (FractionRing A)) qz) hfq)) rfl
+    (le_of_eq (Eq.symm hxq)) (le_of_eq (Eq.symm hyzq)) (le_of_eq (Eq.symm hzq))
+ has type
+  @Membership.mem (FractionRing A) (Submodule (ZMod 2) (FractionRing A)) SetLike.instMembership
+    (fullRiemannRochSpace25Two C principal hmin (basePoleDivisor25Two C boundaryAtom))
+    ↑(Additive.toMul (Additive.ofMul (Units.mk0 ((algebraMap A (FractionRing A)) qz) hfq)))
+but is expected to have type
+  @Membership.mem (FractionRing A) (Submodule (ZMod 2) (FractionRing A)) SetLike.instMembership
+    (fullRiemannRochSpace25Two C principal hmin (basePoleDivisor25Two C boundaryAtom))
+    ((algebraMap A (FractionRing A)) qz)
+/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean:469:11: error: Application type mismatch: The argument
+  qz_mem_basePole_section_space
+has type
+  ∀ (C : ClosedPointGrading) (A : Type ?u.266) [inst : CommRing A] [inst_1 : IsDedekindDomain A]
+    [inst_2 : Algebra (ZMod 2) (FractionRing A)] (principal : Additive (FractionRing A)ˣ →+ C.Divisor)
+    (hmin :
+      ∀ (f g h : Additive (FractionRing A)ˣ),
+        ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+          ∀ (a : C.Atom), min ((principal f) a) ((principal g) a) ≤ (principal h) a)
+    (boundaryAtom : Boundary → C.Atom),
+    Function.Injective boundaryAtom →
+      ∀ (xOrder yzOrder zOrder : Additive (FractionRing A)ˣ →+ ℤ),
+        (∀ (f : Additive (FractionRing A)ˣ), (principal f) (boundaryAtom Boundary.X) = xOrder f) →
+          (∀ (f : Additive (FractionRing A)ˣ), (principal f) (boundaryAtom Boundary.YZ) = yzOrder f) →
+            (∀ (f : Additive (FractionRing A)ˣ), (principal f) (boundaryAtom Boundary.Z) = zOrder f) →
+              ∀ (prime : NonBoundary C boundaryAtom → HeightOneSpectrum A),
+                (∀ (f : Additive (FractionRing A)ˣ) (a : NonBoundary C boundaryAtom),
+                    (principal f) ↑a = (CurveDedekindDivisor.principalDivisor f) (prime a)) →
+                  ∀ (qz : A) (hfq : (algebraMap A (FractionRing A)) qz ≠ 0),
+                    xOrder (Additive.ofMul (Units.mk0 ((algebraMap A (FractionRing A)) qz) hfq)) = -1 →
+                      yzOrder (Additive.ofMul (Units.mk0 ((algebraMap A (FractionRing A)) qz) hfq)) = -1 →
+                        zOrder (Additive.ofMul (Units.mk0 ((algebraMap A (FractionRing A)) qz) hfq)) = -2 →
+                          (algebraMap A (FractionRing A)) qz ∈
+                            fullRiemannRochSpace25Two C principal hmin (basePoleDivisor25Two C boundaryAtom)
+but is expected to have type
+  (algebraMap A (FractionRing A)) qz ∈ fullRiemannRochSpace25Two C principal hmin (basePoleDivisor25Two C boundaryAtom)
+in the application
+  mul_mem_fullRiemannRochSpace25Two C A principal hmin (↑n • basePoleDivisor25Two C boundaryAtom)
+    (basePoleDivisor25Two C boundaryAtom) ((algebraMap A (FractionRing A)) qz ^ n) ((algebraMap A (FractionRing A)) qz)
+    ih qz_mem_basePole_section_space
+'MazurProof.N25F_WBasisPoleSections.fullRiemannRochSpace25Two_mono' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.mul_mem_fullRiemannRochSpace25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.qz_mem_basePole_section_space' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.qz_pow_mem_basePole_section_space' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

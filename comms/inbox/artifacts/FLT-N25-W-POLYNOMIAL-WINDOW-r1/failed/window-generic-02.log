@@ -1,0 +1,18 @@
+/workspace/shared/flt-n25-polynomial-window/PolynomialBasisWindowCheck.lean:40:38: error: Application type mismatch: The argument
+  h
+has type
+  e i = e j
+but is expected to have type
+  i = j
+in the application
+  congrArg Prod.fst h
+/workspace/shared/flt-n25-polynomial-window/PolynomialBasisWindowCheck.lean:42:2: error: Type mismatch: After simplification, term
+  h
+ has type
+  LinearIndependent k (⇑((Polynomial.basisMonomials k).smulTower' b) ∘ fun ij => (ij.1, ↑ij.2))
+but is expected to have type
+  LinearIndependent k fun ij => Polynomial.X ^ ↑ij.2 • b ij.1
+'MazurProof.N25F_PolynomialBasisWindow.polynomial_basis_window_linearIndependent' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

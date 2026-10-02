@@ -164,3 +164,5 @@ FLT 2026-10-02T19:35:00Z Deliver genuine X-local binary leading-term cancellatio
 FLT 2026-10-02T19:51:00Z Deliver actual W/Z-scaled X-local germ, binary leading-residue linear functional and exact kernel L(D-X), plus unique DVR lift/residue criterion. Eight final audits standard-only; bounded checks PASS. Full named gate pending. Continue coarse lower-bound route via actual rank-four W basis and uniform representative-independent boundary pole bound.
 
 FLT 2026-10-02T20:10:00Z Deliver fixed actual rank-four polynomial basis and one uniform pole constant B independent of divisor representatives; all basis functions lie in L(BH), H=X+YZ+2Z, deg H=4. Affine positivity comes from actual factor multiplicities. Nine final audits standard-only; bounded checks PASS. Next: 4(n+1) independent polynomial-basis functions in L((B+n)H).
+
+FLT 2026-10-02T20:38:00Z Deliver 4(n+1) independent actual monomial/basis functions in L((B+n)H) and 4n<=dim L(nH)+4B, with one fixed B. Eleven final audits standard-only; bounded checks PASS. General-D/Picard effectiveness remains open. Next: genuine fractional-ideal principal shift with full degree accounting, before domination by nH.

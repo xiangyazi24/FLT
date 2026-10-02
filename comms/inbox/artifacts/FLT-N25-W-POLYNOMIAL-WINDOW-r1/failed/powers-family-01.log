@@ -1,0 +1,32 @@
+/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean:402:68: error: unexpected token 'omit'; expected 'lemma'
+/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean:448:82: error: Application type mismatch: The argument
+  basePoleDivisor25Two
+has type
+  (C : ClosedPointGrading) → (Boundary → C.Atom) → C.Divisor
+but is expected to have type
+  C.Divisor
+in the application
+  fullRiemannRochSpace25Two C principal hmin basePoleDivisor25Two
+/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean:453:55: error(lean.unknownIdentifier): Unknown identifier `hmin`
+/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean:468:8: error: Application type mismatch: The argument
+  basePoleDivisor25Two
+has type
+  (C : ClosedPointGrading) → (Boundary → C.Atom) → C.Divisor
+of sort `Type (?u.253 + 1)` but is expected to have type
+  C.Divisor
+of sort `Type u_2` in the application
+  mul_mem_fullRiemannRochSpace25Two C A principal hmin (↑n • basePoleDivisor25Two C boundaryAtom) basePoleDivisor25Two
+'MazurProof.N25F_WBasisPoleSections.fullRiemannRochSpace25Two_mono' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.mul_mem_fullRiemannRochSpace25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+/workspace/shared/flt-n25-polynomial-window/ProductBasePowersFamilyCheck.lean:475:14: error(lean.unknownIdentifier): Unknown constant `qz_mem_basePole_section_space`
+'MazurProof.N25F_WBasisPoleSections.qz_pow_mem_basePole_section_space' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

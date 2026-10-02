@@ -1,0 +1,10 @@
+{
+  "name": "window-family-02",
+  "args": [
+    "/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 25.24369786799798,
+  "peak_child_rss_kib": 2295940,
+  "source_sha256": "13606b61c9fbd7d7f77ed60bcdf3d8d5ea8d27f6ec84e0f3b89ae611cf74c90d"
+}

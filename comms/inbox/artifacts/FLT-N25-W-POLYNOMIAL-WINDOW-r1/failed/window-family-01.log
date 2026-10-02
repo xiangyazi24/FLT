@@ -1,0 +1,40 @@
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:498:8: error(lean.invalidField): Invalid field `aeval`: The environment does not contain `Polynomial.aeval`, so it is not possible to project the field `aeval` from an expression
+  p
+of type `Polynomial (ZMod 2)`
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:500:7: error(lean.unknownIdentifier): Unknown constant `Polynomial.aeval`
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:501:10: error(lean.unknownIdentifier): Unknown constant `Polynomial.ringHom_ext'`
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:502:4: error: No goals to be solved
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:549:4: error: Type mismatch
+  IsScalarTower.of_algebraMap_eq'
+    (RingHom.ext_zmod (algebraMap (ZMod ?m.147) ?m.140)
+      ((algebraMap ?m.139 ?m.140).comp (algebraMap (ZMod ?m.147) ?m.139)))
+has type
+  @IsScalarTower (ZMod ?m.147) ?m.139 ?m.140 Algebra.toSMul Algebra.toSMul Algebra.toSMul
+but is expected to have type
+  @IsScalarTower (ZMod 2) (Polynomial (ZMod 2)) A Polynomial.smulZeroClass.toSMul inst✝¹.toSMul inst✝².toSMul
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:566:8: error: Invalid rewrite argument: Expected an equality or iff proof or definition name, but
+  wPolynomialWindow25Two A basis ?n ?ij
+is a value of type
+  FractionRing A
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:601:10: error: synthesized type class instance is not definitionally equal to expression inferred by typing rules, synthesized
+  OreLocalization.instModuleOfIsScalarTower
+inferred
+  Algebra.toModule
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:602:4: error: No goals to be solved
+/workspace/shared/flt-n25-polynomial-window/WPolynomialWindowFamilyCheck.lean:603:57: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Module.Finite (ZMod 2) ↥(fullRiemannRochSpace25Two C principal hmin (↑(B + n) • H))
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+'MazurProof.N25F_WPolynomialWindow.wPolynomialWindow25Two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_WPolynomialWindow.wPolynomialWindow25Two_linearIndependent' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WPolynomialWindow.wPolynomialWindow25Two_mem' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WPolynomialWindow.four_mul_succ_le_finrank_basePole_space' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
