@@ -1,0 +1,10 @@
+{
+  "name": "actual-01",
+  "args": [
+    "/workspace/shared/flt-n25-xchart-injective/XChartInjectiveCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 28.167775181000252,
+  "peak_child_rss_kib": 2503388,
+  "source_sha256": "17097210b61b026376c6cbafa913bbf9353664d5bde14fc48b98875416e7a661"
+}

@@ -1,0 +1,11 @@
+import FLT.Assumptions.MazurProof.N25F_XChartFractionInjective
+
+open MazurProof
+
+example : Function.Injective N25F_XChartFractionMap.xChartToFraction :=
+  N25F_XChartFractionInjective.xChartToFraction_injective
+
+#print axioms N25F_XChartFractionInjective.originEval
+#print axioms N25F_XChartFractionInjective.qx_pow_ne_one
+#check @N25F_XChartFractionInjective.xChartToFraction_injective
+#print axioms N25F_XChartFractionInjective.xChartToFraction_injective

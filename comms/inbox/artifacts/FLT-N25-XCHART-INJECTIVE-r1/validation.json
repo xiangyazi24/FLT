@@ -1,0 +1,65 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "accepted_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "full_project_compile": false,
+  "source_snapshots_verified": 14,
+  "copied_declarations": 51,
+  "harness_parameter": "[IsDedekindDomain W] in the injectivity proof stands for the accepted canonicalWChart_isDedekindDomain instance; prerequisite map and domain-transport bodies use [IsDomain W] in the source harness.",
+  "production_additional_premises": false,
+  "check": {
+    "name": "actual-01",
+    "args": [
+      "/workspace/shared/flt-n25-xchart-injective/XChartInjectiveCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 28.167775181000252,
+    "peak_child_rss_kib": 2503388,
+    "source_sha256": "17097210b61b026376c6cbafa913bbf9353664d5bde14fc48b98875416e7a661"
+  },
+  "files": {
+    "N25F_XChartFractionInjective.lean": "14281e0684021f327112b5d32e037d2d7cfa173f65290b828fb76407e491313b",
+    "XChartInjectiveCheck.lean": "17097210b61b026376c6cbafa913bbf9353664d5bde14fc48b98875416e7a661",
+    "prerequisites/N25F_XChartWChartEquiv.lean": "b002466dc2e6dcf6de5197bc5f21714da13d259793d7cba9acf68aa3dcc743fd",
+    "prerequisites/N25F_XChartFractionMap.lean": "cde468020a66eba45f0648fc4a8accabcce31bd6a67fb4aef7ce9566a8eb3134"
+  },
+  "production_prerequisites": [
+    {
+      "file": "prerequisites/N25F_XChartFractionMap.lean",
+      "role": "Actual coordinate-rigid quotient algebra map and coordinate formulas",
+      "status": "Separate candidate; body checked here with explicit [IsDomain W]; full FLT imports not checked here"
+    },
+    {
+      "file": "prerequisites/N25F_XChartWChartEquiv.lean",
+      "role": "Actual X/W algebra equivalence and domain transport",
+      "status": "Separate candidate; equivalence checked here unconditionally, final domain instance with explicit [IsDomain W]; full FLT imports not checked here"
+    }
+  ],
+  "accepted_structural_instances": [
+    {
+      "class": "IsDomain W",
+      "file": "sources/RationalPointsN25QuotientTwoPlaneChartDomain.lean",
+      "declaration": "canonicalWChart_isDomain",
+      "lines": [
+        721,
+        725
+      ]
+    },
+    {
+      "class": "IsDedekindDomain W",
+      "file": "sources/RationalPointsN25QuotientTwoWChartNormalization.lean",
+      "declaration": "canonicalWChart_isDedekindDomain",
+      "lines": [
+        573,
+        574
+      ]
+    }
+  ],
+  "harness_finite_type": "Algebra.FiniteType (ZMod 2) XChartRing is synthesized from the actual copied polynomial-quotient definitions, not supplied as a parameter.",
+  "new_unconditional_harness_results": [
+    "originEval",
+    "originEval_qx",
+    "qx_pow_ne_one"
+  ]
+}

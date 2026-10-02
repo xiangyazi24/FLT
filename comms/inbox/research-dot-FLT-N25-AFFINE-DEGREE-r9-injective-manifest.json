@@ -1,0 +1,113 @@
+{
+  "source_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 15291,
+      "sha256": "61ce80860d642a56ee0a3a9c063bb2d430402b5c03311a80778f8525295a8661"
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionInjective.lean",
+      "encoding": "utf-8",
+      "bytes": 6861,
+      "sha256": "14281e0684021f327112b5d32e037d2d7cfa173f65290b828fb76407e491313b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/ActualXChartInjectiveCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 457,
+      "sha256": "862a03ab967d614b9613164b83a34d20e49d99e6000a6dcfa87a84a6aef3b44e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/GenericCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1474,
+      "sha256": "15c6ece921375fc9bdc4c26d3f02b84fb7a53eacf8a6e368de8a35bd9dfd0c13"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 4925,
+      "sha256": "bce3e6b8f314ee946e91c9230de20b47f33f2a83ce010c451f9c0608d33d1188"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/XChartInjectiveCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 38756,
+      "sha256": "17097210b61b026376c6cbafa913bbf9353664d5bde14fc48b98875416e7a661"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/actual-01.json",
+      "encoding": "utf-8",
+      "bytes": 289,
+      "sha256": "003217b10f4fb8eb3b5c19a39004b433e15b94144c28e6a8941dc0897de674ee"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/actual-01.log",
+      "encoding": "utf-8",
+      "bytes": 3096,
+      "sha256": "bf64436b0a7ab4bde18c92640cffca0886c697be4381c4b0509e9cbcda61b881"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/copied-declarations.json",
+      "encoding": "utf-8",
+      "bytes": 12076,
+      "sha256": "393962fae83729d3e01c7ac88ea051a1f271d8c32294aa2799a74a8390d62079"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 282,
+      "sha256": "7c4fa72b76f9b8bf23eac667a8b60a3acdbcea34a9e5d289c9502f21d65fd617"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 677,
+      "sha256": "5a0b2ee9c72ed8f73cfdc9a26cf31a43dbfeeb4b2c2d23013a8649a853bfa2cb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 281,
+      "sha256": "63541952a67def260f45ec4f09be7b697460a8e3acd8900b13f839b7a6984433"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 109,
+      "sha256": "7cf7baceef6bc126ec8e233fb41baa1d54cdf349ff670706dcca974331344781"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 4476,
+      "sha256": "a201292fa5b9ca9106fead585181b0c8b0a527ca8174a3c65dd006342d239c1a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 825,
+      "sha256": "2eb7da82f74eea44006e318d93ef5c1a0322643171d26d1b38133727b9466739"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/source-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 6969,
+      "sha256": "49c5741608085d80ce7fa865eeb08d052f7a106f6d43409a1cb4e4faed9a37b7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-INJECTIVE-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2709,
+      "sha256": "3b742ce79614ad84cb43297c747f3d32c87a428047f49bf127c9f8ef462a3508"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r9-injective.md",
+      "encoding": "utf-8",
+      "bytes": 3195,
+      "sha256": "48bae794cf80a36d088e86f21cf6300b2f9f025afb91c78cb32921fe911bdea6"
+    }
+  ]
+}

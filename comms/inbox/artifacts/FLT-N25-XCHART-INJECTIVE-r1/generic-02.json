@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-xchart-injective/GenericCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 3.279558533000454,
+  "peak_child_rss_kib": 2429104,
+  "source_sha256": "15c6ece921375fc9bdc4c26d3f02b84fb7a53eacf8a6e368de8a35bd9dfd0c13"
+}

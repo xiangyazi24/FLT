@@ -1,0 +1,13 @@
+/workspace/shared/flt-n25-xchart-injective/GenericCheck.lean:28:4: error: Type mismatch: After simplification, term
+  congrArg (⇑f.kerLift) h
+ has type
+  @Eq K (f.kerLift ((Ideal.Quotient.mk m) r)) 0
+but is expected to have type
+  @Eq K (f r) 0
+/workspace/shared/flt-n25-xchart-injective/GenericCheck.lean:31:2: error: Type mismatch: After simplification, term
+  congrArg (⇑f.kerLift) hpow
+ has type
+  @Eq K (f.kerLift ((Ideal.Quotient.mk m) r) ^ (Fintype.card (R ⧸ m) - 1)) 1
+but is expected to have type
+  @Eq K (f r ^ (Fintype.card (R ⧸ m) - 1)) 1
+'_private._stdin.0.finite_power_of_not_injective' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
