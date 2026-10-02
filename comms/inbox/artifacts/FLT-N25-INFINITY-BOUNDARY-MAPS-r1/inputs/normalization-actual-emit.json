@@ -1,0 +1,14 @@
+{
+  "name": "actual-emit",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-infinity-normalization",
+    "-o",
+    "/workspace/shared/flt-n25-infinity-normalization/InfinityNormalizationCheck.olean",
+    "/workspace/shared/flt-n25-infinity-normalization/InfinityNormalizationCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 30.030989483002486,
+  "peak_child_rss_kib": 2343340,
+  "source_sha256": "f6d6cd93b00d40d95352498e60c00544048aaaba71523d695aa03c005889b89e"
+}

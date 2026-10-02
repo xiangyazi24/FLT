@@ -1,0 +1,43 @@
+@InfinityNormalization : [IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W] → Type
+@infinityNormalization_finite : ∀ [inst : Module.IsTorsionFree BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_2 : Module.Finite BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [hWrank : Fact (Module.finrank BasePolynomial N25F_NonBoundaryPrincipalDivisor.W = 4)]
+  [hInfinitySeparable : Algebra.IsSeparable BaseField CurveField], Module.Finite BasePolynomial InfinityNormalization
+@infinityNormalization_isFractionRing : ∀ [Module.IsTorsionFree BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [inst : IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+  [Module.Finite BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [hWrank : Fact (Module.finrank BasePolynomial N25F_NonBoundaryPrincipalDivisor.W = 4)],
+  IsFractionRing InfinityNormalization CurveField
+@infinityNormalization_isDedekindDomain : ∀
+  [inst : Module.IsTorsionFree BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_2 : Module.Finite BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [hWrank : Fact (Module.finrank BasePolynomial N25F_NonBoundaryPrincipalDivisor.W = 4)]
+  [hInfinitySeparable : Algebra.IsSeparable BaseField CurveField], IsDedekindDomain InfinityNormalization
+@infinityNormalization_finrank_eq_four : ∀
+  [inst : Module.IsTorsionFree BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_2 : Module.Finite BasePolynomial N25F_NonBoundaryPrincipalDivisor.W]
+  [hWrank : Fact (Module.finrank BasePolynomial N25F_NonBoundaryPrincipalDivisor.W = 4)]
+  [hInfinitySeparable : Algebra.IsSeparable BaseField CurveField],
+  Module.finrank BasePolynomial InfinityNormalization = 4
+'MazurProof.N25F_InfinityNormalization.infinityPolynomialAlgebra' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormalization.infinityRationalAlgebra' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormalization.InfinityNormalization' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityNormalization.infinityNormalization_finite' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormalization.infinityNormalization_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormalization.infinityNormalization_isDedekindDomain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormalization.infinityNormalization_finrank_eq_four' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

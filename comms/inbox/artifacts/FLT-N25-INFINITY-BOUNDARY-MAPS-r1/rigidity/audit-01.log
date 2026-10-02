@@ -1,0 +1,3 @@
+'MazurProof.N25F_LocalValuationRigidity.bijective_of_local_same_fraction_field' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

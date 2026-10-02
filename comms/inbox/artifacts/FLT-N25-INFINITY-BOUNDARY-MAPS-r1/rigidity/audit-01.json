@@ -1,0 +1,10 @@
+{
+  "name": "audit-01",
+  "args": [
+    "/workspace/shared/flt-n25-local-valuation-rigidity/LocalValuationRigidityCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 40.80086768799811,
+  "peak_child_rss_kib": 2063420,
+  "source_sha256": "36b809b0ce326ef4c41275d85c0dc57bfb9621d1ed7883e46c7df5b04a914c38"
+}

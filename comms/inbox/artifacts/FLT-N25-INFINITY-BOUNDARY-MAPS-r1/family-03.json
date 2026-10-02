@@ -1,0 +1,10 @@
+{
+  "name": "family-03",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-boundary-maps/InfinityBoundaryMapsCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 27.40061924100155,
+  "peak_child_rss_kib": 2548268,
+  "source_sha256": "d4ca61756195bed36ae1437fee078d34ab15eced16420953cf022ed1a05108a9"
+}

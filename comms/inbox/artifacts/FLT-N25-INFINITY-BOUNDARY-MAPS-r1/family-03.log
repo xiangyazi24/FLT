@@ -1,0 +1,8 @@
+@infinityNormalization_boundary_factor : ∀ [inst : IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W] {R : Type u_2}
+  [inst_1 : CommRing R] [inst_2 : Algebra (ZMod 2) R] [IsIntegrallyClosed R] (baseToR : BasePolynomial →ₐ[ZMod 2] R)
+  (localToField : R →ₐ[ZMod 2] CurveField),
+  localToField.comp baseToR = infinityBaseToField →
+    IsFractionRing R CurveField → ∃ f, (∀ (a : InfinityNormalization), localToField (f a) = ↑a) ∧ Function.Injective ⇑f
+'MazurProof.N25F_InfinityBoundaryMapsCheck.infinityNormalization_boundary_factor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

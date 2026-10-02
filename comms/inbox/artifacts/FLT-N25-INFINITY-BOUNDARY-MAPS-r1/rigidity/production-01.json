@@ -1,0 +1,10 @@
+{
+  "name": "production-01",
+  "args": [
+    "/workspace/shared/flt-n25-local-valuation-rigidity/N25F_LocalValuationRigidity.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 64.28370211400033,
+  "peak_child_rss_kib": 2548268,
+  "source_sha256": "85a78d9e1b6cced2a3c8f64defcd8fa92f979a3bceddc12ccd99c28e53d8f5a9"
+}

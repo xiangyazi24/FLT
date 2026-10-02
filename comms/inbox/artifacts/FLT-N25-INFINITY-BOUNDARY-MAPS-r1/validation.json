@@ -1,0 +1,54 @@
+{
+  "accepted_source": "40f7d090be57ff3439af1a3e7d257f3aabc47ca4",
+  "accepted_files": [
+    {
+      "file": "N25F_InfinityNormalization.lean",
+      "sha": "e287c76528c8e6a982b1a3c9ff3f26fd6ea7a0df",
+      "equal": true
+    },
+    {
+      "file": "N25F_IntegralBoundaryFactor.lean",
+      "sha": "571f1029a686250ead53959b4b6a2a547e226994",
+      "equal": true
+    }
+  ],
+  "boundary_maps_full_actual_imports": "NOT RUN",
+  "boundary_maps_production_additional_hypotheses": [],
+  "family_check": {
+    "name": "family-03",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-boundary-maps/InfinityBoundaryMapsCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 27.40061924100155,
+    "peak_child_rss_kib": 2548268,
+    "source_sha256": "d4ca61756195bed36ae1437fee078d34ab15eced16420953cf022ed1a05108a9"
+  },
+  "generic_production": {
+    "name": "production-01",
+    "args": [
+      "/workspace/shared/flt-n25-local-valuation-rigidity/N25F_LocalValuationRigidity.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 64.28370211400033,
+    "peak_child_rss_kib": 2548268,
+    "source_sha256": "85a78d9e1b6cced2a3c8f64defcd8fa92f979a3bceddc12ccd99c28e53d8f5a9"
+  },
+  "generic_audit": {
+    "name": "audit-01",
+    "args": [
+      "/workspace/shared/flt-n25-local-valuation-rigidity/LocalValuationRigidityCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 40.80086768799811,
+    "peak_child_rss_kib": 2063420,
+    "source_sha256": "36b809b0ce326ef4c41275d85c0dc57bfb9621d1ed7883e46c7df5b04a914c38"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "normalization_fixture_source_sha256": "f6d6cd93b00d40d95352498e60c00544048aaaba71523d695aa03c005889b89e",
+  "normalization_fixture_olean_sha256": "f7f5d69af1a2c4d9567a1475e93c15d406c02405ef43f3a7bcc1a165759ee909"
+}
