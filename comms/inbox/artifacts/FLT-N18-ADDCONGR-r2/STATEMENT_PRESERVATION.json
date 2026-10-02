@@ -1,0 +1,6 @@
+{
+  "add_congr_statement_byte_identical": true,
+  "toolbox_declaration_bodies_byte_identical": true,
+  "seven_branch_and_countertheorem_proof_bodies_byte_identical": true,
+  "lean_and_axiom_checks": "NOT RUN"
+}

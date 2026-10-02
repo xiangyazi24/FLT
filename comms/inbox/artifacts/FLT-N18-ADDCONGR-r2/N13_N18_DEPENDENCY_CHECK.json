@@ -1,0 +1,11 @@
+{
+  "n13_endpoint_commit": "d7afa66f690a038ef82e9fe261bf1b98f4cf18c3",
+  "n13_audit_pin": "29e80dbc17c5fdf3a194618d65dc0676199e19f5",
+  "n18_named_modules": [
+    "FLT.Assumptions.MazurProof.N18RouteC_Separated",
+    "FLT.Assumptions.MazurProof.N18RouteC_PushPull"
+  ],
+  "new_source_pin": "4017da66cbb1b8deff6da7116c7af5de540e1908",
+  "pin_delta": "only N18AddCongrProof and N18AddCongrWired added; all prior files unchanged",
+  "scope": "N13 constructed endpoint only; full Mazur also has separate order-18 arithmetic route"
+}

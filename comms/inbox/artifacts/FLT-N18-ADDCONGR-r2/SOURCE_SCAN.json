@@ -1,0 +1,30 @@
+{
+  "scope": "four changed candidate modules only",
+  "lean_checks": "NOT RUN",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongr.lean",
+      "sha256": "412341d84601cc7a3fda6a80997328affa90d5575034890d2a396b3e4f724d60",
+      "bytes": 1601,
+      "code_flags": []
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongrBasic.lean",
+      "sha256": "22316c94058df9f8ac6120863f40555f286b0088f368be46a7269e2cdaec5c4c",
+      "bytes": 11600,
+      "code_flags": []
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongrProof.lean",
+      "sha256": "e741869abf41b6386f837dd9110eb20a33ec52a91f69f120bb9cf2566bb09810",
+      "bytes": 49120,
+      "code_flags": []
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongrWired.lean",
+      "sha256": "5020c806e13a8f46c907f5f15635241ee8e8199727d49da9739b1ee5a355b30c",
+      "bytes": 4156,
+      "code_flags": []
+    }
+  ]
+}
