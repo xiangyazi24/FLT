@@ -1,0 +1,12 @@
+{
+  "name": "support-proxy",
+  "args": [
+    "-o",
+    ".lake/build/lib/lean/Mathlib/Tactic/ProxyType.olean",
+    "Mathlib/Tactic/ProxyType.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.089649843999723,
+  "peak_child_rss_kib": 818348,
+  "source_sha256": "f4d8c5e618d4f479327065b4b0a39a40f4c1f63025c8f434b4e20d8ae519cae3"
+}

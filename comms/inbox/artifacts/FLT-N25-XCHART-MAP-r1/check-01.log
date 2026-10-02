@@ -1,0 +1,64 @@
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:22:22: error: No deriving handlers have been implemented for class `Fintype`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:344:4: error: `MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.xZ` has already been declared
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:346:4: error: `MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.xW` has already been declared
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:348:4: error: `MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.xW` has already been declared
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:453:5: error: unsolved goals
+⊢ 2 = 0
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:454:5: error: unsolved goals
+⊢ 2 = 0
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:458:8: warning: declaration uses `sorry`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:464:2: warning: Try `simp at heq` instead of `simpa using heq`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:469:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_XChartFractionMap.fraction_qx_ne_zero`:
+  [IsDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:473:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartFractionMap.wChartPoint_eq`:
+  [IsDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:485:51: error: unsolved goals
+inst✝ : IsDomain W
+⊢ ((algebraMap W (FractionRing W)) qx)⁻¹ * (algebraMap W (FractionRing W)) qx = 1
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:487:4: warning: This simp argument is unused:
+  fraction_qx_ne_zero
+
+Hint: Omit it from the simp argument list.
+  simp [xFractionPoint, wChartPoint_eq, scaleCoordinates4, mapCoordinates4,̵
+  ̵ ̵ ̵ ̵ ̵f̵r̵a̵c̵t̵i̵o̵n̵_̵q̵x̵_̵n̵e̵_̵z̵e̵r̵o̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:501:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:509:2: error: Tactic `simp` failed with a nested error:
+(deterministic) timeout at `«Lean.Meta.acLt»`, maximum number of heartbeats (200000) has been reached
+
+Note: Use `set_option maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:517:2: error: Tactic `simp` failed with a nested error:
+(deterministic) timeout at `«Lean.Meta.acLt»`, maximum number of heartbeats (200000) has been reached
+
+Note: Use `set_option maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+'MazurProof.N25F_XChartFractionMap.qx_ne_zero' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'MazurProof.N25F_XChartFractionMap.xChartToFraction' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'MazurProof.N25F_XChartFractionMap.xChartToFraction_xY' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XChartFractionMap.xChartToFraction_xZ' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XChartFractionMap.xChartToFraction_xW' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

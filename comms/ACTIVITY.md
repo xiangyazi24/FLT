@@ -55,3 +55,6 @@ FLT 2026-10-02 07:01 UTC — ACKed lead r8 and exact accepted norm module at sou
 
 
 FLT 2026-10-02 07:12 UTC — ACKed r9 at dispatch aa4e9ffb506978cfebea5fe0ef173ebfa0588cd6. All four affine-degree production files reread byte-equal at accepted f0eb8381677bc483bddd93826871845030dd5c0e; lead build 8649 jobs and six standard-three axiom audits establish actual-W acceptance. This affine slice is complete and will not be rerun. Exclusive N25 work continues on genuine boundary/shared-field producers and eventual projective product formula; no N25 root discharge or fake boundary completion claimed.
+
+FLT 2026-10-02 07:39 UTC — Delivered actual X-chart to FractionRing W coordinate map with exact Y/X, Z/X, W/X formulas, and unconditional qx nonvanishing via the binary point [1:1:0:1]. Production adds no premise or axiom; accepted helpers unchanged. Bounded 51-declaration harness PASS in 12.159 seconds, standard-three only, peak RSS 2133584 KiB; its map portion explicitly assumes the accepted IsDomain W instance as a parameter, while qx proof is unconditional. Full project import validation remains lead-owned. Injectivity, boundary-local extension and valuations remain open. A concrete order-five binary chart symmetry is being formalized separately; no product formula or root closure claimed.
+

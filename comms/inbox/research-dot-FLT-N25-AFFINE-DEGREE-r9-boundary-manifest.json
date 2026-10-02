@@ -1,0 +1,134 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "source_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "dispatch_commit": "aa4e9ffb506978cfebea5fe0ef173ebfa0588cd6",
+  "status": "Actual coordinate map source complete; bounded domain-parameter microcheck PASS, full FLT integration pending; not injectivity",
+  "files": [
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 5030,
+      "sha256": "6f7efdb792c4a4b313a6dec32141d30e1d77af5b6123ace42991df61522f3a7c",
+      "git_blob": "802d455c7cf01de6aab20f4f17d920532f52963e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/ActualXChartMapCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1133,
+      "sha256": "3f69320caebfdace788f0091d28ad94967a9492130e0adb1d2352a9b039cc823",
+      "git_blob": "b79585b7a60b4ac0c54926114085f35dde379428"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/XChartMapCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 20587,
+      "sha256": "bf7e0c8cbf8a686ce09bf423392dd4f9af15285f1022acf977faf52813dd8352",
+      "git_blob": "e689f1048a0bfc5f41e399e40b324b16013c837f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/check-01.json",
+      "encoding": "utf-8",
+      "bytes": 85,
+      "sha256": "a16619d1f424a49219e62c1ffe76245c2f60371e9b08ce027f65311ad2e33db8",
+      "git_blob": "9bf252336dbd2413ba494254f4ce5057b08a9b16"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/check-01.log",
+      "encoding": "utf-8",
+      "bytes": 4178,
+      "sha256": "d9567edc4d478f88431d4ff0e52c5f4de1a29c4dfddc993155550469a0fa6232",
+      "git_blob": "7eb157050e50139476eb333157755835ccf951cf"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/check-02.json",
+      "encoding": "utf-8",
+      "bytes": 276,
+      "sha256": "71908339f06cef65c210aa6d5ab222494e55d4e07767af1993b43cf9cc71dd31",
+      "git_blob": "647b0d838867a2b03839b9c9be48d1df0c74e591"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/check-02.log",
+      "encoding": "utf-8",
+      "bytes": 1333,
+      "sha256": "6cce1233144ac5973506e97b5cff9d6a61ca67a871cf6edb7bb052dc0b056508",
+      "git_blob": "bdfcc17708502edff2d07ed804d65a69f5456181"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/copied-declarations.json",
+      "encoding": "utf-8",
+      "bytes": 12076,
+      "sha256": "393962fae83729d3e01c7ac88ea051a1f271d8c32294aa2799a74a8390d62079",
+      "git_blob": "c7f8073071c6ecf21c97b7dc0ca0655d035c30c2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/source-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 6969,
+      "sha256": "49c5741608085d80ce7fa865eeb08d052f7a106f6d43409a1cb4e4faed9a37b7",
+      "git_blob": "e234671574975a74442cdd7041601c81637acd70"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 4014,
+      "sha256": "d139c0787383f23eb37b52a12f13172c86ffc0139cca277c4856b881b6f4c6ec",
+      "git_blob": "8d2ffd4606097ce99ca89c43b951566bfe04fc00"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 819,
+      "sha256": "54c66a02ea719e12f217eb10ce6afbd5ca3f2d2ea70b34367fdfa00bfe0ed637",
+      "git_blob": "85532abee5022a2d96b33d5071a638f3e309ec65"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/support-proxy.json",
+      "encoding": "utf-8",
+      "bytes": 321,
+      "sha256": "588a6e3527f892313791f0fa8b7db9406acaad282941db8306920dbbdfd20829",
+      "git_blob": "b486329204e939b02cdd9ded499b55f9b4c81172"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/support-proxy.log",
+      "encoding": "utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/support-fintype.json",
+      "encoding": "utf-8",
+      "bytes": 331,
+      "sha256": "fcea50c4f20ec3dec9fa70c0123a1fe725d03ff00a127792576f9afd2cc8f768",
+      "git_blob": "1e5a27ef796c406aedf7704f84c46ed9ab0fd9a4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XCHART-MAP-r1/support-fintype.log",
+      "encoding": "utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionMap.lean",
+      "encoding": "utf-8",
+      "bytes": 7601,
+      "sha256": "cde468020a66eba45f0648fc4a8accabcce31bd6a67fb4aef7ce9566a8eb3134",
+      "git_blob": "fff302ef924a9e8d97f7c57299da3bbfd34018c3"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r9-boundary-candidate.md",
+      "encoding": "utf-8",
+      "bytes": 2924,
+      "sha256": "cfcb1fbb92ba420c3475c208feb928a90c94b8771f05910a1f73f68d9783f0cd",
+      "git_blob": "665b5e2f15b2c5e6c52a01dfb98e568237a1d07f"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 14099,
+      "sha256": "324b9f1ab78f1f08932382114461e01aa89df5ece0addd17bb7a7e161649c0ef",
+      "git_blob": "84afa06b05287f8c30a72192323f809c834a7b75"
+    }
+  ]
+}

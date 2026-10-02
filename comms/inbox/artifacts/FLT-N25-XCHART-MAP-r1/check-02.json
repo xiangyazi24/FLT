@@ -1,0 +1,10 @@
+{
+  "name": "check-02",
+  "args": [
+    "/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 12.158536704999278,
+  "peak_child_rss_kib": 2133584,
+  "source_sha256": "bf7e0c8cbf8a686ce09bf423392dd4f9af15285f1022acf977faf52813dd8352"
+}

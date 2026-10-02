@@ -1,0 +1,15 @@
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:461:2: warning: Try `simp at heq` instead of `simpa using heq`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+/workspace/shared/flt-n25-xchart-map/XChartMapCheck.lean:500:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+'MazurProof.N25F_XChartFractionMap.qx_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_XChartFractionMap.qx_ne_zero : MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qx ≠ 0
+@MazurProof.N25F_XChartFractionMap.xChartToFraction : [IsDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing →ₐ[ZMod 2]
+    FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_XChartFractionMap.xChartToFraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XChartFractionMap.xChartToFraction_xY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XChartFractionMap.xChartToFraction_xZ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XChartFractionMap.xChartToFraction_xW' depends on axioms: [propext, Classical.choice, Quot.sound]

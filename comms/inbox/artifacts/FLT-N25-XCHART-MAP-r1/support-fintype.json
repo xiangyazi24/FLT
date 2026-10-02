@@ -1,0 +1,12 @@
+{
+  "name": "support-fintype",
+  "args": [
+    "-o",
+    ".lake/build/lib/lean/Mathlib/Tactic/DeriveFintype.olean",
+    "Mathlib/Tactic/DeriveFintype.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 8.169185441000081,
+  "peak_child_rss_kib": 889328,
+  "source_sha256": "df785752c158adcdc464e3370114f05fe16cd9ccde82e710d0630d15a89282fc"
+}
