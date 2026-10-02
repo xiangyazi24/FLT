@@ -1,0 +1,10 @@
+{
+  "name": "generic-03",
+  "args": [
+    "/workspace/shared/flt-n25-center-distinctness/GenericSameCenterCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.69858734599984,
+  "peak_child_rss_kib": 2473728,
+  "source_sha256": "15c05d2793ce566a37b9aff583d6377a6c374ea1e0855119deb7acd733cfe42d"
+}

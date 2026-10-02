@@ -1,0 +1,4 @@
+'MazurProof.N25F_InfinityCenterDistinctness.exists_equiv_of_same_center' depends on axioms: [propext, Quot.sound]
+'_private._stdin.0.MazurProof.N25F_InfinityCenterDistinctness.incompatible_unit_ratio' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

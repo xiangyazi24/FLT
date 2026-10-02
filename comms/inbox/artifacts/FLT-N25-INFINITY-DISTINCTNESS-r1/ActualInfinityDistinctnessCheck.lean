@@ -1,0 +1,5 @@
+import FLT.Assumptions.MazurProof.N25F_InfinityCenterDistinctness
+
+#print axioms MazurProof.N25F_InfinityCenterDistinctness.exists_equiv_of_same_center
+#print axioms MazurProof.N25F_InfinityCenterDistinctness.xInfinityPrime_ne_yzInfinityPrime
+#print axioms MazurProof.N25F_InfinityCenterDistinctness.infinityCenters_distinct

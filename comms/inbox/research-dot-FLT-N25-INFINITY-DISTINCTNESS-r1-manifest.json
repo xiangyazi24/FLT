@@ -1,0 +1,60 @@
+{
+  "source_commit": "e0f728a3c0149389d6dcc9f0053dc6991ccb687b",
+  "required_candidate_commit": "b4175cfe6cc8e4d1a9a291f54529b32e6a4d20ff",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 29205,
+      "sha256": "1a1a1d8461ae4032f2d6cddcd6189f4cdb60ae9b18a7d897cbc5c5eb0e25844e"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityCenterDistinctness.lean",
+      "encoding": "utf-8",
+      "bytes": 4675,
+      "sha256": "e214cf397f7184af4649c5ed09d64cb1e943e310eddf5bdb074cca26f060abe9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-DISTINCTNESS-r1/ActualInfinityDistinctnessCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 325,
+      "sha256": "6557411e9b8f5e549b24cfcec5fc2b1d9b7cbf962d37ffe40c2755b7d7e8a2fc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-DISTINCTNESS-r1/GenericSameCenterCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 2232,
+      "sha256": "15c05d2793ce566a37b9aff583d6377a6c374ea1e0855119deb7acd733cfe42d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-DISTINCTNESS-r1/generic-03.json",
+      "encoding": "utf-8",
+      "bytes": 293,
+      "sha256": "20455c933aaeb8445ca724a2f6f5df37a8e06153afc673caef0d203531c54ded"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-DISTINCTNESS-r1/generic-03.log",
+      "encoding": "utf-8",
+      "bytes": 262,
+      "sha256": "5c298611d66db8b0e8f2165fb83f47c5cc813580d8a9b3a035212d4c9c139337"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-DISTINCTNESS-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 881,
+      "sha256": "ee8ade1eaa02346f4c4ae18c27c623567457ff71a3c9ec1896b5248a2623389b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-DISTINCTNESS-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 797,
+      "sha256": "51646ff4f4c5f5078dc68bf779013b698971394f411d9d4971453911b04a1221"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-INFINITY-DISTINCTNESS-r1.md",
+      "encoding": "utf-8",
+      "bytes": 3855,
+      "sha256": "8530b3cce3e996c3ae472896a4bf9a51921c85bffd57927f620a3a52c87d0df1"
+    }
+  ]
+}
