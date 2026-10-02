@@ -3,6 +3,9 @@ import FLT.Assumptions.MazurProof.N25F_XChartFractionMap
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal
 import Mathlib.RingTheory.DedekindDomain.Dvr
 
+-- Full-module imports make instance search slower than in dot's selective-import check.
+set_option synthInstance.maxHeartbeats 200000
+
 /-!
 # The actual X-boundary local ring is a discrete valuation ring
 

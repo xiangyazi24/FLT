@@ -1,0 +1,20 @@
+{
+  "accepted_source": "0b2cfe016226552b61f3ef4074a05e48cec50560",
+  "reason": "Parent reports r10 accepted all 14 predecessors; full imports require synchronized synthInstance.maxHeartbeats",
+  "option": "set_option synthInstance.maxHeartbeats 200000",
+  "historical_directory": "/workspace/shared/flt-n25-affine-overlap-equiv/historical-before-synth-heartbeats",
+  "files": {
+    "N25F_YZAffineOverlapEquiv.lean": {
+      "old_sha256": "8b8b0b1bea27d7bb368e223854c9e93ab141e8ffd39d752cc1a57262979e62ab",
+      "new_sha256": "41b01e4e7689bc23c919115212035b24d3964cb423a4c2c36d547d7b38a53455",
+      "namespace_body_preserved_byte_for_byte": true,
+      "namespace_tail_sha256": "1b0851a88805fc411ce2bf79d9bf6aa3a64b0ed3ffee483ffa7f1ea3b654f77e"
+    },
+    "YZAffineOverlapEquivCheck.lean": {
+      "old_sha256": "f89b34c4e9c18603d9498c05d0101143b227192f90793e14aa01d705e5e8d285",
+      "new_sha256": "055dbb9c8673c87641ef16f00ed3cbbe1601590e040978ba09503b097b0a4e49",
+      "namespace_body_preserved_byte_for_byte": true,
+      "namespace_tail_sha256": "90b498325ed54908b9f342acfca4dd947ad3b7e96470c8c40d303888aa9aee01"
+    }
+  }
+}

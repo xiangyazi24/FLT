@@ -1,0 +1,7 @@
+import FLT.Assumptions.MazurProof.N25F_YZOverlapLocalization
+
+#check @MazurProof.N25F_YZOverlapLocalization.zYOpenToYZLocal
+#check @MazurProof.N25F_YZOverlapLocalization.zYOpenToYZLocal_invSelf
+#print axioms MazurProof.N25F_YZOverlapLocalization.zYOpenToYZLocal
+#print axioms MazurProof.N25F_YZOverlapLocalization.zYOpenToYZLocal_algebraMap
+#print axioms MazurProof.N25F_YZOverlapLocalization.zYOpenToYZLocal_invSelf

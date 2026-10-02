@@ -1,0 +1,9 @@
+import FLT.Assumptions.MazurProof.N25F_YZAffineOverlapEquiv
+import FLT.Assumptions.MazurProof.N25F_YZOverlapLocalization
+
+#check MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv
+#print axioms MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv
+#print axioms MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_algebraMap
+#print axioms MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_symm_algebraMap
+#print axioms MazurProof.N25F_YZOverlapLocalization.zYOpenToYZLocal
+#print axioms MazurProof.N25F_YZOverlapLocalization.zYOpenToYZLocal_invSelf

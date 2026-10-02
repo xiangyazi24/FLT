@@ -1,5 +1,8 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryYZLocal
 
+-- Full-module imports make instance search slower than in dot's selective-import check.
+set_option synthInstance.maxHeartbeats 200000
+
 /-! The actual YZ-boundary point lies in the overlap with the Z chart: the
 germ Z/Y is a unit in its existing local ring. -/
 

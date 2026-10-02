@@ -112,6 +112,7 @@ theorem algebraMap_Rz_X :
   simp [canonicalWChartZ, canonicalWChartPoint, chartQuotientPoint,
     mappedAmbientPoint, chartMap, ambientDehomogenize, dehomogenizedVariable, qz]
 
+set_option synthInstance.maxHeartbeats 200000 in
 /-- The genuine nonvanishing of `Z/W` follows from the established
 torsion-free normalization algebra over the polynomial ring `F₂[z]`. -/
 theorem qz_ne_zero : (qz : W) ≠ 0 := by

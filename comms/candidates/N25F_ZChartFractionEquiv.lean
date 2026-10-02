@@ -1,5 +1,8 @@
 import FLT.Assumptions.MazurProof.N25F_ZChartFractionInjective
 
+-- Full-module imports make instance search slower than in dot's selective-import check.
+set_option synthInstance.maxHeartbeats 200000
+
 /-!
 # The coordinate-rigid equivalence of the actual Z and W function fields
 

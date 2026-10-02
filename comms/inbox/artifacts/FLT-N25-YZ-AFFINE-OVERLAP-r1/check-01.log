@@ -1,0 +1,102 @@
+MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen : MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing →ₐ[ZMod
+    2]
+  MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen
+'MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod
+    2]
+  MazurProof.N25F_YZAffineOverlapEquiv.YZOpen
+'MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen_yX : MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen
+    MazurProof.N25F_YZOverlapMap.yX =
+  IsLocalization.Away.invSelf MazurProof.N25F_ZChartWChartEquiv.zY *
+    (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+        MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen)
+      MazurProof.N25F_ZChartWChartEquiv.zX
+'MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen_yX' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen_yZ : MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ =
+  IsLocalization.Away.invSelf MazurProof.N25F_ZChartWChartEquiv.zY
+'MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen_yZ' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen_yzW : MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yzW =
+  IsLocalization.Away.invSelf MazurProof.N25F_ZChartWChartEquiv.zY *
+    (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+        MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen)
+      MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW
+'MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen_yzW' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen_zX : MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen
+    MazurProof.N25F_ZChartWChartEquiv.zX =
+  IsLocalization.Away.invSelf MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ *
+    (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing
+        MazurProof.N25F_YZAffineOverlapEquiv.YZOpen)
+      MazurProof.N25F_YZOverlapMap.yX
+'MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen_zX' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen_zY : MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen
+    MazurProof.N25F_ZChartWChartEquiv.zY =
+  IsLocalization.Away.invSelf MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ
+'MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen_zY' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen_zW : MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW =
+  IsLocalization.Away.invSelf MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ *
+    (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing
+        MazurProof.N25F_YZAffineOverlapEquiv.YZOpen)
+      MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yzW
+'MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen_zW' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yzOpenToZYOpen : MazurProof.N25F_YZAffineOverlapEquiv.YZOpen →ₐ[ZMod 2]
+  MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen
+'MazurProof.N25F_YZAffineOverlapEquiv.yzOpenToZYOpen' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.zyOpenToYZOpen : MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen →ₐ[ZMod 2]
+  MazurProof.N25F_YZAffineOverlapEquiv.YZOpen
+'MazurProof.N25F_YZAffineOverlapEquiv.zyOpenToYZOpen' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yzOpenToZYOpen_invSelf : MazurProof.N25F_YZAffineOverlapEquiv.yzOpenToZYOpen
+    (IsLocalization.Away.invSelf MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ) =
+  (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+      MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen)
+    MazurProof.N25F_ZChartWChartEquiv.zY
+'MazurProof.N25F_YZAffineOverlapEquiv.yzOpenToZYOpen_invSelf' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.zyOpenToYZOpen_invSelf : MazurProof.N25F_YZAffineOverlapEquiv.zyOpenToYZOpen
+    (IsLocalization.Away.invSelf MazurProof.N25F_ZChartWChartEquiv.zY) =
+  (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing
+      MazurProof.N25F_YZAffineOverlapEquiv.YZOpen)
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ
+'MazurProof.N25F_YZAffineOverlapEquiv.zyOpenToYZOpen_invSelf' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv : Localization.Away
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ ≃ₐ[ZMod 2]
+  Localization.Away MazurProof.N25F_ZChartWChartEquiv.zY
+'MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_algebraMap : ∀
+  (a : MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing),
+  MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv
+      ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing
+          MazurProof.N25F_YZAffineOverlapEquiv.YZOpen)
+        a) =
+    MazurProof.N25F_YZAffineOverlapEquiv.yChartToZYOpen a
+'MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_symm_algebraMap : ∀
+  (a : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing),
+  MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv.symm
+      ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+          MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen)
+        a) =
+    MazurProof.N25F_YZAffineOverlapEquiv.zChartToYZOpen a
+'MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_symm_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_invSelf : MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv
+    (IsLocalization.Away.invSelf MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ) =
+  (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing
+      MazurProof.N25F_YZAffineOverlapEquiv.ZYOpen)
+    MazurProof.N25F_ZChartWChartEquiv.zY
+'MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_invSelf' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_symm_invSelf : MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv.symm
+    (IsLocalization.Away.invSelf MazurProof.N25F_ZChartWChartEquiv.zY) =
+  (algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.YChartRing
+      MazurProof.N25F_YZAffineOverlapEquiv.YZOpen)
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin.yZ
+'MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv_symm_invSelf' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

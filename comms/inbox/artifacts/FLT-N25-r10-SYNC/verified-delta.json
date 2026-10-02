@@ -1,0 +1,192 @@
+[
+  {
+    "file": "N25F_XBoundaryOrder.lean",
+    "sha": "506082d8ddbbe3b8347681b8bb43372a70cb4646",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000 in"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 4327,
+    "accepted_sha256": "5e2435a1504aa6a19f34f1477798126c9fdd123c0be835b9b541468d1f34a5a7"
+  },
+  {
+    "file": "N25F_XChartFractionEquiv.lean",
+    "sha": "096479718b807530c7cc569b027dae016622aa2e",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000 in"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 6638,
+    "accepted_sha256": "d178f1ca537b117d30008dcbc7d51dd17e1d0c5c334d0a5324d4fab0f34bf46b"
+  },
+  {
+    "file": "N25F_XChartFractionInjective.lean",
+    "sha": "908a081dc57ecdba7f30c03db1ff81798797bbb2",
+    "byteEqual": true,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 6861,
+    "accepted_sha256": "14281e0684021f327112b5d32e037d2d7cfa173f65290b828fb76407e491313b"
+  },
+  {
+    "file": "N25F_XChartWChartEquiv.lean",
+    "sha": "08374fe9c7e0ce855e75be02ee693dab8fa10e28",
+    "byteEqual": true,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 12598,
+    "accepted_sha256": "b002466dc2e6dcf6de5197bc5f21714da13d259793d7cba9acf68aa3dcc743fd"
+  },
+  {
+    "file": "N25F_XLocalDVR.lean",
+    "sha": "210b25b745b328c84a561b2c47a6c0af0159cc5c",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 3009,
+    "accepted_sha256": "b06afec3cbaecc9539c2470162605e659735d3971a8aedca8b822628c0d977ef"
+  },
+  {
+    "file": "N25F_XLocalFractionEmbedding.lean",
+    "sha": "4615e13a05f9de7e551f91f26021fe6cae944ec3",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 2769,
+    "accepted_sha256": "a4201922c111e3e8f8ca767cf5382158e6d5aeb00174320299d286d5df50ea20"
+  },
+  {
+    "file": "N25F_YZLocalZUnit.lean",
+    "sha": "ad53c224a0a1d30854dd3a4b68a936bcb758f152",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 1154,
+    "accepted_sha256": "5b58e2a909559bc1ebecc8c3c86864298fa27401fa8e96981beab218f41ca0af"
+  },
+  {
+    "file": "N25F_ZChartFractionEquiv.lean",
+    "sha": "6a772e9139975b9c17d5750ef23ad3dbabe01882",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 6739,
+    "accepted_sha256": "4001badff6dfd4126ece6ec0fa9294f35b00a401c933074f715c06d8ed3b695a"
+  },
+  {
+    "file": "N25F_ZChartFractionInjective.lean",
+    "sha": "9c55c5054648d9ebf603a3f1e1cad5303a38622b",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 3230,
+    "accepted_sha256": "676c03bd851488fa8adc63dad07f246284d4c8d5715a52a22b7b94ada82f8fc7"
+  },
+  {
+    "file": "N25F_ZChartFractionMap.lean",
+    "sha": "6d4fc6b81c41545743ab3531ef723600d127c97b",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000 in"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 8291,
+    "accepted_sha256": "81534f43a38be201189e9d675851efa39067d6431d1792c6247343e6d656bdf2"
+  },
+  {
+    "file": "N25F_ZChartWChartEquiv.lean",
+    "sha": "f4e730377981632deca64e7d51a02710a0e5f7e1",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 12900,
+    "accepted_sha256": "89612a55a204d03973ef68258995be26b0af4d44c0383c82f978e94b50a6a835"
+  },
+  {
+    "file": "N25F_YZOverlapMap.lean",
+    "sha": "57936786638863fd99e587ebdca03b1727fc661d",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 6723,
+    "accepted_sha256": "75479c6f991d20a6e111221484fe85f83cbdadd4de67fda2574ab07894b10dbc"
+  },
+  {
+    "file": "N25F_ZBoundaryOrder.lean",
+    "sha": "e8647da0787abcd11dc0ecc6070f87ee5309ce30",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 6966,
+    "accepted_sha256": "77ef51fd608be81ca690dfd9bcc2443921ac6c6032da15c1b7d14550ce1c88e8"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWBoundaryXLocal.lean",
+    "sha": "8153853eab1d52cd126d8f66497adfe3b2c3ae17",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000 in"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 15821,
+    "accepted_sha256": "425623a0d4295826bb7132515fcc021700967b70af74154e6e0ec03dc9f1377a"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWBoundaryYZLocal.lean",
+    "sha": "36d7b40acea1ecf5fd83f2af1024de696c3cf642",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000 in"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 7898,
+    "accepted_sha256": "15d3cb9f7c9d97fcc9bb710bc4702d7e748fa051e942c2ff288a7834951faac2"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWBoundaryZLocal.lean",
+    "sha": "b9326c1b3a3b80e8841256727e2aba6535051abc",
+    "byteEqual": false,
+    "onlyDocumentedConfigurationChange": true,
+    "options": [
+      "set_option synthInstance.maxHeartbeats 200000 in",
+      "set_option synthInstance.maxHeartbeats 200000 in",
+      "set_option synthInstance.maxHeartbeats 200000 in"
+    ],
+    "materialized_git_blob_match": true,
+    "accepted_bytes": 23936,
+    "accepted_sha256": "b476cd44a13a89b389b5a3c685598792a4743689dfd0143b89d9e2f061839347"
+  }
+]

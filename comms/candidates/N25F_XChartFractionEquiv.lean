@@ -113,6 +113,7 @@ theorem xChartFractionAlgEquiv_algebraMap (r : XChartRing) :
       xChartToFraction r :=
   xFractionToFraction_algebraMap r
 
+set_option synthInstance.maxHeartbeats 200000 in
 /-- The fixed W-chart function field is a fraction field of the actual X-chart
 ring for the coordinate-rigid algebra structure. The algebra structure is kept
 explicit to avoid choosing a global competing scalar action. -/

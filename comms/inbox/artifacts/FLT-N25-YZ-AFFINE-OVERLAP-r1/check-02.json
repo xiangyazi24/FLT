@@ -1,0 +1,14 @@
+{
+  "name": "check-02",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-affine-overlap-equiv",
+    "-o",
+    "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.olean",
+    "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 26.496022035997157,
+  "peak_child_rss_kib": 2477708,
+  "source_sha256": "f89b34c4e9c18603d9498c05d0101143b227192f90793e14aa01d705e5e8d285"
+}

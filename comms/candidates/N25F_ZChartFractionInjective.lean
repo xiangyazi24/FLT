@@ -3,6 +3,9 @@ import Mathlib.RingTheory.Jacobson.Ring
 import Mathlib.FieldTheory.Finite.Basic
 import Mathlib.RingTheory.Finiteness.Cardinality
 
+-- Full-module imports make instance search slower than in dot's selective-import check.
+set_option synthInstance.maxHeartbeats 200000
+
 /-! The actual coordinate-rigid Z-chart map is injective. A finite image
 would force 1/qz to have finite order, contradicted in the established
 polynomial coefficient algebra by evaluation of X at zero. -/

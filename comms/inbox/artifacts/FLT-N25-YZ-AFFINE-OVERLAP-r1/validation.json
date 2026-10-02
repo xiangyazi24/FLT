@@ -1,0 +1,91 @@
+{
+  "main_declaration": "MazurProof.N25F_YZAffineOverlapEquiv.yzAffineOverlapEquiv",
+  "type": "Localization.Away yZ \u2243\u2090[ZMod 2] Localization.Away zY",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "check_kind": "Unconditional exact-actual-chart-definition harness; production body byte-identical",
+  "production_body_matches_harness": true,
+  "added_premises": false,
+  "harness_parameters": [],
+  "full_FLT_imports_compiled": false,
+  "candidate_sha256": "41b01e4e7689bc23c919115212035b24d3964cb423a4c2c36d547d7b38a53455",
+  "harness_sha256": "055dbb9c8673c87641ef16f00ed3cbbe1601590e040978ba09503b097b0a4e49",
+  "reusable_olean_sha256": "b07483d27d23f1989b9482a7b928ebbff72f240637e57c16d4b6f4032081b210",
+  "audited_declarations": 17,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "checks": [
+    {
+      "name": "check-03",
+      "args": [
+        "-R",
+        "/workspace/shared/flt-n25-affine-overlap-equiv",
+        "-o",
+        "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.olean",
+        "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 167.8206450960024,
+      "peak_child_rss_kib": 2463576,
+      "source_sha256": "055dbb9c8673c87641ef16f00ed3cbbe1601590e040978ba09503b097b0a4e49",
+      "timing_note": "Total wrapper duration includes shared compiler gate wait; compiler timeout remained 60 seconds."
+    }
+  ],
+  "historical_checks": [
+    {
+      "name": "check-01",
+      "args": [
+        "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 24.655519659001584,
+      "peak_child_rss_kib": 2462120,
+      "source_sha256": "f89b34c4e9c18603d9498c05d0101143b227192f90793e14aa01d705e5e8d285"
+    },
+    {
+      "name": "check-02",
+      "args": [
+        "-R",
+        "/workspace/shared/flt-n25-affine-overlap-equiv",
+        "-o",
+        "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.olean",
+        "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 26.496022035997157,
+      "peak_child_rss_kib": 2477708,
+      "source_sha256": "f89b34c4e9c18603d9498c05d0101143b227192f90793e14aa01d705e5e8d285"
+    }
+  ],
+  "configuration_sync": {
+    "accepted_source": "0b2cfe016226552b61f3ef4074a05e48cec50560",
+    "reason": "Parent reports r10 accepted all 14 predecessors; full imports require synchronized synthInstance.maxHeartbeats",
+    "option": "set_option synthInstance.maxHeartbeats 200000",
+    "historical_directory": "/workspace/shared/flt-n25-affine-overlap-equiv/historical-before-synth-heartbeats",
+    "files": {
+      "N25F_YZAffineOverlapEquiv.lean": {
+        "old_sha256": "8b8b0b1bea27d7bb368e223854c9e93ab141e8ffd39d752cc1a57262979e62ab",
+        "new_sha256": "41b01e4e7689bc23c919115212035b24d3964cb423a4c2c36d547d7b38a53455",
+        "namespace_body_preserved_byte_for_byte": true,
+        "namespace_tail_sha256": "1b0851a88805fc411ce2bf79d9bf6aa3a64b0ed3ffee483ffa7f1ea3b654f77e"
+      },
+      "YZAffineOverlapEquivCheck.lean": {
+        "old_sha256": "f89b34c4e9c18603d9498c05d0101143b227192f90793e14aa01d705e5e8d285",
+        "new_sha256": "055dbb9c8673c87641ef16f00ed3cbbe1601590e040978ba09503b097b0a4e49",
+        "namespace_body_preserved_byte_for_byte": true,
+        "namespace_tail_sha256": "90b498325ed54908b9f342acfca4dd947ad3b7e96470c8c40d303888aa9aee01"
+      }
+    }
+  },
+  "file_level_options": {
+    "synthInstance.maxHeartbeats": 200000
+  },
+  "import_environment": {
+    "LEAN_PATH": "/workspace/shared/flt-n25-zfield-equivalence:/workspace/shared/flt-n25-zfraction-injective"
+  },
+  "no_predecessor_changes": true,
+  "no_remote_writes": true
+}

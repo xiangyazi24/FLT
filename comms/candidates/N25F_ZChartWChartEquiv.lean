@@ -1,6 +1,9 @@
 import FLT.Assumptions.MazurProof.N25F_NonBoundaryPrincipalDivisor
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal
 
+-- Full-module imports make instance search slower than in dot's selective-import check.
+set_option synthInstance.maxHeartbeats 200000
+
 /-!
 # An actual algebra equivalence between the Z and W charts
 

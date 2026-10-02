@@ -1,0 +1,276 @@
+{
+  "accepted_source_commit": "0b2cfe016226552b61f3ef4074a05e48cec50560",
+  "dispatch_commit": "5f5d4776181bf744e8d6ce28b97736e7b2ab0459",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 21218,
+      "sha256": "8c5d13f452037b8624a1a6e801860aff6ccf1bad6fe76ecf1367f99d1896e15c"
+    },
+    {
+      "path": "comms/candidates/N25F_XBoundaryOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 4327,
+      "sha256": "5e2435a1504aa6a19f34f1477798126c9fdd123c0be835b9b541468d1f34a5a7"
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 6638,
+      "sha256": "d178f1ca537b117d30008dcbc7d51dd17e1d0c5c334d0a5324d4fab0f34bf46b"
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionInjective.lean",
+      "encoding": "utf-8",
+      "bytes": 6861,
+      "sha256": "14281e0684021f327112b5d32e037d2d7cfa173f65290b828fb76407e491313b"
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionMap.lean",
+      "encoding": "utf-8",
+      "bytes": 7601,
+      "sha256": "cde468020a66eba45f0648fc4a8accabcce31bd6a67fb4aef7ce9566a8eb3134"
+    },
+    {
+      "path": "comms/candidates/N25F_XChartWChartEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 12598,
+      "sha256": "b002466dc2e6dcf6de5197bc5f21714da13d259793d7cba9acf68aa3dcc743fd"
+    },
+    {
+      "path": "comms/candidates/N25F_XLocalDVR.lean",
+      "encoding": "utf-8",
+      "bytes": 3009,
+      "sha256": "b06afec3cbaecc9539c2470162605e659735d3971a8aedca8b822628c0d977ef"
+    },
+    {
+      "path": "comms/candidates/N25F_XLocalFractionEmbedding.lean",
+      "encoding": "utf-8",
+      "bytes": 2769,
+      "sha256": "a4201922c111e3e8f8ca767cf5382158e6d5aeb00174320299d286d5df50ea20"
+    },
+    {
+      "path": "comms/candidates/N25F_YZAffineOverlapEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 15426,
+      "sha256": "41b01e4e7689bc23c919115212035b24d3964cb423a4c2c36d547d7b38a53455"
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalZUnit.lean",
+      "encoding": "utf-8",
+      "bytes": 1154,
+      "sha256": "5b58e2a909559bc1ebecc8c3c86864298fa27401fa8e96981beab218f41ca0af"
+    },
+    {
+      "path": "comms/candidates/N25F_YZOverlapLocalization.lean",
+      "encoding": "utf-8",
+      "bytes": 1966,
+      "sha256": "04c379877852a84f5e64ad8e1ac89f31ae60510758c010fa9abb335fa7a0d52a"
+    },
+    {
+      "path": "comms/candidates/N25F_YZOverlapMap.lean",
+      "encoding": "utf-8",
+      "bytes": 6723,
+      "sha256": "75479c6f991d20a6e111221484fe85f83cbdadd4de67fda2574ab07894b10dbc"
+    },
+    {
+      "path": "comms/candidates/N25F_ZBoundaryOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 6966,
+      "sha256": "77ef51fd608be81ca690dfd9bcc2443921ac6c6032da15c1b7d14550ce1c88e8"
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartFractionEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 6739,
+      "sha256": "4001badff6dfd4126ece6ec0fa9294f35b00a401c933074f715c06d8ed3b695a"
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartFractionInjective.lean",
+      "encoding": "utf-8",
+      "bytes": 3230,
+      "sha256": "676c03bd851488fa8adc63dad07f246284d4c8d5715a52a22b7b94ada82f8fc7"
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartFractionMap.lean",
+      "encoding": "utf-8",
+      "bytes": 8291,
+      "sha256": "81534f43a38be201189e9d675851efa39067d6431d1792c6247343e6d656bdf2"
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartWChartEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 12900,
+      "sha256": "89612a55a204d03973ef68258995be26b0af4d44c0383c82f978e94b50a6a835"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 4432,
+      "sha256": "e5f23745cf0c4fe1b991c20bbe48d8e370f9b89ee074146239d950d7db88d67b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/YZAffineOverlapEquivCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 18201,
+      "sha256": "055dbb9c8673c87641ef16f00ed3cbbe1601590e040978ba09503b097b0a4e49"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/check-01.json",
+      "encoding": "utf-8",
+      "bytes": 297,
+      "sha256": "f673adb4bf0ffc686f2d8dc198306201a54ac87e679af0c69aaa44b99395b711"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/check-01.log",
+      "encoding": "utf-8",
+      "bytes": 7651,
+      "sha256": "3cc1e6477fd2cdaec8d7fb1aea1b6061f3f7581cb557183e7dd767927a33bc67"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/check-02.json",
+      "encoding": "utf-8",
+      "bytes": 457,
+      "sha256": "0ffd923f562822e56b3575f95a77be3cd92ce694efc828eef6ceddade4942f11"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/check-02.log",
+      "encoding": "utf-8",
+      "bytes": 7651,
+      "sha256": "3cc1e6477fd2cdaec8d7fb1aea1b6061f3f7581cb557183e7dd767927a33bc67"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/check-03.json",
+      "encoding": "utf-8",
+      "bytes": 456,
+      "sha256": "3342e2206d0fb5ac4c7a4beb086dfa5ce0167ea63453a7ad9ba97c50a2422ca8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/check-03.log",
+      "encoding": "utf-8",
+      "bytes": 7651,
+      "sha256": "3cc1e6477fd2cdaec8d7fb1aea1b6061f3f7581cb557183e7dd767927a33bc67"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/configuration-sync.json",
+      "encoding": "utf-8",
+      "bytes": 1133,
+      "sha256": "89fdfa4632c6ad4234ddfeb779aaff2f1652ca2e03f89f4fdd0c63a3d22751fe"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/make_candidate.py",
+      "encoding": "utf-8",
+      "bytes": 14164,
+      "sha256": "f26c1290570e43a4574c3fc743dc2ce6ded1e9c2142151b0a581ef22deff38c3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/package_validation.py",
+      "encoding": "utf-8",
+      "bytes": 3380,
+      "sha256": "c0a54ec67fa55060ea671955285ee361107ea3e0d7c716697990906b90eddc4c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 882,
+      "sha256": "1435577cdb54015a01be1ac4e32a0a8959ec6c90b3c4aae88a34d39a2546ca86"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/source-provenance.json",
+      "encoding": "utf-8",
+      "bytes": 1748,
+      "sha256": "8942fbd5a99daec38eb07419355b3d49ffa49176e0be7e312122c738e8bef8c8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-AFFINE-OVERLAP-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 3865,
+      "sha256": "be74ca451583b9ab27662213ed97904f7a12cda9583b7f37a776a9c23b543cbc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/ActualYZAffineOverlapCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 574,
+      "sha256": "589b81f44a182909e839ec6798355e43ad5ce9c87cccf7f1d0bbfbf047314154"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/accepted-inputs/RationalPointsN25QuotientTwoWBoundaryXLocal.lean",
+      "encoding": "utf-8",
+      "bytes": 15821,
+      "sha256": "425623a0d4295826bb7132515fcc021700967b70af74154e6e0ec03dc9f1377a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/accepted-inputs/RationalPointsN25QuotientTwoWBoundaryYZLocal.lean",
+      "encoding": "utf-8",
+      "bytes": 7898,
+      "sha256": "15d3cb9f7c9d97fcc9bb710bc4702d7e748fa051e942c2ff288a7834951faac2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/accepted-inputs/RationalPointsN25QuotientTwoWBoundaryZLocal.lean",
+      "encoding": "utf-8",
+      "bytes": 23936,
+      "sha256": "b476cd44a13a89b389b5a3c685598792a4743689dfd0143b89d9e2f061839347"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/lead-receipt-r10.md",
+      "encoding": "utf-8",
+      "bytes": 1938,
+      "sha256": "2e3460bc3cf70ba4e54d672df10039dcb8b8794a79ee2f713a47a1dd84b6016a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/pending-localization/ActualYZOverlapLocalizationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 417,
+      "sha256": "5e51e6b28a829dc6ad0f19814bd906419c3e41d7e42b442af108bc860090cf73"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/pending-localization/GenericYZOverlapLocalizationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 10163,
+      "sha256": "03f6932413a0a8d3264f973171042b2c79842be5fa0892cb315f0dbf0fdc3b41"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/pending-localization/configuration-sync.json",
+      "encoding": "utf-8",
+      "bytes": 711,
+      "sha256": "db419f41ac020b6607929cc3a06536ceff2fa032e91dfbc37986a84b76f5423d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/pending-localization/generic-03.json",
+      "encoding": "utf-8",
+      "bytes": 309,
+      "sha256": "cd6af8cd419b3318df9da08c8aec997dccc8e7b8e27f56e0e0510cf17f3b0dc9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/pending-localization/generic-03.log",
+      "encoding": "utf-8",
+      "bytes": 10908,
+      "sha256": "e14de3619e9ea861d0b93c2035a83e826105a9f2174074e7dfe912d971da7030"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/pending-localization/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 1736,
+      "sha256": "2add444f4ce08a8bdd6ca73b8f0452e350f734ce0be3db44e6d89de9e2aedb96"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/pending-localization/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 885,
+      "sha256": "8013669099bfbcf243ad579cdff9624e15b975793ff1909257a85539df87afaa"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-r10-SYNC/verified-delta.json",
+      "encoding": "utf-8",
+      "bytes": 6723,
+      "sha256": "b595d0b642c0b81c489eb3ceaf228da10638b1366d2e04601d186ad2b24fc8c2"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r10.md",
+      "encoding": "utf-8",
+      "bytes": 5490,
+      "sha256": "c2d8b6aeb1ff1da3b12e1066fd41ca1d2b35c938e8567239656f6334375bd88f"
+    }
+  ]
+}

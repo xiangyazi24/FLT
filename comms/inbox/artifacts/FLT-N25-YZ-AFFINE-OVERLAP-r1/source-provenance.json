@@ -1,0 +1,40 @@
+{
+  "observed_source": "0b2cfe016226552b61f3ef4074a05e48cec50560",
+  "fixture_source_base": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "source_transition": "Parent reports r10 accepted all 14 preceding candidates at this source; requested synthInstance.maxHeartbeats synchronization only. Original exact-definition provenance retained below.",
+  "source_y_definitions": [
+    {
+      "declaration": "YChartRing",
+      "first_line": 32,
+      "sha256": "c5e14d881be7a009388a1f36f6a0addc040dd9de4f52e050175a1eaf2a30797a"
+    },
+    {
+      "declaration": "yZ",
+      "first_line": 36,
+      "sha256": "d443cd29c0e2b237c69f160a9d2826ba0761b1eeb136a2dc9f54a67b3d9d24a5"
+    },
+    {
+      "declaration": "yzW",
+      "first_line": 38,
+      "sha256": "6e49f968cf4e25c9077b790c8f16b1f7411dc0ffa5eb7b37f4bc4d266caaa0c8"
+    }
+  ],
+  "source_yX": {
+    "file": "/workspace/shared/flt-n25-yz-overlap-map/N25F_YZOverlapMap.lean",
+    "declaration": "MazurProof.N25F_YZOverlapMap.yX",
+    "text": "def yX : YChartRing := chartMap 1 (MvPolynomial.X 0)",
+    "sha256": "90dd6a7967d45a924c93948f459c6ff2245443af4157569ed318a6f5c7b312cb"
+  },
+  "imported_exact_definition_harnesses": [
+    {
+      "file": "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.lean",
+      "source_sha256": "f25ea10e112b5959eed4b18113a25056d4563ae1f4e4221811ebaf37c54fe24c",
+      "olean_sha256": "6037a2b6b4a9e7c353e2aca8036595f8bfb3cfe2c8290063c59b474b714662ef"
+    },
+    {
+      "file": "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean",
+      "source_sha256": "525985ce211f4c05c0b916949c026346d266f060263dfcbda296c28dc3daed17",
+      "olean_sha256": "244000f7f98bb99214bb655d62ef27a55c7886825ac5477d25abe170be3f0844"
+    }
+  ]
+}

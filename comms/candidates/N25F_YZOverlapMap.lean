@@ -2,6 +2,9 @@ import FLT.Assumptions.MazurProof.N25F_YZLocalZUnit
 import FLT.Assumptions.MazurProof.N25F_ZChartWChartEquiv
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenEvaluation
 
+-- Full-module imports make instance search slower than in dot's selective-import check.
+set_option synthInstance.maxHeartbeats 200000
+
 /-! The existing YZ-boundary local ring lies in the Y/Z chart overlap.
 Normalize its actual Y-chart point by the proved unit Z/Y to obtain the
 coordinate-rigid Z-chart algebra map, with exact coordinate formulas. -/

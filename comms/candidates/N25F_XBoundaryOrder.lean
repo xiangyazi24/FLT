@@ -29,6 +29,7 @@ local notation "W" => N25F_NonBoundaryPrincipalDivisor.W
 local notation "K" => FractionRing W
 local instance : xPrime.IsPrime := xPrime_isMaximal.isPrime
 
+set_option synthInstance.maxHeartbeats 200000 in
 /-- The common coordinate-rigid field is a fraction field of the actual
 X-boundary local ring. The scalar action is explicitly the established map. -/
 theorem xLocalToFraction_isFractionRing :

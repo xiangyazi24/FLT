@@ -4,6 +4,9 @@ import Mathlib.RingTheory.DedekindDomain.Dvr
 import Mathlib.RingTheory.Localization.LocalizationLocalization
 import Mathlib.RingTheory.OrderOfVanishing.Basic
 
+-- Full-module imports make instance search slower than in dot's selective-import check.
+set_option synthInstance.maxHeartbeats 200000
+
 /-! The actual Z-boundary DVR embeds coordinate-rigidly in FractionRing W.
 Its genuine length order extends to nonzero functions and gives qz pole
 order two at the existing boundary point [0:0:1:0]. -/
