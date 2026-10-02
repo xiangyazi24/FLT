@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-separable/GenericSeparableTwist.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 33.481706566002686,
+  "peak_child_rss_kib": 2395048,
+  "source_sha256": "a107232ddd5d50d9dddc0f00312abec3f348c12ade2399faa9b0786162106a08"
+}

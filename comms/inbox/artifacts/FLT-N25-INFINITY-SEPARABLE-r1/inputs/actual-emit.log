@@ -1,0 +1,67 @@
+/workspace/shared/flt-n25-infinity-field/InfinityFunctionFieldCheck.lean:51:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_InfinityFunctionField.affinePolynomialBaseToField_injective`:
+  [Module.Finite BasePolynomial W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.Finite BasePolynomial W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-infinity-field/InfinityFunctionFieldCheck.lean:89:32: warning: This simp argument is unused:
+  IsScalarTower.coe_toAlgHom
+
+Hint: Omit it from the simp argument list.
+  simp only [AlgHom.comp_apply, I̵s̵S̵c̵a̵l̵a̵r̵T̵o̵w̵e̵r̵.̵c̵o̵e̵_̵t̵o̵A̵l̵g̵H̵o̵m̵,̵ ̵infinityBaseToField, Polynomial.aeval_X]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+affinePolynomialBaseToField : BasePolynomial →ₐ[ZMod 2] CurveField
+'MazurProof.N25F_InfinityFunctionField.affinePolynomialBaseToField' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@affinePolynomialBaseToField_injective : ∀ [Module.IsTorsionFree BasePolynomial W] [IsDedekindDomain W]
+  [Module.Finite BasePolynomial W], Function.Injective ⇑affinePolynomialBaseToField
+'MazurProof.N25F_InfinityFunctionField.affinePolynomialBaseToField_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@affineRationalBaseToField : [Module.IsTorsionFree BasePolynomial W] →
+  [IsDedekindDomain W] → [Module.Finite BasePolynomial W] → BaseField →ₐ[ZMod 2] CurveField
+'MazurProof.N25F_InfinityFunctionField.affineRationalBaseToField' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@affineRationalBaseToField_algebraMap : ∀ [inst : Module.IsTorsionFree BasePolynomial W] [inst_1 : IsDedekindDomain W]
+  [inst_2 : Module.Finite BasePolynomial W] (p : BasePolynomial),
+  affineRationalBaseToField ((algebraMap BasePolynomial BaseField) p) = affinePolynomialBaseToField p
+'MazurProof.N25F_InfinityFunctionField.affineRationalBaseToField_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@affineRationalBaseToField_variable : ∀ [inst : Module.IsTorsionFree BasePolynomial W] [inst_1 : IsDedekindDomain W]
+  [inst_2 : Module.Finite BasePolynomial W], affineRationalBaseToField baseVariable = (algebraMap W CurveField) qz
+'MazurProof.N25F_InfinityFunctionField.affineRationalBaseToField_variable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@infinityRationalBaseToField : [Module.IsTorsionFree BasePolynomial W] →
+  [IsDedekindDomain W] → [Module.Finite BasePolynomial W] → BaseField →ₐ[ZMod 2] CurveField
+'MazurProof.N25F_InfinityFunctionField.infinityRationalBaseToField' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@infinityRationalBaseToField_comp_algebraMap : ∀ [inst : Module.IsTorsionFree BasePolynomial W]
+  [inst_1 : IsDedekindDomain W] [inst_2 : Module.Finite BasePolynomial W],
+  infinityRationalBaseToField.comp (IsScalarTower.toAlgHom (ZMod 2) BasePolynomial BaseField) = infinityBaseToField
+'MazurProof.N25F_InfinityFunctionField.infinityRationalBaseToField_comp_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@infinityRationalBaseToField_algebraMap : ∀ [inst : Module.IsTorsionFree BasePolynomial W] [inst_1 : IsDedekindDomain W]
+  [inst_2 : Module.Finite BasePolynomial W] (p : BasePolynomial),
+  infinityRationalBaseToField ((algebraMap BasePolynomial BaseField) p) = infinityBaseToField p
+'MazurProof.N25F_InfinityFunctionField.infinityRationalBaseToField_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@affineRationalBaseToField_finrank : ∀ [inst : Module.IsTorsionFree BasePolynomial W] [inst_1 : IsDedekindDomain W]
+  [inst_2 : Module.Finite BasePolynomial W],
+  Module.finrank BasePolynomial W = 4 → Module.finrank BaseField CurveField = 4
+'MazurProof.N25F_InfinityFunctionField.affineRationalBaseToField_finrank' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@infinityRationalBaseToField_finite_finrank : ∀ [inst : Module.IsTorsionFree BasePolynomial W]
+  [inst_1 : IsDedekindDomain W] [inst_2 : Module.Finite BasePolynomial W],
+  Module.finrank BasePolynomial W = 4 → Module.Finite BaseField CurveField ∧ Module.finrank BaseField CurveField = 4
+'MazurProof.N25F_InfinityFunctionField.infinityRationalBaseToField_finite_finrank' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

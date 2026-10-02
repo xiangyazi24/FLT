@@ -1,0 +1,43 @@
+{
+  "accepted_source_commit": "366318f1af7d6a6722cc90fee468a2b0c5dcf9ea",
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "checks": [
+    {
+      "name": "generic-01",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-separable/GenericSeparableTwist.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 33.481706566002686,
+      "peak_child_rss_kib": 2395048,
+      "source_sha256": "a107232ddd5d50d9dddc0f00312abec3f348c12ade2399faa9b0786162106a08"
+    },
+    {
+      "name": "actual-01",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-separable/InfinitySeparableCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 42.84855900099865,
+      "peak_child_rss_kib": 2487904,
+      "source_sha256": "eec627a363067dcd4fd86b93b7d3bfaa2186c0b95cf35aacb5ecdb71fd32ddb2"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "harness_existing_separability_action": "FractionRing.liftAlgebra (R := BasePolynomial) (K := CurveField)",
+  "harness_conclusion_action": "infinityRationalBaseToField.toRingHom.toAlgebra",
+  "import": {
+    "source_sha256": "87783b448ce33a86c618d6c36a5e3da4315fdd5cb07667c6feec4e41e007179e",
+    "olean_sha256": "b72b8308c686ef78ef372937dab3a0af9acd648b40ddf87d91623fe0a45e8008"
+  },
+  "accepted_field_byte_check": {
+    "name": "N25F_InfinityFunctionField.lean",
+    "sha": "24effc2e9208373e6e93607a1c6d588e8b5ea1d5",
+    "byte_equal": true
+  }
+}

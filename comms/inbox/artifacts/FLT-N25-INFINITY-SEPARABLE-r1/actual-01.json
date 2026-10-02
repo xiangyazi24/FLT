@@ -1,0 +1,10 @@
+{
+  "name": "actual-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-separable/InfinitySeparableCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 42.84855900099865,
+  "peak_child_rss_kib": 2487904,
+  "source_sha256": "eec627a363067dcd4fd86b93b7d3bfaa2186c0b95cf35aacb5ecdb71fd32ddb2"
+}

@@ -1,0 +1,5 @@
+import FLT.Assumptions.MazurProof.N25F_InfinitySeparable
+
+#print axioms MazurProof.N25F_InfinitySeparable.affineRationalBaseToField_eq_canonicalLift
+#print axioms MazurProof.N25F_InfinitySeparable.affineRationalBaseToField_isSeparable
+#print axioms MazurProof.N25F_InfinitySeparable.infinityRationalBaseToField_isSeparable
