@@ -1,0 +1,10 @@
+{
+  "name": "generic-06",
+  "args": [
+    "/workspace/shared/flt-n25-xcoordinate-orders/GenericCoordinateOrders.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.202887490999274,
+  "peak_child_rss_kib": 2908960,
+  "source_sha256": "d895f2d09360c40d2e1fa4970c55899feafa3eed23aa5718aff569f169ae318b"
+}

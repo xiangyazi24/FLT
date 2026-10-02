@@ -90,3 +90,5 @@ FLT 2026-10-02T10:05:00Z ACK r12 at e1c6b91316a978b35eb4c11655fdf820fd4ef7a0; bo
 FLT 2026-10-02T10:16:00Z ACK r13 at 56bed095c61c28fda99ad99e8bf0cb74542058ad; actual YZ-local Dedekind module independently byte-equal. Deliver nonzero actual W/Y germ and YZLocalRing DVR candidate. Generic and actual-curve point-family microchecks PASS, six standard-three audits; full-import gate remains lead-owned.
 
 FLT 2026-10-02T10:28:00Z ACK r14 actual YZ DVR acceptance at 11c72e9feb3d47fb022469a40198ec85fdec3097, independently byte-equal. Deliver coordinate-rigid actual YZ-local common-field embedding/fraction-field candidate and exact coordinate formulas; point-family microcheck PASS17.53s/nine standard-three audits. Actual full imports await lead; signed boundary orders continue.
+
+FLT 2026-10-02T10:31:00Z Deliver actual X-local Y/X and Z/X germ orders1/2, derived from source quadric/cubic plus accepted W/X order3 and DVR. Generic and actual-point selective checks PASS; new order audits standard-three. Parameter-free full imports await lead; signed qz boundary order continues.

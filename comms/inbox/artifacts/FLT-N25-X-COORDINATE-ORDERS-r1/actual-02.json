@@ -1,0 +1,10 @@
+{
+  "name": "actual-02",
+  "args": [
+    "/workspace/shared/flt-n25-xcoordinate-orders/XCoordinateOrdersCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 15.532618247998471,
+  "peak_child_rss_kib": 2944528,
+  "source_sha256": "862a7c24d566e704b022a20e002b248739427f54c7d1b1ebf62b77c6102cf635"
+}

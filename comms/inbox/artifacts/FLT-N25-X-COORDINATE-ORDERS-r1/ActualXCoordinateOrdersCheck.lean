@@ -1,0 +1,6 @@
+import FLT.Assumptions.MazurProof.N25F_XCoordinateOrders
+
+#print axioms MazurProof.N25F_XCoordinateOrders.xYGerm
+#print axioms MazurProof.N25F_XCoordinateOrders.xZGerm
+#print axioms MazurProof.N25F_XCoordinateOrders.xYGerm_ord_eq_one
+#print axioms MazurProof.N25F_XCoordinateOrders.xZGerm_ord_eq_two

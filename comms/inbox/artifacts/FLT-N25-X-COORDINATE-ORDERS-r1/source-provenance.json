@@ -1,0 +1,15 @@
+{
+  "accepted_source_commit": "11c72e9feb3d47fb022469a40198ec85fdec3097",
+  "defining_chart_source_pin": "56bed095c61c28fda99ad99e8bf0cb74542058ad",
+  "defining_chart_git_blob_sha": "7dd2a3b0dcaf84ac8afa1ea9b5151327c9cb0539",
+  "fixture_import": {
+    "module": "XChartFractionEquivCheck",
+    "source_sha256": "f57fe127aafc8f04721675974801c323eba429977c69e55f8547d944ff20355b",
+    "olean_sha256": "719dfca2f146f2e12053b52784a786bbc395da32369bf2da73aa36adaee22e9e"
+  },
+  "fixture_explicit_parameters": [
+    "IsDedekindDomain W",
+    "Ring.ord XLocalRing xWGerm = 3"
+  ],
+  "actual_point_binding": "copied exact source xChartEval and xPrime; no arbitrary point parameter"
+}
