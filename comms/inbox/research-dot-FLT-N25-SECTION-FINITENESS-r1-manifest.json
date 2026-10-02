@@ -1,0 +1,84 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "cbc18db13c9d5c3219c54407ff43aa84d4e01334",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 36141,
+      "sha256": "a4fd73dac2dac3a672816ff28e6ee7e170a8cc0a26c526466b93206f1b759293"
+    },
+    {
+      "path": "comms/candidates/N25F_SectionFiniteness.lean",
+      "encoding": "utf-8",
+      "bytes": 4737,
+      "sha256": "eb5c0425afabce6f308a28fbe9aa89d217e640aa278a0fea849c82e0c3ac3b8e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/ActualSectionFinitenessCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 642,
+      "sha256": "1f17fc37c0394dc77f9dda960605a7a1f46caed2188e2f60bee020eb49cc4dd6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/RiemannRochSpaceFamilyInput.lean",
+      "encoding": "utf-8",
+      "bytes": 5016,
+      "sha256": "30c1b5264b9f0865a0fb90b630b8666df3d78bac371f2e44477d722a623e8a44"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/SectionFinitenessFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 17241,
+      "sha256": "a3e87a3eee2c6be8b211b710469714196eaf2ca74e72058b42ddb54b6dcf5d9f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/effective-source.lean",
+      "encoding": "utf-8",
+      "bytes": 8187,
+      "sha256": "e978466206274f2441e6a26a27489cfbe6378bcdddf5deb6a0ba53cff1bc1440"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/family-01.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "f4e21be9fc2198959d1d00986b7413e92d55e89a4e23b1626c6343c7a0ed504f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/family-01.log",
+      "encoding": "utf-8",
+      "bytes": 1066,
+      "sha256": "801f625e4bc24e51a9561badfede5ccbc45fc760f86d451195059f14cf71f5b6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/make_family.py",
+      "encoding": "utf-8",
+      "bytes": 4111,
+      "sha256": "69d9214a8eaa1b5535e1056155ca60618de77c9256e290847d82affc1c5fdf37"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/picard-source.lean",
+      "encoding": "utf-8",
+      "bytes": 8088,
+      "sha256": "a0000a5b3ee6b87bd3393129f4d5f0240f261de25063826821f07cf1e16650b5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 880,
+      "sha256": "0c5d86e265e2f0b47fad3754cbac28df284f0bd08d58cd1b47542e677abddf0e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-SECTION-FINITENESS-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1135,
+      "sha256": "48ae86b91f67886f5bfe9e5d7d2159b5807e4423d6459df5c382fad69c958e3c"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-SECTION-FINITENESS-r1.md",
+      "encoding": "utf-8",
+      "bytes": 3217,
+      "sha256": "9063156c5882f3cafc38a7ef34cee549e2378ed26ca00eb6678d4a02791ac894"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+import FLT.Assumptions.MazurProof.N25F_SectionFiniteness
+
+#print axioms MazurProof.N25F_SectionFiniteness.NonzeroSection25Two
+#print axioms MazurProof.N25F_SectionFiniteness.effectiveDivisorOfNonzeroSection25Two
+#print axioms MazurProof.N25F_SectionFiniteness.effectiveDivisorOfNonzeroSection25Two_cast
+#print axioms MazurProof.N25F_SectionFiniteness.effectiveDivisorOfNonzeroSection25Two_injective
+#print axioms MazurProof.N25F_SectionFiniteness.nonzeroSection25Two_finite
+#print axioms MazurProof.N25F_SectionFiniteness.fullRiemannRochSpace25Two_finite
+#print axioms MazurProof.N25F_SectionFiniteness.fullRiemannRochSpace25Two_moduleFinite

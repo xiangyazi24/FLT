@@ -1,0 +1,10 @@
+{
+  "name": "family-01",
+  "args": [
+    "/workspace/shared/flt-n25-section-finiteness/SectionFinitenessFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.933567592001054,
+  "peak_child_rss_kib": 2037428,
+  "source_sha256": "a3e87a3eee2c6be8b211b710469714196eaf2ca74e72058b42ddb54b6dcf5d9f"
+}

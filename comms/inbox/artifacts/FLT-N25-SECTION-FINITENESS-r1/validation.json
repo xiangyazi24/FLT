@@ -1,0 +1,35 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "cbc18db13c9d5c3219c54407ff43aa84d4e01334",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "NonzeroSection25Two",
+    "effectiveDivisorOfNonzeroSection25Two",
+    "effectiveDivisorOfNonzeroSection25Two_cast",
+    "effectiveDivisorOfNonzeroSection25Two_injective",
+    "nonzeroSection25Two_finite",
+    "fullRiemannRochSpace25Two_finite",
+    "fullRiemannRochSpace25Two_moduleFinite"
+  ],
+  "passed": [
+    {
+      "name": "family-01",
+      "args": [
+        "/workspace/shared/flt-n25-section-finiteness/SectionFinitenessFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 5.933567592001054,
+      "peak_child_rss_kib": 2037428,
+      "source_sha256": "a3e87a3eee2c6be8b211b710469714196eaf2ca74e72058b42ddb54b6dcf5d9f"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "full_grading_finite_producer": "complete proof included, all degrees",
+  "portable_generator_exact_reproduction": true,
+  "picard_finiteness": "OPEN",
+  "riemann_roch_rank_identity": "OPEN"
+}

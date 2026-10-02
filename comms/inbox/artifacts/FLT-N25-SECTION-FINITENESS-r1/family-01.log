@@ -1,0 +1,22 @@
+'MazurProof.CurveZetaEffectiveDivisors.ClosedPointGrading.effDivOfDegreeFinite' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionFiniteness.NonzeroSection25Two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_SectionFiniteness.effectiveDivisorOfNonzeroSection25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionFiniteness.effectiveDivisorOfNonzeroSection25Two_cast' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionFiniteness.effectiveDivisorOfNonzeroSection25Two_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionFiniteness.nonzeroSection25Two_finite' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionFiniteness.fullRiemannRochSpace25Two_finite' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionFiniteness.fullRiemannRochSpace25Two_moduleFinite' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
