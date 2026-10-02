@@ -1,0 +1,1 @@
+'MazurProof.N25F_BinaryResidueOrder.log_ordFrac_sub_one_pos' depends on axioms: [propext, Classical.choice, Quot.sound]

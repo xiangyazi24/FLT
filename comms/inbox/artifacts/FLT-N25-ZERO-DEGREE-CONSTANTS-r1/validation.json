@@ -1,0 +1,71 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "e08cf8eeca5f5b55ec85cfb530f8b9f2701342ff",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_BinaryResidueOrder.log_ordFrac_sub_one_pos",
+    "MazurProof.N25F_ZeroDegreeConstants.one_mem_fullRiemannRochSpace25Two_zero",
+    "MazurProof.N25F_ZeroDegreeConstants.xBoundaryOrder_eq_zero_of_mem_zero",
+    "MazurProof.N25F_ZeroDegreeConstants.mem_fullRiemannRochSpace25Two_zero_iff",
+    "MazurProof.N25F_ZeroDegreeConstants.fullRiemannRochSpace25Two_zero_eq_span_one",
+    "MazurProof.N25F_ZeroDegreeConstants.fullRiemannRochSpace25Two_zero_finite",
+    "MazurProof.N25F_ZeroDegreeConstants.finrank_fullRiemannRochSpace25Two_zero",
+    "MazurProof.N25F_ZeroDegreeConstants.fullPrincipalDivisor_eq_zero_iff",
+    "MazurProof.N25F_ZeroDegreeConstants.fullPrincipalDivisor_injective"
+  ],
+  "production_additional_hypotheses": [],
+  "passed": [
+    {
+      "name": "residue-01",
+      "args": [
+        "/workspace/shared/flt-n25-zero-degree-constants/BinaryResidueOrderCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 58.78871996800444,
+      "peak_child_rss_kib": 2907044,
+      "source_sha256": "1b3e05fc5c4662fd4d4847c5c9ae50e80ba13be3bedfebc7f848386f8d3d7d86"
+    },
+    {
+      "name": "constants-family-04",
+      "args": [
+        "/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 14.350224495996372,
+      "peak_child_rss_kib": 2947152,
+      "source_sha256": "3ab542b14b2270bd48668aaa73994abe56ce01d173c134dced67f2f3898b862f"
+    }
+  ],
+  "failed": [
+    {
+      "name": "constants-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 20.509347047998745,
+      "peak_child_rss_kib": 2903668,
+      "source_sha256": "e41e92f0c7f208b3154bd858d2bd5c4932bcd33fdae0a0f5e941cbf081cec296"
+    },
+    {
+      "name": "constants-family-03",
+      "args": [
+        "/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 11.184761365002487,
+      "peak_child_rss_kib": 2949040,
+      "source_sha256": "a98b74941f1ff3396f768492fceb69daa55780a40a718566add2f713222ea932"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "degree_zero_rank": 1,
+  "all_degrees_finiteness": "NEXT TARGET",
+  "picard_finiteness": "OPEN",
+  "riemann_roch_rank_identity": "OPEN"
+}

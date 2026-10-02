@@ -1,0 +1,10 @@
+{
+  "name": "constants-family-01",
+  "args": [
+    "/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 20.509347047998745,
+  "peak_child_rss_kib": 2903668,
+  "source_sha256": "e41e92f0c7f208b3154bd858d2bd5c4932bcd33fdae0a0f5e941cbf081cec296"
+}

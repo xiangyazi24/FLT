@@ -1,0 +1,10 @@
+{
+  "name": "residue-01",
+  "args": [
+    "/workspace/shared/flt-n25-zero-degree-constants/BinaryResidueOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 58.78871996800444,
+  "peak_child_rss_kib": 2907044,
+  "source_sha256": "1b3e05fc5c4662fd4d4847c5c9ae50e80ba13be3bedfebc7f848386f8d3d7d86"
+}

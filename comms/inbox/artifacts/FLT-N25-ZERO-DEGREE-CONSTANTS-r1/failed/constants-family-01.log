@@ -1,0 +1,82 @@
+/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean:232:71: error: unexpected token 'include'; expected 'lemma'
+/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean:248:45: error: unsolved goals
+L : Type u_1
+inst✝⁶ : Field L
+C : ClosedPointGrading
+inst✝⁵ : Algebra (ZMod 2) L
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+hzero : ∀ (f : Additive Lˣ), C.divisorDegree (principal f) = 0
+R : Type u_2
+inst✝⁴ : CommRing R
+inst✝³ : IsDomain R
+inst✝² : IsDiscreteValuationRing R
+inst✝¹ : Algebra R L
+inst✝ : IsFractionRing R L
+x : C.Atom
+hdeg : C.atomDegree x = 1
+hpoint : ∀ (f : Additive Lˣ), (principal f) x = ((Ring.ordFrac R) ↑(Additive.toMul f)).log
+f : Additive Lˣ
+hf : ↑(Additive.toMul f) ∈ fullRiemannRochSpace25Two C principal hmin 0
+hb : ∀ (A : C.Atom), 0 ≤ (principal f) A
+hx : 0 ≤ ((Ring.ordFrac R) ↑(Additive.toMul f)).log
+hne : ¬((Ring.ordFrac R) ↑(Additive.toMul f)).log = 0
+hpos : 0 < ((Ring.ordFrac R) ↑(Additive.toMul f)).log
+⊢ ((-Finsupp.single x 1).sum fun x m => m * ↑(C.atomDegree x)) < 0
+/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean:249:44: warning: This simp argument is unused:
+  hdeg
+
+Hint: Omit it from the simp argument list.
+  simp [ClosedPointGrading.divisorDegree,̵ ̵h̵d̵e̵g̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean:263:79: error: unexpected token 'include'; expected 'lemma'
+/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean:282:66: error: Application type mismatch: The argument
+  one_mem_fullRiemannRochSpace25Two_zero
+has type
+  ∀ (C : ClosedPointGrading) [inst : Algebra (ZMod 2) ?m.263] (principal : Additive ?m.263ˣ →+ C.Divisor)
+    (hmin :
+      ∀ (f g h : Additive ?m.263ˣ),
+        ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+          ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A),
+    1 ∈ fullRiemannRochSpace25Two C principal hmin 0
+but is expected to have type
+  ?m.262 ∈ fullRiemannRochSpace25Two C principal hmin 0
+in the application
+  Submodule.sub_mem (fullRiemannRochSpace25Two C principal hmin 0) ha one_mem_fullRiemannRochSpace25Two_zero
+/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean:282:105: error: Invalid argument name `C` for function `Submodule.sub_mem`
+
+Hint: Perhaps you meant one of the following parameter names:
+  • `R`: C̵R̲
+  • `M`: C̵M̲
+  • `module_M`: C̵m̲o̲d̲u̲l̲e̲_̲M̲
+  • `p`: C̵p̲
+  • `x`: C̵x̲
+  • `y`: C̵y̲
+/workspace/shared/flt-n25-zero-degree-constants/ZeroDegreeConstantsFamilyCheck.lean:290:81: error: unexpected token 'include'; expected 'lemma'
+'MazurProof.N25F_ZeroDegreeConstants.one_mem_fullRiemannRochSpace25Two_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.xBoundaryOrder_eq_zero_of_mem_zero' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.mem_fullRiemannRochSpace25Two_zero_iff' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.fullRiemannRochSpace25Two_zero_eq_span_one' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.fullRiemannRochSpace25Two_zero_finite' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.finrank_fullRiemannRochSpace25Two_zero' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,24 @@
+'MazurProof.N25F_ZeroDegreeConstants.one_mem_fullRiemannRochSpace25Two_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.xBoundaryOrder_eq_zero_of_mem_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.mem_fullRiemannRochSpace25Two_zero_iff' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.fullRiemannRochSpace25Two_zero_eq_span_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.fullRiemannRochSpace25Two_zero_finite' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.finrank_fullRiemannRochSpace25Two_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.fullPrincipalDivisor_eq_zero_iff' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ZeroDegreeConstants.fullPrincipalDivisor_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
