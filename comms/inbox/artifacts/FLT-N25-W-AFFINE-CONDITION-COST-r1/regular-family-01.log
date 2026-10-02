@@ -1,0 +1,16 @@
+/workspace/shared/flt-n25-affine-regular-lift/WRegularSectionLiftFamilyCheck.lean:267:12: warning: `mul_le_mul_right'` has been deprecated: Use `mul_le_mul_left` instead
+'MazurProof.N25F_WRegularSectionLift.existsUnique_wChart_lift_of_mem_basePole_space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WRegularSectionLift.wRegularSectionLift25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WRegularSectionLift.algebraMap_wRegularSectionLift25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WRegularSectionLift.wRegularSectionLiftLinearMap25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WRegularSectionLift.wRegularSectionLiftLinearMap25Two_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

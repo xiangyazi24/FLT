@@ -1,0 +1,10 @@
+{
+  "name": "cost-family-01",
+  "args": [
+    "/workspace/shared/flt-n25-affine-regular-lift/WAffineConditionCostFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 15.127157351998903,
+  "peak_child_rss_kib": 2859368,
+  "source_sha256": "ebe3182e90e17c05599261932300fa79db2a2a296c5a4bf3f47094f088e25be3"
+}

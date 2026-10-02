@@ -1,0 +1,162 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "4d3482cbd4e6212f7097371dc3388f8934793c51",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 39199,
+      "sha256": "9fa60d29b1190b7b9ab17fa007c137fbae6669c6c3f3a0c1eb5b9ef6b8ecf540"
+    },
+    {
+      "path": "comms/candidates/N25F_DedekindOrderMembership.lean",
+      "encoding": "utf-8",
+      "bytes": 3823,
+      "sha256": "356f5b6fe7ef2d22e4a5f2ea3eb68cd83f14ab0aa78994a845be6e3a4da14d5e"
+    },
+    {
+      "path": "comms/candidates/N25F_WAffineConditionCost.lean",
+      "encoding": "utf-8",
+      "bytes": 4598,
+      "sha256": "c2440b3a8dfbc17992d994e8774c5baa65d2b6d961887987cdd363ab8ec5b5ba"
+    },
+    {
+      "path": "comms/candidates/N25F_WRegularSectionLift.lean",
+      "encoding": "utf-8",
+      "bytes": 4402,
+      "sha256": "d0918b21f2169696922abedae5395a67b8e242f89e0c39a0956656e92aea26dc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/ActualWAffineConditionCostCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1324,
+      "sha256": "cb2629f1ccf0af2b011186b8966ef7b0fe31bd3ec8c92919255bc954111f841b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/CurveDedekindDivisorInput.lean",
+      "encoding": "utf-8",
+      "bytes": 4199,
+      "sha256": "37aac2b75aca0d95e3f367a5e3e1e524c3bae2bc55e16e96c04b6f05bc9b6580"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/DedekindOrderMembershipCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 7708,
+      "sha256": "8d26a5eaac4642875e9fb9e5d892bffd9b7b021cabecea41e868f4c40d1fa2a8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/RiemannRochSpaceFamilyInput.lean",
+      "encoding": "utf-8",
+      "bytes": 5016,
+      "sha256": "30c1b5264b9f0865a0fb90b630b8666df3d78bac371f2e44477d722a623e8a44"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/WAffineConditionCostFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 27345,
+      "sha256": "ebe3182e90e17c05599261932300fa79db2a2a296c5a4bf3f47094f088e25be3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/WRegularSectionLiftFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 18039,
+      "sha256": "cb2b86c1e01606e272d36ba5ce0ff50aaa81346fcda0b8c539953b6d0fe1b70d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/accepted-N25F_DedekindFactorDegree.lean",
+      "encoding": "utf-8",
+      "bytes": 3417,
+      "sha256": "b536b08c43bbfe3d60121419ddb3d526971ea2eb8db91f02aa92ba43ca79d2f3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/cost-family-01.json",
+      "encoding": "utf-8",
+      "bytes": 308,
+      "sha256": "3e29dfe441e33ffca1d095ea4a2c99cef85d721dc3aed88c277a09eadc475c0a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/cost-family-01.log",
+      "encoding": "utf-8",
+      "bytes": 1408,
+      "sha256": "4d056b82de6d5a4a2299836162754639fa87af628e25e2699c22e8a127608596"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/failed/DedekindOrderMembershipCheck-failed-01.lean",
+      "encoding": "utf-8",
+      "bytes": 7718,
+      "sha256": "2642ed9d884c13b0c85e5cf6e21f983ad02d4c4314500a96fed30332610adf0f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/failed/membership-01.json",
+      "encoding": "utf-8",
+      "bytes": 303,
+      "sha256": "ab9c5d27f1338ee8e364f37ef0f371b5be7825e64622a9283c7c7035e094f915"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/failed/membership-01.log",
+      "encoding": "utf-8",
+      "bytes": 2017,
+      "sha256": "75c3774ac055861bddd748d88cc240c28217e7279343d5f779ac7fa25ce9b900"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/make_cost_family.py",
+      "encoding": "utf-8",
+      "bytes": 3523,
+      "sha256": "c5c75eddddfdf1f3eca83ad52787abe03a8a384c0f8dfa9f23a5a111c2c7c3ad"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/make_membership.py",
+      "encoding": "utf-8",
+      "bytes": 607,
+      "sha256": "0e664a86c2590cf863cc3621dbb5dd58b1e83fde1f35c1fd15aabd4881dde513"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/make_regular_family.py",
+      "encoding": "utf-8",
+      "bytes": 3737,
+      "sha256": "15781aa4e57fda17519bae1692041d04ca58278b66a09eb13d457479c235aacb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/membership-02.json",
+      "encoding": "utf-8",
+      "bytes": 304,
+      "sha256": "aac584a6559774dde83964841ae5dd5cbb764bcffadc6245695956ed8a76f70a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/membership-02.log",
+      "encoding": "utf-8",
+      "bytes": 726,
+      "sha256": "45233f1f02b44f7982abb140455967097df41d12b09576f57b79044a713cb22c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/regular-family-01.json",
+      "encoding": "utf-8",
+      "bytes": 310,
+      "sha256": "9226838d601e77c2b80b65c0cc9a254cf36c0f02d2ae81e9f268dfa1c03af1a1"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/regular-family-01.log",
+      "encoding": "utf-8",
+      "bytes": 851,
+      "sha256": "f4a87973921266357ea16fe7815cfe7366ccd3b3471959aa4c243745d81f92ee"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 881,
+      "sha256": "114facc6eea3a216a088a16055fdfc8a760df4c2250396105b162ac0abad1cae"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-AFFINE-CONDITION-COST-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 3417,
+      "sha256": "31b50d6f25a831ec91ed38237f7d03cc451b8bf893482f9e9639dcd7233d751d"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-W-AFFINE-CONDITION-COST-r1.md",
+      "encoding": "utf-8",
+      "bytes": 5064,
+      "sha256": "ef3d0bed87d98580a5693e8395893ea3ba6a4549030e8d77de7d3b6fc4eb2bcb"
+    }
+  ]
+}

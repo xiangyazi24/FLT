@@ -1,0 +1,10 @@
+{
+  "name": "membership-01",
+  "args": [
+    "/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 54.70811703999789,
+  "peak_child_rss_kib": 2805596,
+  "source_sha256": "2642ed9d884c13b0c85e5cf6e21f983ad02d4c4314500a96fed30332610adf0f"
+}

@@ -1,0 +1,81 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "4d3482cbd4e6212f7097371dc3388f8934793c51",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_DedekindOrderMembership.fractionalIdeal_le_one_of_count_nonneg",
+    "MazurProof.N25F_DedekindOrderMembership.fractionalIdeal_le_of_count_le",
+    "MazurProof.N25F_DedekindOrderMembership.existsUnique_algebraMap_eq_of_count_nonneg",
+    "MazurProof.N25F_DedekindOrderMembership.mem_fractionalIdeal_iff_count_le",
+    "MazurProof.N25F_WRegularSectionLift.existsUnique_wChart_lift_of_mem_basePole_space",
+    "MazurProof.N25F_WRegularSectionLift.wRegularSectionLift25Two",
+    "MazurProof.N25F_WRegularSectionLift.algebraMap_wRegularSectionLift25Two",
+    "MazurProof.N25F_WRegularSectionLift.wRegularSectionLiftLinearMap25Two",
+    "MazurProof.N25F_WRegularSectionLift.wRegularSectionLiftLinearMap25Two_injective",
+    "MazurProof.N25F_WAffineConditionCost.wSectionIdealQuotient25Two",
+    "MazurProof.N25F_WAffineConditionCost.wSectionIdealQuotient25Two_eq_zero_iff",
+    "MazurProof.N25F_WAffineConditionCost.wSectionIdealQuotient25Two_eq_zero_iff_orders",
+    "MazurProof.N25F_WAffineConditionCost.finrank_basePole_le_kernel_add_ideal_quotient",
+    "MazurProof.N25F_WAffineConditionCost.finrank_basePole_le_kernel_add_weighted_affine_cost"
+  ],
+  "passed": [
+    {
+      "name": "membership-02",
+      "args": [
+        "/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 30.148708553999313,
+      "peak_child_rss_kib": 2792072,
+      "source_sha256": "8d26a5eaac4642875e9fb9e5d892bffd9b7b021cabecea41e868f4c40d1fa2a8"
+    },
+    {
+      "name": "regular-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-affine-regular-lift/WRegularSectionLiftFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 11.118886653996015,
+      "peak_child_rss_kib": 2841144,
+      "source_sha256": "cb2b86c1e01606e272d36ba5ce0ff50aaa81346fcda0b8c539953b6d0fe1b70d"
+    },
+    {
+      "name": "cost-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-affine-regular-lift/WAffineConditionCostFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 15.127157351998903,
+      "peak_child_rss_kib": 2859368,
+      "source_sha256": "ebe3182e90e17c05599261932300fa79db2a2a296c5a4bf3f47094f088e25be3"
+    }
+  ],
+  "failed": [
+    {
+      "name": "membership-01",
+      "args": [
+        "/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 54.70811703999789,
+      "peak_child_rss_kib": 2805596,
+      "source_sha256": "2642ed9d884c13b0c85e5cf6e21f983ad02d4c4314500a96fed30332610adf0f"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "linter_warnings": [
+    "Supported deprecated multiplication monotonicity alias",
+    "One unused generic finite-type instance in kernel identity"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "current_weighted_formula_blob": "8fbc4b58fda1005453cdf6075bfd65dff22867b8",
+  "old_W_ideal_wrapper": "ABSENT at accepted source, NOT USED",
+  "actual_regular_lift_and_affine_cost": "PROVED IN CANDIDATE CHAIN",
+  "final_kernel_as_shifted_section_space": "OPEN",
+  "general_divisor_lower_bound": "OPEN",
+  "picard_finiteness": "OPEN"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "regular-family-01",
+  "args": [
+    "/workspace/shared/flt-n25-affine-regular-lift/WRegularSectionLiftFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 11.118886653996015,
+  "peak_child_rss_kib": 2841144,
+  "source_sha256": "cb2b86c1e01606e272d36ba5ce0ff50aaa81346fcda0b8c539953b6d0fe1b70d"
+}

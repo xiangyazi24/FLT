@@ -1,0 +1,13 @@
+/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean:132:12: warning: `mul_le_mul_right'` has been deprecated: Use `mul_le_mul_left` instead
+'MazurProof.N25F_DedekindOrderMembership.fractionalIdeal_le_one_of_count_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_DedekindOrderMembership.fractionalIdeal_le_of_count_le' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_DedekindOrderMembership.existsUnique_algebraMap_eq_of_count_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_DedekindOrderMembership.mem_fractionalIdeal_iff_count_le' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

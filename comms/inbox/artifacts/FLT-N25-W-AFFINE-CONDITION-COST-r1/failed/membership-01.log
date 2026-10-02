@@ -1,0 +1,47 @@
+/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean:132:12: error(lean.unknownIdentifier): Unknown constant `FractionalIdeal.mul_le_mul_right`
+/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean:126:76: error: unsolved goals
+R : Type u_1
+K : Type u_2
+inst✝⁴ : CommRing R
+inst✝³ : IsDedekindDomain R
+inst✝² : Field K
+inst✝¹ : Algebra R K
+inst✝ : IsFractionRing R K
+I J : FractionalIdeal R⁰ K
+hI : I ≠ 0
+hJ : J ≠ 0
+hc : ∀ (v : HeightOneSpectrum R), FractionalIdeal.count K v J ≤ FractionalIdeal.count K v I
+hprod : I * J⁻¹ ≤ 1
+⊢ I ≤ J
+/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean:146:6: error: Application type mismatch: The argument
+  FractionalIdeal.mem_spanSingleton_self ?m.99
+has type
+  ∀ (x : ?m.100), x ∈ FractionalIdeal.spanSingleton ?m.99 x
+but is expected to have type
+  f ∈ FractionalIdeal.spanSingleton R⁰ f
+in the application
+  fractionalIdeal_le_one_of_count_nonneg (FractionalIdeal.spanSingleton R⁰ f)
+    (FractionalIdeal.spanSingleton_ne_zero_iff.mpr hf) hc (FractionalIdeal.mem_spanSingleton_self ?m.99)
+/workspace/shared/flt-n25-affine-regular-lift/DedekindOrderMembershipCheck.lean:146:46: error: Application type mismatch: The argument
+  f
+has type
+  K
+but is expected to have type
+  Submonoid ?m.97
+in the application
+  @FractionalIdeal.mem_spanSingleton_self ?m.97 ?m.98 f
+'MazurProof.N25F_DedekindOrderMembership.fractionalIdeal_le_one_of_count_nonneg' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_DedekindOrderMembership.fractionalIdeal_le_of_count_le' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_DedekindOrderMembership.existsUnique_algebraMap_eq_of_count_nonneg' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_DedekindOrderMembership.mem_fractionalIdeal_iff_count_le' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
