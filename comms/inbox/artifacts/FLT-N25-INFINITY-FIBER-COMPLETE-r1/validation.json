@@ -1,0 +1,44 @@
+{
+  "source_commit": "e46e0b6107bf133c10cc2f02482fa835b91a7e71",
+  "accepted_files": [
+    {
+      "file": "N25F_InfinityResidueFields.lean",
+      "sha": "18c50ccdb25902a9dc513699195381689946700e",
+      "equal": true
+    },
+    {
+      "file": "N25F_InfinityRamificationIndices.lean",
+      "sha": "9d827b2f5d38ca791a46d4f5fce0eb94c4197bc0",
+      "equal": true
+    }
+  ],
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "weight_check": {
+    "name": "generic-01",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-fiber/GenericFiberWeightsCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 2.842714400998375,
+    "peak_child_rss_kib": 1574432,
+    "source_sha256": "ff88ee8bbd54f7788c2887dc25d6abdd12af79dce08db980eb65c48545bf6f20"
+  },
+  "actual_normalization_family_check": {
+    "name": "family-01",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-fiber/InfinityFiberCompleteCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 21.791986195996287,
+    "peak_child_rss_kib": 2743200,
+    "source_sha256": "8db27203c25ecee94f580f4d360e191db2d70bfcffa39acbb56d564172db2fe6"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "public_declarations": 6,
+  "remaining_gap": "arbitrary-function norm/valuation sum; no PerfectField assumption added"
+}

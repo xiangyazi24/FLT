@@ -1,0 +1,8 @@
+import FLT.Assumptions.MazurProof.N25F_InfinityFiberComplete
+
+#print axioms MazurProof.N25F_InfinityFiberComplete.exhaustive_of_weights
+#print axioms MazurProof.N25F_InfinityFiberComplete.infinityNormalization_algebraMap_injective
+#print axioms MazurProof.N25F_InfinityFiberComplete.infinityNormalization_isTorsionFree
+#print axioms MazurProof.N25F_InfinityFiberComplete.infinityNormalization_flat
+#print axioms MazurProof.N25F_InfinityFiberComplete.infinityFiber_sum
+#print axioms MazurProof.N25F_InfinityFiberComplete.infinity_primesOver_complete

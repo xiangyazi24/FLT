@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-fiber/GenericFiberWeightsCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 2.842714400998375,
+  "peak_child_rss_kib": 1574432,
+  "source_sha256": "ff88ee8bbd54f7788c2887dc25d6abdd12af79dce08db980eb65c48545bf6f20"
+}

@@ -1,0 +1,1 @@
+'MazurProof.N25F_InfinityFiberComplete.exhaustive_of_weights' depends on axioms: [propext, Classical.choice, Quot.sound]

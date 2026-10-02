@@ -1,0 +1,10 @@
+{
+  "name": "family-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-fiber/InfinityFiberCompleteCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 21.791986195996287,
+  "peak_child_rss_kib": 2743200,
+  "source_sha256": "8db27203c25ecee94f580f4d360e191db2d70bfcffa39acbb56d564172db2fe6"
+}

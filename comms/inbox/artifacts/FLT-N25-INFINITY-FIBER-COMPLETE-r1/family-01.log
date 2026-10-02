@@ -1,0 +1,13 @@
+'MazurProof.N25F_InfinityFiberComplete.infinityNormalization_algebraMap_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityFiberComplete.infinityNormalization_isTorsionFree' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityFiberComplete.infinityNormalization_flat' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityFiberComplete.infinityFiber_sum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityFiberComplete.infinity_primesOver_complete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
