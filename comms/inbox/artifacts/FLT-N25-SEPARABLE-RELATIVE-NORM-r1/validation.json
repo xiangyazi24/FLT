@@ -1,0 +1,53 @@
+{
+  "source_commit": "a00509e7a5438c940ef079f1f867baf94c8b85cc",
+  "accepted_fiber": {
+    "blob": "63a77428f070ca49fc7d5daa306a03461728d3f9",
+    "byte_equal": true
+  },
+  "production_source_check": "PASS unchanged Mathlib-only production source",
+  "production_check": {
+    "name": "norm-02",
+    "args": [
+      "/workspace/shared/flt-n25-separable-relative-norm/N25F_SeparableRelativeNorm.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 38.53962275700178,
+    "peak_child_rss_kib": 2879508,
+    "source_sha256": "517d0e847f783d7051b31b409e60b3b4ed72c0c169c10cb5697b5e39d853fffd"
+  },
+  "audit_check": {
+    "name": "audit-01",
+    "args": [
+      "/workspace/shared/flt-n25-separable-relative-norm/SeparableRelativeNormCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 25.91667746999883,
+    "peak_child_rss_kib": 2882140,
+    "source_sha256": "59728030f2dea0e5fd58f84b67198f3d82024bd19f461e941c46e1dfd487a7be"
+  },
+  "emission": {
+    "name": "production-emit",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-separable-relative-norm",
+      "-o",
+      "/workspace/shared/flt-n25-separable-relative-norm/N25F_SeparableRelativeNorm.olean",
+      "/workspace/shared/flt-n25-separable-relative-norm/N25F_SeparableRelativeNorm.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 67.57810879300087,
+    "peak_child_rss_kib": 2927388,
+    "source_sha256": "517d0e847f783d7051b31b409e60b3b4ed72c0c169c10cb5697b5e39d853fffd"
+  },
+  "olean_sha256": "009797ab91f2d09b630ef94df9a1fb565ec7727f5fe0e6ae1d0d48ed59752610",
+  "source_vs_audit": "byte-identical production prefix; only print commands appended",
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "perfect_field_premise": false,
+  "canonical_action": "FractionRing.liftAlgebra",
+  "production_full_flt_integration": "NOT RUN",
+  "public_declarations": 5
+}

@@ -1,0 +1,27 @@
+{
+  "verified_at_utc": "2026-10-02T14:16:51Z",
+  "mathlib_pin": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "root": "Mathlib.RingTheory.Ideal.Norm.RelNorm",
+  "cache_exit_code": 0,
+  "new_modules": 6,
+  "already_decompressed": 2410,
+  "bounds": {
+    "cpu_count": 1,
+    "timeout_seconds": 180,
+    "gate": "with-compiler-slot"
+  },
+  "modules": [
+    {
+      "module": "Mathlib.RingTheory.NormalClosure",
+      "bytes": 354304,
+      "sha256": "888d33350c837515cb74ea1d59e5db2e102772a236b1fdcc224c8329ae437438"
+    },
+    {
+      "module": "Mathlib.RingTheory.Ideal.Norm.RelNorm",
+      "bytes": 241120,
+      "sha256": "d62f54b4360ee98acd77d9b100231f12e86da970e914f6a4e022cffae8b82c97"
+    }
+  ],
+  "log": "logs/relative-norm-cache.log",
+  "project_or_mathlib_build": "NOT RUN"
+}

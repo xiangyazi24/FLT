@@ -1,0 +1,10 @@
+{
+  "name": "audit-01",
+  "args": [
+    "/workspace/shared/flt-n25-separable-relative-norm/SeparableRelativeNormCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 25.91667746999883,
+  "peak_child_rss_kib": 2882140,
+  "source_sha256": "59728030f2dea0e5fd58f84b67198f3d82024bd19f461e941c46e1dfd487a7be"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "production-emit",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-separable-relative-norm",
+    "-o",
+    "/workspace/shared/flt-n25-separable-relative-norm/N25F_SeparableRelativeNorm.olean",
+    "/workspace/shared/flt-n25-separable-relative-norm/N25F_SeparableRelativeNorm.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 67.57810879300087,
+  "peak_child_rss_kib": 2927388,
+  "source_sha256": "517d0e847f783d7051b31b409e60b3b4ed72c0c169c10cb5697b5e39d853fffd"
+}

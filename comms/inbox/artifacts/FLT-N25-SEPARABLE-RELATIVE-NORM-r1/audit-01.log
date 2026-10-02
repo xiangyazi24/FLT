@@ -1,0 +1,20 @@
+MazurProof.N25F_SeparableRelativeNorm.relNorm_prime_of_separable : ∀ (R : Type u_1) (S : Type u_2) [inst : CommRing R]
+  [inst_1 : CommRing S] [inst_2 : IsDedekindDomain R] [inst_3 : IsDedekindDomain S] [inst_4 : Algebra R S]
+  [inst_5 : Module.Finite R S] [inst_6 : Module.IsTorsionFree R S]
+  [Algebra.IsSeparable (FractionRing R) (FractionRing S)] (P : Ideal S) (p : Ideal R) [P.LiesOver p] [P.IsMaximal]
+  [p.IsMaximal], (Ideal.relNorm R) P = p ^ p.inertiaDeg P
+'MazurProof.N25F_SeparableRelativeNorm.normalClosure_isSeparable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SeparableRelativeNorm.normalClosure_isGalois_of_separable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SeparableRelativeNorm.normalClosure_finite_of_separable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SeparableRelativeNorm.normalClosure_isDedekindDomain_of_separable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SeparableRelativeNorm.relNorm_prime_of_separable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

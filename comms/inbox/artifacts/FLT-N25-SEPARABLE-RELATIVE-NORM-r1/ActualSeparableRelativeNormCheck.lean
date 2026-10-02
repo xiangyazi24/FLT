@@ -1,0 +1,7 @@
+import FLT.Assumptions.MazurProof.N25F_SeparableRelativeNorm
+
+#print axioms MazurProof.N25F_SeparableRelativeNorm.normalClosure_isSeparable
+#print axioms MazurProof.N25F_SeparableRelativeNorm.normalClosure_isGalois_of_separable
+#print axioms MazurProof.N25F_SeparableRelativeNorm.normalClosure_finite_of_separable
+#print axioms MazurProof.N25F_SeparableRelativeNorm.normalClosure_isDedekindDomain_of_separable
+#print axioms MazurProof.N25F_SeparableRelativeNorm.relNorm_prime_of_separable
