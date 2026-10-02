@@ -1,0 +1,31 @@
+{
+  "source_pin": "4c6a8b6feb2a4e487ed51c64852bd1ae98416ee3",
+  "scope": "source reconnaissance only; actual emitted closure pending lead",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "bytes": 8968,
+      "sha256": "c09c1bd05fe3d18258cef97221710df2daaedc4ed6d6c0d750528f01d5a662a5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-DEPENDENCIES-r1/EXISTING_EVIDENCE_REVIEW.md",
+      "bytes": 12986,
+      "sha256": "9380dfd6fc551a1301ff556d8556f59495c3a48eb0b7e88b170b9ca9847e82f0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-DEPENDENCIES-r1/SOURCE_ONLY_SCAN.json",
+      "bytes": 151139,
+      "sha256": "c3a90324c91c9e1b5fda4185afbe7c361f1dc92da3f8da4dc923bf09b5c90035"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-DEPENDENCIES-r1/SOURCE_RECONNAISSANCE.md",
+      "bytes": 7495,
+      "sha256": "dc993cb1270c6152a50b64f3e910dadb7b83c76e7491dcc4b2a8b69a029123e4"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-MAZUR-DEPENDENCIES-r1.md",
+      "bytes": 3084,
+      "sha256": "2ae484cb41c2c9f48fdad52f27f3ed418562eb05bd49025c092449f3e8c59300"
+    }
+  ]
+}

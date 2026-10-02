@@ -1,0 +1,4271 @@
+{
+  "scope": "407 non-N13-prefixed MazurProof Lean files, excluding CyclicExclusion13; lexical source scan only, NOT import or emitted proof-dependency closure",
+  "pin": "4c6a8b6feb2a4e487ed51c64852bd1ae98416ee3",
+  "scanned": 407,
+  "failures": [],
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/Axioms.lean",
+      "git_blob": "08240490ce5d88a2bed1252ee58790da598297be",
+      "bytes": 12344,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "FLT.Assumptions.MazurProof.NoncyclicN10",
+        "FLT.Assumptions.MazurProof.GroupTheory",
+        "FLT.Assumptions.MazurProof.RealTorsionBridge",
+        "FLT.Assumptions.MazurProof.TwoInvariantFactors",
+        "FLT.Assumptions.MazurProof.CyclicOrderAssembly"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/BillingMahlerField.lean",
+      "git_blob": "641bb0171eac4d6dd3408b3ea925dae0d724e21f",
+      "bytes": 55484,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "Mathlib.NumberTheory.NumberField.ClassNumber",
+        "Mathlib.NumberTheory.NumberField.Units.DirichletTheorem"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/ClosedFiberAffineCore.lean",
+      "git_blob": "c1c942b72a7fa81bbe08c476bca66c14f8960daf",
+      "bytes": 4953,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion",
+        "Mathlib.AlgebraicGeometry.Pullbacks",
+        "Mathlib.RingTheory.Ideal.Quotient.Operations",
+        "Mathlib.RingTheory.TensorProduct.Quotient"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveDedekindDivisor.lean",
+      "git_blob": "20c6208962f3163e4eabda838efc5c73afdc0b6c",
+      "bytes": 4199,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.DedekindDomain.Factorization"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveDivisorPicard.lean",
+      "git_blob": "b18241f067c4cc82e5cd22c2ee857179aecf42bf",
+      "bytes": 8088,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaEffectiveDivisors",
+        "FLT.Assumptions.MazurProof.CurveDedekindDivisor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveLocalIntersectionLength.lean",
+      "git_blob": "4fc0cc48346427c3263256a3d43076fabb81dbf1",
+      "bytes": 2197,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.Ideal.Quotient.Operations",
+        "Mathlib.RingTheory.LocalRing.Length",
+        "Mathlib.RingTheory.LocalRing.Quotient",
+        "Mathlib.RingTheory.OrderOfVanishing.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveZetaClassNumber.lean",
+      "git_blob": "9cdd1f0b2ace516072ff96335c54f96231d49df3",
+      "bytes": 15768,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveZetaEffectiveDivisors.lean",
+      "git_blob": "625379a993b61110b1ca67b2bd05e6c85e721631",
+      "bytes": 8187,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveZetaEulerRecurrence.lean",
+      "git_blob": "9c2044a558ce651c4205bec06474ad341f80e5b6",
+      "bytes": 4960,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveZetaFrobeniusOrbitGrading.lean",
+      "git_blob": "781c6196fc2aa7ea685b004fd985e9f937ded758",
+      "bytes": 18259,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaPointOrbitClassification",
+        "Mathlib.Dynamics.PeriodicPts.Lemmas"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveZetaMarkedDivisors.lean",
+      "git_blob": "203442cf3e2067e49d0709d25d747e2726c1e19f",
+      "bytes": 20071,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaEffectiveDivisors",
+        "FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence",
+        "Mathlib.Data.Finite.Sigma"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveZetaMiddleRiemannRoch.lean",
+      "git_blob": "d6033aa809ed203b3632cb40f487cc625d9976f3",
+      "bytes": 10836,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaClassNumber",
+        "FLT.Assumptions.MazurProof.CurveDivisorPicard",
+        "Mathlib.LinearAlgebra.Projectivization.Cardinality"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CurveZetaPointOrbitClassification.lean",
+      "git_blob": "7a482b2218cf7238bda702500a8bcfcc763176e1",
+      "bytes": 2034,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaMarkedDivisors"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion11.lean",
+      "git_blob": "0420f5a9fc6e9023d5f9045ce1426e92dade7244",
+      "bytes": 24603,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "FLT.Assumptions.MazurProof.TateOrder11",
+        "FLT.Assumptions.MazurProof.RationalPointsN11",
+        "FLT.Assumptions.MazurProof.RationalPointsN11Descent",
+        "FLT.Assumptions.MazurProof.BillingMahlerField",
+        "FLT.Assumptions.MazurProof.RationalPointsN11IdealSquare"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion14.lean",
+      "git_blob": "6cd0e82aa9b9346971920d0c7cfe982930cc3ce4",
+      "bytes": 19414,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CyclicOrderReduction",
+        "FLT.Assumptions.MazurProof.TateOrder18",
+        "scratch.DischargeN14"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion15.lean",
+      "git_blob": "86e9a8b2452a11d87c63deeaa8de1ad3ddae43ca",
+      "bytes": 94447,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CyclicOrderReduction",
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "FLT.Assumptions.MazurProof.RationalPointsX115",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion16.lean",
+      "git_blob": "135d260a84c7fbda02181939827089c8515ee913",
+      "bytes": 4259,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CyclicOrderReduction",
+        "FLT.Assumptions.MazurProof.RationalPointsX116"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion17.lean",
+      "git_blob": "290404ee8bcfb82d6affe867bad4280566d80fa7",
+      "bytes": 1237,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "FLT.Assumptions.MazurProof.TateOrder17",
+        "FLT.Assumptions.MazurProof.TateOrder17Quotient"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion18.lean",
+      "git_blob": "0253b1c701ccef73115b3401d86ca330d286f6d5",
+      "bytes": 4219,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder18",
+        "FLT.Assumptions.MazurProof.RationalPointsN18Descent",
+        "FLT.Assumptions.MazurProof.N18ObstructionDefs",
+        "FLT.Assumptions.MazurProof.N18GoodModelAssembly"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion19.lean",
+      "git_blob": "22f452c2a9fc4876fe4f7c9c3bd53455faa79dbe",
+      "bytes": 1268,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "FLT.Assumptions.MazurProof.TateOrder19",
+        "FLT.Assumptions.MazurProof.XDelta19RationalPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion20.lean",
+      "git_blob": "fd8865131545f7729181d4cc1e57ede0fccaabf2",
+      "bytes": 18436,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "FLT.Assumptions.MazurProof.DescentBridge",
+        "FLT.Assumptions.MazurProof.DescentBridgeN12",
+        "FLT.Assumptions.MazurProof.VeluTwoIsogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion21.lean",
+      "git_blob": "03d6f35a53e2a44cc4a68eb2d6ef8b8d63fe406f",
+      "bytes": 21072,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder18",
+        "FLT.Assumptions.MazurProof.RationalPointsX121"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion25.lean",
+      "git_blob": "a565a1ad93b61041c711cf392af0e9136410715c",
+      "bytes": 1977,
+      "code_flags": [
+        {
+          "line": 47,
+          "code": "axiom no_explicit_order25_obstruction : ¬ ExplicitOrder25Obstruction"
+        }
+      ],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder25Factor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion27.lean",
+      "git_blob": "32d0da75aa2a402b3b9a400b6103f6e8e654cfbf",
+      "bytes": 1107,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN27ThreeDescent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion35.lean",
+      "git_blob": "4d4e63859a9a0ac5f1e9f931cd4fc63e63846055",
+      "bytes": 13758,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CyclicOrderReduction",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "FLT.Assumptions.MazurProof.TateOriginDivision",
+        "FLT.Assumptions.MazurProof.RationalPointsX135Formal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicExclusion49.lean",
+      "git_blob": "8e5187d679334b4b123cf4efaf74c82c126a53e2",
+      "bytes": 1896,
+      "code_flags": [
+        {
+          "line": 43,
+          "code": "axiom no_raw_order49_tate_obstruction : ¬ RawOrder49TateObstruction"
+        }
+      ],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOriginDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicOrderArithmetic.lean",
+      "git_blob": "082f4e0613325e39ec1e9e85ddb064d7e59a941a",
+      "bytes": 12805,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.TorsionDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicOrderAssembly.lean",
+      "git_blob": "473cc497a0756210bb400943dd6515c5ca38b711",
+      "bytes": 9412,
+      "code_flags": [
+        {
+          "line": 102,
+          "code": "axiom no_prime_order_ge_23"
+        }
+      ],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "FLT.Assumptions.MazurProof.CyclicOrderArithmetic",
+        "FLT.Assumptions.MazurProof.CyclicExclusion14",
+        "FLT.Assumptions.MazurProof.CyclicExclusion16",
+        "FLT.Assumptions.MazurProof.CyclicExclusion20",
+        "FLT.Assumptions.MazurProof.CyclicExclusion25",
+        "FLT.Assumptions.MazurProof.CyclicExclusion27",
+        "FLT.Assumptions.MazurProof.CyclicExclusion49",
+        "FLT.Assumptions.MazurProof.CyclicExclusion35",
+        "FLT.Assumptions.MazurProof.CyclicExclusion15",
+        "FLT.Assumptions.MazurProof.CyclicExclusion21",
+        "FLT.Assumptions.MazurProof.CyclicExclusion11",
+        "FLT.Assumptions.MazurProof.CyclicExclusion13",
+        "FLT.Assumptions.MazurProof.CyclicExclusion18",
+        "FLT.Assumptions.MazurProof.N18GoodModelAssembly",
+        "FLT.Assumptions.MazurProof.CyclicExclusion17",
+        "FLT.Assumptions.MazurProof.CyclicExclusion19"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclicOrderReduction.lean",
+      "git_blob": "253ed9cc5ca892fe10d7a8b274151c51bea94d19",
+      "bytes": 5624,
+      "code_flags": [
+        {
+          "line": 31,
+          "code": "axiom mazur_prime_torsion_bound"
+        }
+      ],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/CyclotomicLayer.lean",
+      "git_blob": "e30177f07b99da609a74606cd8006e853b72e668",
+      "bytes": 538,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RootsOfUnity"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentBridge.lean",
+      "git_blob": "401ea82007138178d808e8972ae17c4fd0125edb",
+      "bytes": 689,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RationalPointsC20",
+        "FLT.Assumptions.MazurProof.KubertBridgeN10"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentBridgeDefs.lean",
+      "git_blob": "3e3ef2d1b337676ef0c2d8f461e0e63eb2a024e4",
+      "bytes": 516,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentBridgeN12.lean",
+      "git_blob": "2e268f1fd48c64d54f6c5dadee10f26340bf9d8f",
+      "bytes": 1802,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.DescentBridgeN12Defs",
+        "FLT.Assumptions.MazurProof.KubertBridgeN12",
+        "FLT.Assumptions.MazurProof.N12CheckedDescentBridge"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentBridgeN12Defs.lean",
+      "git_blob": "f6b9b3c1909e165a5dd16e6fe3f99920ba233368",
+      "bytes": 404,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentBridgeN14.lean",
+      "git_blob": "199bdd2ea405fad4932f12f7a735aae8a709d3a0",
+      "bytes": 1821,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "scratch.ObstructionN14",
+        "FLT.Assumptions.MazurProof.CyclicExclusion14"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentBridgeN16.lean",
+      "git_blob": "c88f89c756953715338d81f452f8ffd2e87b28e0",
+      "bytes": 799,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.KubertBridgeN16",
+        "FLT.Assumptions.MazurProof.CyclicExclusion16"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentBridgeN16Defs.lean",
+      "git_blob": "934681978e3f293c29dc9a60bcb22aa0699f86cf",
+      "bytes": 390,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/DescentObstruction.lean",
+      "git_blob": "43bdd32b8833e500f067eb643423684643a5d589",
+      "bytes": 4778,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Data.ZMod.Basic",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/EvenPrincipalIdeal.lean",
+      "git_blob": "094f16a3512002e16b55cec23fab3c44f650fdd3",
+      "bytes": 8807,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Algebra.Group.Int.Even",
+        "Mathlib.RingTheory.DedekindDomain.Factorization",
+        "Mathlib.RingTheory.Ideal.IsPrincipal",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/EvenSexticNormPair.lean",
+      "git_blob": "218559466ae8b0b16ad4d61febe49d30206a945a",
+      "bytes": 12484,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.FakeSquareClass"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/ExceptionalPrincipalIdeal.lean",
+      "git_blob": "7babf73776266cd39609c8d828717a19d835cead",
+      "bytes": 15985,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.EvenPrincipalIdeal",
+        "Mathlib.Data.ZMod.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/FakeSquareClass.lean",
+      "git_blob": "6a87ec65f7b11d69c7d6a8aa16970db491edb5e5",
+      "bytes": 3900,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/FermatCubicPoints.lean",
+      "git_blob": "091b36e7f33fed58acb2997ce92118054b4febff",
+      "bytes": 988,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/FiniteFieldFrobeniusDescent.lean",
+      "git_blob": "a3903213a963bbe256131518faf0aa732cf7b89f",
+      "bytes": 20626,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange",
+        "Mathlib.FieldTheory.Finite.Extension"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/FullTorsionBound.lean",
+      "git_blob": "7815a9a60c6d6b281647a0b1e7b18af618a5fc93",
+      "bytes": 6312,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.NoFull3Torsion",
+        "FLT.Assumptions.MazurProof.GroupTheory"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/GeneralizedGraphIdealCore.lean",
+      "git_blob": "3a834be87e18cb5f232fde23f27871cbb919a443",
+      "bytes": 12704,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.Ideal.Operations",
+        "Mathlib.RingTheory.Polynomial.Basic",
+        "Mathlib.Tactic.LinearCombination"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/GlueDataClosedBaseChange.lean",
+      "git_blob": "f36d557c8e62a600b303e054cd25958f8106d796",
+      "bytes": 4187,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.AlgebraicGeometry.Pullbacks"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/GlueDataClosedBaseChangeTransition.lean",
+      "git_blob": "a9536177f2ccef93680a2655449ac589c415f785",
+      "bytes": 13161,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.GlueDataClosedBaseChange"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/GlueDataOffDiagonal.lean",
+      "git_blob": "bc1feacddaa33d3e67a333b835e86c47d59f3383",
+      "bytes": 1500,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.CategoryTheory.GlueData"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/GraphJacobianDecompositionFrame.lean",
+      "git_blob": "90cf8737f1eada867be33e692807103d77920643",
+      "bytes": 8566,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.FractionalIdeal.Inverse",
+        "Mathlib.RingTheory.Ideal.Span",
+        "Mathlib.Tactic.FieldSimp",
+        "Mathlib.Tactic.Ring"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/GraphJacobianDualFrame.lean",
+      "git_blob": "b95c35c2aaf267407a2c5012f0eba6513e769f27",
+      "bytes": 10642,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.FractionalIdeal.Inverse",
+        "Mathlib.RingTheory.Ideal.Span",
+        "Mathlib.Tactic.FieldSimp",
+        "Mathlib.Tactic.Ring"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/GroupTheory.lean",
+      "git_blob": "c44f100c320326462c3bd4ba39078f2ccf4ec94f",
+      "bytes": 6839,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/IntegralClosureOfEisensteinDiscr.lean",
+      "git_blob": "92f9a46a19755d13336f5494d7405c8352fc0fb4",
+      "bytes": 1982,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.Discriminant",
+        "Mathlib.RingTheory.Polynomial.Eisenstein.IsIntegral"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/InvariantFactorLemmas.lean",
+      "git_blob": "2e2bd1c84e0ecc7760fdc4f5883adb8920e76013",
+      "bytes": 7059,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.GroupTheory"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/InvariantFactors.lean",
+      "git_blob": "26d761bfe536471eb62d19e3d7e792364c0585c9",
+      "bytes": 14820,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.GroupTheory.FiniteAbelian.Basic",
+        "Mathlib.GroupTheory.Torsion",
+        "Mathlib.Data.ZMod.Basic",
+        "Mathlib.LinearAlgebra.FreeModule.Finite.Quotient",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/KubertBridgeN10.lean",
+      "git_blob": "7868003232049201d3f64c94e39b634b359fef40",
+      "bytes": 6015,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.DescentBridgeDefs",
+        "scratch.TateZ2xZ10Reduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/KubertBridgeN12.lean",
+      "git_blob": "1723bd7da4422221702b5ad521fbc9230ebcfb63",
+      "bytes": 14547,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.DescentBridgeN12Defs",
+        "FLT.Assumptions.MazurProof.RationalPointsN12",
+        "scratch.TateZ2xZ12Reduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/KubertBridgeN16.lean",
+      "git_blob": "04ce20eb66e8c70ed788a25f1e50d4ba1fe830d5",
+      "bytes": 13312,
+      "code_flags": [
+        {
+          "line": 342,
+          "code": "sorry"
+        },
+        {
+          "line": 361,
+          "code": "sorry"
+        }
+      ],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.DescentBridgeN16Defs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/LinearAdjoinRootScalar.lean",
+      "git_blob": "f13117ca5c34a2e894563c4fa8ac555813ab3788",
+      "bytes": 2454,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.AdjoinRoot"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/MazurEndpointAudit.lean",
+      "git_blob": "dd1d546f98b9dceb7b609c167d1ba8a5eea65663",
+      "bytes": 400,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionBound"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12CheckedDescentBridge.lean",
+      "git_blob": "e3a39fd79ee656a321b01dd6ea996bd51796ce91",
+      "bytes": 13386,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N12RawBranchEuler",
+        "FLT.Assumptions.MazurProof.N12DividedBranchUnit",
+        "FLT.Assumptions.MazurProof.N12ParamBridge",
+        "FLT.Assumptions.MazurProof.N12DoubleLegDegenerate",
+        "FLT.Assumptions.MazurProof.N12E1FullCoverBridge"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12DividedBranchFactors.lean",
+      "git_blob": "444250bc5f873e02bccfa1ef7e37ebfbb71e599c",
+      "bytes": 11307,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N12QuarticEisenstein"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12DividedBranchUnit.lean",
+      "git_blob": "568dae7f72bf49a2980b09500e018a0c9e9492ee",
+      "bytes": 5316,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N12DividedBranchFactors",
+        "FLT.Assumptions.MazurProof.N12FourSquaresAP"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12DoubleLegDegenerate.lean",
+      "git_blob": "59308abac257afbae074a093f4a70daa4b9f44cb",
+      "bytes": 5016,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N12E1CoverResiduals",
+        "FLT.Assumptions.MazurProof.N12QuarticEisenstein"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12E1CoverResiduals.lean",
+      "git_blob": "466678e55b01e60e50a5eb66af209e316a3e3ddd",
+      "bytes": 5121,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12E1FullCoverBridge.lean",
+      "git_blob": "deb7fbb6c1d17a44183a08bbb622365583bf6b0f",
+      "bytes": 24239,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN12",
+        "FLT.Assumptions.MazurProof.N12E1CoverResiduals",
+        "FLT.Assumptions.MazurProof.N12E1FullCoverExtraction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12E1FullCoverExtraction.lean",
+      "git_blob": "2d01109f6bb0ea843eaa5ea16fa71ed755bb7426",
+      "bytes": 46287,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Data.Nat.Factorization.Basic",
+        "Mathlib.Data.Rat.Lemmas",
+        "Mathlib.NumberTheory.Padics.PadicVal.Basic",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12EulerAux.lean",
+      "git_blob": "e6aead001dc06a1077bda526ce3fb3ed3830c530",
+      "bytes": 4120,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Tactic",
+        "Mathlib.RingTheory.Int.Basic",
+        "Mathlib.Data.Int.Lemmas"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12FourSquaresAP.lean",
+      "git_blob": "d4ba11766ebfda49860ae0659588df92c27a2369",
+      "bytes": 137330,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.NumberTheory.FLT.Four",
+        "Mathlib.NumberTheory.LegendreSymbol.Basic",
+        "Mathlib.Data.Rat.Lemmas",
+        "Mathlib.Tactic",
+        "FLT.Assumptions.MazurProof.N12E1CoverResiduals",
+        "FLT.Assumptions.MazurProof.N12EulerAux"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12ParamBridge.lean",
+      "git_blob": "2b7fe2ced70b5edb01629b54ef7fc0e4171e5a97",
+      "bytes": 32075,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N12QuarticEisenstein"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean",
+      "git_blob": "46d37066470e89043db9f6f5993e3eddbd54772c",
+      "bytes": 45437,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Tactic",
+        "Mathlib.RingTheory.Int.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N12RawBranchEuler.lean",
+      "git_blob": "1d3f0661407b00b16d688eef931d74e3a6398378",
+      "bytes": 11203,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N12QuarticEisenstein",
+        "FLT.Assumptions.MazurProof.N12FourSquaresAP"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongr.lean",
+      "git_blob": "6ce054e8c1b3f90f24c5b7a05793d4cc635a0f28",
+      "bytes": 1601,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18AddCongrWired"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongrBasic.lean",
+      "git_blob": "4c4a443a2bbbbc344330987dcb0daa81e5e4c3fa",
+      "bytes": 11600,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Isogeny",
+        "FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic",
+        "FLT.Assumptions.MazurProof.N18Block5Instantiation"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongrProof.lean",
+      "git_blob": "c390e3eeae2305631bdbe7ba659967e23dcfd7d0",
+      "bytes": 49120,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18AddCongrBasic",
+        "FLT.Assumptions.MazurProof.N18RouteC_TorsionTable"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18AddCongrWired.lean",
+      "git_blob": "6535599663470c818a622aa978f34175323705f7",
+      "bytes": 4156,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18AddCongrProof"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18Block5FormalKernel.lean",
+      "git_blob": "1513113a01356096a2608c4f3a0dbd9d9c604d38",
+      "bytes": 5411,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18Block5Instantiation.lean",
+      "git_blob": "aec3f8525a209a2d461bdfba0801869ea22cbefa",
+      "bytes": 26536,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18Block5FormalKernel",
+        "FLT.Assumptions.MazurProof.N18RouteC_Isogeny",
+        "FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic",
+        "FLT.Assumptions.MazurProof.N18RouteC_Reduction",
+        "FLT.Assumptions.MazurProof.N18RouteC_Block4",
+        "FLT.Assumptions.MazurProof.N18RouteC_Composition",
+        "FLT.Assumptions.MazurProof.N18RouteC_Separated",
+        "FLT.Assumptions.MazurProof.N18ReductionHom",
+        "FLT.Assumptions.MazurProof.N18ObstructionDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18ConjCube.lean",
+      "git_blob": "5c23329a4ef4c77149c2bcfa641d09a2d9f89406",
+      "bytes": 8293,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.UniqueFactorizationDomain.Finsupp",
+        "Mathlib.RingTheory.UniqueFactorizationDomain.Multiplicity",
+        "Mathlib.Tactic.NormNum",
+        "Mathlib.Data.Nat.GCD.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18GoodModelAssembly.lean",
+      "git_blob": "e331588358cc26fd0fd51bd048b49e580000fe03",
+      "bytes": 129045,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18AddCongr",
+        "FLT.Assumptions.MazurProof.N18PackageII",
+        "FLT.Assumptions.MazurProof.N18GoodModelValCoords",
+        "FLT.Assumptions.MazurProof.N18VpiWrapper",
+        "FLT.Assumptions.MazurProof.N18RouteC_GoodModel",
+        "FLT.Assumptions.MazurProof.N18Block5Instantiation",
+        "FLT.Assumptions.MazurProof.RationalPointsN18Descent",
+        "FLT.Assumptions.MazurProof.N18RouteC_Block7",
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSound",
+        "FLT.Assumptions.MazurProof.N18RouteC_TorsionTable",
+        "FLT.Assumptions.MazurProof.N18GoodReduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18GoodModelValCoords.lean",
+      "git_blob": "2e7006b8fa0f84c3620b6baf588f1e9b83770108",
+      "bytes": 9158,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_GoodModel",
+        "FLT.Assumptions.MazurProof.N18AddCongr"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18GoodReduction.lean",
+      "git_blob": "eccd0ad2142ba00ab64b02c770f85b3d7ff657ad",
+      "bytes": 137166,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18AddCongr",
+        "FLT.Assumptions.MazurProof.N18PackageII",
+        "FLT.Assumptions.MazurProof.N18GoodModelValCoords",
+        "FLT.Assumptions.MazurProof.N18VpiWrapper",
+        "FLT.Assumptions.MazurProof.N18RouteC_GoodModel",
+        "FLT.Assumptions.MazurProof.N18RouteC_Reduction",
+        "FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic",
+        "FLT.Assumptions.MazurProof.N18Block5Instantiation",
+        "FLT.Assumptions.MazurProof.N18RouteC_Block7",
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSound",
+        "FLT.Assumptions.MazurProof.N18RouteC_TorsionTable"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18ObstructionDefs.lean",
+      "git_blob": "340559507c83111acb11a72a3338e7e780ab6399",
+      "bytes": 766,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Data.Rat.Defs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18PackageII.lean",
+      "git_blob": "4a5f18b597d347e1cdd4d0b25184a6ff22e4f59d",
+      "bytes": 34793,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_GoodModel",
+        "FLT.Assumptions.MazurProof.N18AddCongr",
+        "FLT.Assumptions.MazurProof.N18GoodModelValCoords",
+        "FLT.Assumptions.MazurProof.N18VpiWrapper",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18ReductionHom.lean",
+      "git_blob": "ea9ebd53a2abca3b935ddc66dd5023106b036ae8",
+      "bytes": 4230,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Isogeny",
+        "FLT.Assumptions.MazurProof.N18RouteC_Reduction",
+        "FLT.Assumptions.MazurProof.N18Block5FormalKernel"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Block4.lean",
+      "git_blob": "ec1a25b70bae67d6e00f902d36e2170a46eff680",
+      "bytes": 1496,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_PhiPreimage",
+        "FLT.Assumptions.MazurProof.N18RouteC_Composition"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Block7.lean",
+      "git_blob": "762d606b5687c6fee7d760a0e70ca530aa77e04a",
+      "bytes": 3664,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_FiberTable",
+        "FLT.Assumptions.MazurProof.N18RouteC_Reduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Composition.lean",
+      "git_blob": "84a37bd5ea6228afdfdb0502a78883916ce2025e",
+      "bytes": 19122,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_DualPreimage"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Curve.lean",
+      "git_blob": "00ecad88ab5a1a7ba9edc758fc03074b83c4a1e0",
+      "bytes": 2761,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Split"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Cyclotomic.lean",
+      "git_blob": "2d0628fb3355c67b6a10a94b34b1f164c92b8abf",
+      "bytes": 12267,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_DualSurvivor",
+        "Mathlib.NumberTheory.NumberField.CMField",
+        "Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal",
+        "Mathlib.Analysis.Real.Pi.Bounds"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_CyclotomicReduction.lean",
+      "git_blob": "4d772144ecfc4320ceece774f14aa715265eb74c",
+      "bytes": 16128,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_CyclotomicTwo"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_CyclotomicTwo.lean",
+      "git_blob": "b35391dad806b9fb97ec9ba6422cb7e2d4092f26",
+      "bytes": 9515,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_CyclotomicValuation",
+        "Mathlib.RingTheory.LocalRing.ResidueField.Instances"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_CyclotomicUnits.lean",
+      "git_blob": "db5bc456329e4ab07d6e03441f08dc5a31a24eac",
+      "bytes": 4058,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Cyclotomic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_CyclotomicValuation.lean",
+      "git_blob": "fcd4aee75f6ac39448521e04570eef0ed8e3d92b",
+      "bytes": 26807,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_CyclotomicUnits",
+        "Mathlib.RingTheory.UniqueFactorizationDomain.Multiplicity"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_DualGlobal.lean",
+      "git_blob": "ae75b7cff11f4847a56d1e8b4bc8c70d274d74c7",
+      "bytes": 2136,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_GlobalCubes"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_DualLocal.lean",
+      "git_blob": "df1a202e6124eec680204d7543a8f524ab583199",
+      "bytes": 22743,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_DualGlobal",
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSound",
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSolubility",
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeLarge"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_DualPreimage.lean",
+      "git_blob": "830b72e29f3e58a3822750dc8c54cbecb6b37638",
+      "bytes": 5634,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_KummerGeometry",
+        "FLT.Assumptions.MazurProof.N18RouteC_TwoAdic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_DualSurvivor.lean",
+      "git_blob": "3f13080b6ef1508442d09c00b554e0caa2bcf59b",
+      "bytes": 7710,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalCubeComparison"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_FiberTable.lean",
+      "git_blob": "73ca323473667d3b028977a482f47539f67eed1d",
+      "bytes": 10651,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_FieldBasis",
+        "FLT.Assumptions.MazurProof.N18RouteC_Finiteness",
+        "FLT.Assumptions.MazurProof.N18RouteC_TorsionTable",
+        "FLT.Assumptions.MazurProof.N18RouteC_Curve"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_FieldArithmetic.lean",
+      "git_blob": "aa649873dcf4c3195b04f7a4922f983f2a6ee993",
+      "bytes": 25530,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Split",
+        "Mathlib.NumberTheory.NumberField.ClassNumber",
+        "Mathlib.NumberTheory.NumberField.Ideal.KummerDedekind"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_FieldBasis.lean",
+      "git_blob": "9200d63eabe0eebc7d90e4d7f3d75613a0349fea",
+      "bytes": 2150,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Split"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Finiteness.lean",
+      "git_blob": "9529f05f7788146fa7cf43a0ae6aa2bc7f12b964",
+      "bytes": 13466,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Separated"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_GlobalCubes.lean",
+      "git_blob": "73001ca420dc5971f31a277ee2933386ba450ea6",
+      "bytes": 14646,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_ValuationSupport",
+        "FLT.Assumptions.MazurProof.N18ConjCube",
+        "FLT.Assumptions.MazurProof.N18RouteC_UnitCubes",
+        "FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic",
+        "FLT.Assumptions.MazurProof.N18RouteC_TwoAdic",
+        "Mathlib.RingTheory.UniqueFactorizationDomain.Finsupp",
+        "Mathlib.RingTheory.DedekindDomain.SelmerGroup"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_GoodModel.lean",
+      "git_blob": "cc017ec8d7424c9086d4813ff67b55caf16bcaf8",
+      "bytes": 5730,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Isogeny",
+        "FLT.Assumptions.MazurProof.N18RouteC_VariableChangePoints",
+        "Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Isogeny.lean",
+      "git_blob": "8fa8ed67ebd1f84a53874d3ac1d93538b26868f1",
+      "bytes": 8734,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Split"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_IsogenyPoints.lean",
+      "git_blob": "042cb055ed3b8e0530b791c67a5be4f44869e7cc",
+      "bytes": 4100,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_FieldArithmetic",
+        "FLT.Assumptions.MazurProof.N18RouteC_Isogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_KummerGeometry.lean",
+      "git_blob": "f9f32177f65c0d8087337ae240a03456cbf49c9a",
+      "bytes": 13177,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_IsogenyPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_LocalCubeComparison.lean",
+      "git_blob": "4fdeb40d475921d6702e2c6e11df8438303c467e",
+      "bytes": 11901,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_DualLocal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_LocalThree.lean",
+      "git_blob": "b63fad54d2fda14974960725798731ce75423759",
+      "bytes": 21331,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Split",
+        "Mathlib.Algebra.Ring.MinimalAxioms"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_LocalThreeLarge.lean",
+      "git_blob": "97eb3b9e5ca8f10302ed090851bc34a6cfad6ca6",
+      "bytes": 1773,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeLargeTable"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_LocalThreeLargeTable.lean",
+      "git_blob": "de664876613f1ca84f6e38cacc4132a729eb06d3",
+      "bytes": 602,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSolubility"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_LocalThreeSolubility.lean",
+      "git_blob": "7cba2df91f6eb4df0c6ab78c4a4c313d8d8206a5",
+      "bytes": 4858,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSolubilityTable"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_LocalThreeSolubilityTable.lean",
+      "git_blob": "9c88d9d094ac338aeb69aa8058a4323432059ed4",
+      "bytes": 8569,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThree"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_LocalThreeSound.lean",
+      "git_blob": "91f4fb25b12a335b2f06f50fc378f5f63e89802f",
+      "bytes": 16131,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_FieldArithmetic",
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThree",
+        "FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_PhiLocal.lean",
+      "git_blob": "6de4511f351e0612a4c7eb2f63cb5b6d0e6f7a01",
+      "bytes": 25323,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_CyclotomicReduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_PhiPreimage.lean",
+      "git_blob": "3ae3e9c22ddfcaee789397206023ac9324bb56e3",
+      "bytes": 8945,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_PhiLocal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_PushPull.lean",
+      "git_blob": "3c50dd84cf5ea700320bb45002e611d0dc619925",
+      "bytes": 5063,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Quotients.lean",
+      "git_blob": "c5ed2311e3238afe916855bd1babfe5821c9e152",
+      "bytes": 15633,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Split"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Reduction.lean",
+      "git_blob": "361fda7d7ae5e3ead780f52265521ba9a0acc921",
+      "bytes": 1791,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Split",
+        "Mathlib.Data.Fintype.WithTopBot"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Separated.lean",
+      "git_blob": "9d49862027469b7829bdb31766822574cb5b2d2f",
+      "bytes": 8079,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_PushPull"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_Split.lean",
+      "git_blob": "b1d89ea37fe6609708b13bc2bcee4d12f4a7e18b",
+      "bytes": 11648,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_ThreeAdic.lean",
+      "git_blob": "9175c748a53472cacc991c2221e52e9e83cad32b",
+      "bytes": 6478,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_FieldArithmetic",
+        "Mathlib.RingTheory.DedekindDomain.AdicValuation"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_TorsionTable.lean",
+      "git_blob": "165cff8bb1a5eb430365e05e557fe49b95e071cc",
+      "bytes": 12064,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Isogeny",
+        "FLT.Assumptions.MazurProof.N18RouteC_Quotients"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_TwoAdic.lean",
+      "git_blob": "276e2f1baa06ca01d6e2983c27fb4888dbb52031",
+      "bytes": 2148,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_FieldArithmetic",
+        "Mathlib.RingTheory.DedekindDomain.AdicValuation"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_UnitCubes.lean",
+      "git_blob": "8a95fb9a3c2a083935fa3a9b60645b4111198773",
+      "bytes": 6956,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSound",
+        "Mathlib.NumberTheory.NumberField.Units.DirichletTheorem"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_ValuationSupport.lean",
+      "git_blob": "d11bcd6655fc2429a59883aee4f988c5271b2cbf",
+      "bytes": 11420,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_Composition",
+        "Mathlib.Algebra.Order.GroupWithZero.Canonical"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18RouteC_VariableChangePoints.lean",
+      "git_blob": "cc57268905755b218bd3eb2b4556f8b59b2c1e73",
+      "bytes": 18795,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N18VpiWrapper.lean",
+      "git_blob": "57ee7b23667ae1716706e7bfecb209b14626606f",
+      "bytes": 2492,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic",
+        "FLT.Assumptions.MazurProof.N18AddCongr"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N19SutherlandModels.lean",
+      "git_blob": "ae4bf9f60821f0e9e9807ed7080b7fb01db47d3b",
+      "bytes": 12026,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ChartLocalOrder.lean",
+      "git_blob": "a808c0fb1c4aa6d5410f8d5abbdc8c27a4366f92",
+      "bytes": 19674,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_NonBoundaryPrincipalDivisor",
+        "Mathlib.NumberTheory.RamificationInertia.Valuation",
+        "Mathlib.RingTheory.OrderOfVanishing.Noetherian",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ChartLocalUnitCriterion.lean",
+      "git_blob": "f780d30cb9ab83947001d55b23b3e7005f740daa",
+      "bytes": 12148,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_ChartLocalOrder",
+        "Mathlib.RingTheory.DedekindDomain.Instances"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_GradedConePieceHilbert.lean",
+      "git_blob": "0cce021e96699c52118197a53873e8c43fd81ec2",
+      "bytes": 7641,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoQuotientGrading",
+        "Mathlib.Data.Finsupp.Multiset",
+        "Mathlib.Data.Sym.Card",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+        "Mathlib.RingTheory.MvPolynomial.Basic",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_Next.lean",
+      "git_blob": "98cc68bfc9a0c815deb59f0d5e9637fb3a5c660a",
+      "bytes": 3373,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaFrobeniusOrbitGrading",
+        "FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientThreeBaseChange"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_NonBoundaryPrincipalDivisor.lean",
+      "git_blob": "4cb645a429c94c736267ff2ec7f7e77463eb493d",
+      "bytes": 4215,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveDedekindDivisor",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWChartNormalization",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenOrbitPrimeInjective"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectiveDivisorDegree.lean",
+      "git_blob": "30b90a32ee153c3c7eedb0b4746a882d25be34b4",
+      "bytes": 14976,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveDivisorPicard",
+        "FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorSplit",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectiveDivisorSplit.lean",
+      "git_blob": "c3ab045b8c87ebf90b5af37e3ebc6369cbb00c34",
+      "bytes": 8701,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaEffectiveDivisors",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointPartition",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeAffineChartJacobian.lean",
+      "git_blob": "32787f7590dc5e15fbf1ec9ef5bd21d252fef077",
+      "bytes": 38963,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3",
+        "Mathlib.RingTheory.MvPolynomial.EulerIdentity"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeBoundaryDiagnostic.lean",
+      "git_blob": "8cdc7cfe3a4932e9c2c6bb0289ffe94a61705d5c",
+      "bytes": 2588,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_ThreeAffineChartJacobian",
+        "Mathlib.RingTheory.Artinian.Module",
+        "Mathlib.RingTheory.DiscreteValuationRing.Basic",
+        "Mathlib.RingTheory.OrderOfVanishing.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeBoundaryPointClassification.lean",
+      "git_blob": "69f5ec6c95551e06d59cfc7d0cdf42b58911807e",
+      "bytes": 2158,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeDegreeDescent.lean",
+      "git_blob": "b9781c67a032cd7162e095dd6f0e3299da8a61d8",
+      "bytes": 2592,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_Next",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientFrobeniusOrbits"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeFormalJacobianBridge.lean",
+      "git_blob": "ff46222543fd54fe494f07bb9cca40a5e5a828b1",
+      "bytes": 14206,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3",
+        "Mathlib.Algebra.MvPolynomial.PDeriv",
+        "Mathlib.RingTheory.MvPolynomial.Homogeneous",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean",
+      "git_blob": "3065c8bc8a605e325fb4b046a77e8a4a59a0ff39",
+      "bytes": 14504,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_ThreeDegreeDescent",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientFrobeniusOrbits"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreePhysicalDegreeDecomposition.lean",
+      "git_blob": "ad1bbf56d46eeaf66692edad495b33794bcd3880",
+      "bytes": 14723,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_Next"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeWChartDRegular.lean",
+      "git_blob": "bc1b7c55deb4328af6fc20bb83a1c558ab8e3fec",
+      "bytes": 21383,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Algebra.MvPolynomial.Equiv",
+        "Mathlib.Algebra.Polynomial.RingDivision",
+        "Mathlib.Algebra.Ring.NonZeroDivisors",
+        "Mathlib.RingTheory.AdjoinRoot",
+        "Mathlib.RingTheory.Flat.TorsionFree",
+        "Mathlib.RingTheory.Ideal.Quotient.Operations",
+        "Mathlib.RingTheory.Polynomial.UniqueFactorization",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeWOpenClosedPoints.lean",
+      "git_blob": "7808c83a47a0844daf538b464ac82aa7f4fdc4f0",
+      "bytes": 24663,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_ThreeWOpenPrimeEquiv",
+        "FLT.Assumptions.MazurProof.N25F_ThreeBoundaryPointClassification",
+        "FLT.Assumptions.MazurProof.N25F_ThreeWOpenNonempty",
+        "FLT.Assumptions.MazurProof.N25F_ThreeWOpenMaximalEquiv",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientThreeBaseChange",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange",
+        "FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius",
+        "Mathlib.Algebra.MvPolynomial.Eval",
+        "Mathlib.Data.ZMod.Basic",
+        "Mathlib.Dynamics.PeriodicPts.Defs",
+        "Mathlib.FieldTheory.Finite.Basic",
+        "Mathlib.RingTheory.Ideal.Quotient.Operations",
+        "Mathlib.RingTheory.IntegralDomain",
+        "Mathlib.RingTheory.Jacobson.Ring",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeWOpenMaximalEquiv.lean",
+      "git_blob": "7e633b844e3e91d65b3abfe0aef49cc6a8c0fdec",
+      "bytes": 2778,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_ThreeWOpenPrimeEquiv",
+        "Mathlib.RingTheory.Jacobson.Ring"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeWOpenNonempty.lean",
+      "git_blob": "3b055543c801bda9e815ea49be295d677d192bbb",
+      "bytes": 3118,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_ThreeWChartDRegular",
+        "FLT.Assumptions.MazurProof.N25F_ThreeBoundaryDiagnostic",
+        "Mathlib.Data.ZMod.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ThreeWOpenPrimeEquiv.lean",
+      "git_blob": "4b233942064a2ba362bf2545629d1b2ff13eb4d4",
+      "bytes": 7134,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N25F_ThreeWChartDRegular",
+        "Mathlib.RingTheory.Localization.Away.Basic",
+        "Mathlib.RingTheory.Localization.Ideal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/NoFull3Torsion.lean",
+      "git_blob": "a79da929d4cfbc0368227821647132a950be0540",
+      "bytes": 8620,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS3",
+        "FLT.Assumptions.MazurProof.RealTorsionBound"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/NoFull4Torsion.lean",
+      "git_blob": "1fb9c385b7ff8f1458b169b5429a4d8bf804aa95",
+      "bytes": 18946,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RealTopologyS3",
+        "FLT.Assumptions.MazurProof.RealTorsionBound",
+        "FLT.Assumptions.MazurProof.TorsionDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/NoncyclicN10.lean",
+      "git_blob": "43cbca91aa61518dfea5b665d74e21a2f1a730c1",
+      "bytes": 737,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.DescentBridge",
+        "FLT.Assumptions.MazurProof.DescentBridgeN12"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/NormalizedProjectiveCurveFrobenius.lean",
+      "git_blob": "4ba899c901eb36752d3ea05e774d63fda2d32a6b",
+      "bytes": 10224,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.FiniteFieldFrobeniusDescent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/ObstructionCurve.lean",
+      "git_blob": "483aa7c0fe41565bd17dbcb8c5c5da3968e5e6d1",
+      "bytes": 18662,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point",
+        "scratch.ObstructionComplete",
+        "scratch.TateZ2xZ10Reduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/OneVerticalPrimeCore.lean",
+      "git_blob": "d36e1c12cb5e01cf0dec291a34ee7428858bf7e6",
+      "bytes": 1830,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Data.Finsupp.Basic",
+        "Mathlib.Data.Finsupp.SMulWithZero"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/PadeZeroConstantSquare.lean",
+      "git_blob": "c3924338052bd6b1e3af68bd43b72a04478d44a1",
+      "bytes": 5165,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Algebra.Polynomial.FieldDivision",
+        "Mathlib.RingTheory.Coprime.Lemmas",
+        "Mathlib.RingTheory.Polynomial.Resultant.Basic",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/PowerBasisDiscriminant.lean",
+      "git_blob": "d723cedfcf36b623ff05e70fb985572911ad2dc7",
+      "bytes": 7843,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.FieldTheory.Minpoly.IsIntegrallyClosed",
+        "Mathlib.RingTheory.Discriminant",
+        "Mathlib.RingTheory.Polynomial.Resultant.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/PrimeExclusion17.lean",
+      "git_blob": "dc5a272bb477e41d4495087f1027242452245027",
+      "bytes": 4086,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/PrimeExclusion19.lean",
+      "git_blob": "cb65ea06d9437acc904896f206cc091ab962a59d",
+      "bytes": 1426,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/ProperLineSpecializationCore.lean",
+      "git_blob": "7facf9119f0466c3413a72dc4302dc4de36a6d22",
+      "bytes": 1525,
+      "code_flags": [],
+      "import_headers": []
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/QuadraticAdjoinRootNorm.lean",
+      "git_blob": "099d18068f77e70d80c0dca9e61d4feb343d08c1",
+      "bytes": 12334,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Algebra.Polynomial.Degree.IsMonicOfDegree",
+        "Mathlib.RingTheory.AdjoinRoot",
+        "Mathlib.RingTheory.Norm.Basic",
+        "Mathlib.RingTheory.Polynomial.Resultant.Basic",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/QuadraticNormRigidity.lean",
+      "git_blob": "e3c69ae3af1eed104bc131885a8201b73bdf9922",
+      "bytes": 4285,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.LinearAlgebra.Basis.Basic",
+        "Mathlib.LinearAlgebra.Charpoly.Basic",
+        "Mathlib.LinearAlgebra.Charpoly.ToMatrix",
+        "Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff",
+        "Mathlib.RingTheory.Norm.Basic",
+        "Mathlib.RingTheory.Trace.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/QuarticDescent.lean",
+      "git_blob": "08c7d85747a7372014da4b7f92dd5e97303ebea1",
+      "bytes": 57995,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "Mathlib.NumberTheory.PythagoreanTriples"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RamifiedDlog.lean",
+      "git_blob": "c30c070cef331c66f4e2c73bc876997b715e52dc",
+      "bytes": 4795,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.FakeSquareClass",
+        "Mathlib.Algebra.DualNumber"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsC20.lean",
+      "git_blob": "137ea057ad2c6634ab8788f158bdeb9e44330c4f",
+      "bytes": 12849,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.DescentBridgeDefs",
+        "FLT.Assumptions.MazurProof.QuarticDescent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN11.lean",
+      "git_blob": "c06d179bde809b031104ef0bd2051efb77e467a6",
+      "bytes": 3647,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN11Descent.lean",
+      "git_blob": "33db351c96acca5498e2c97f4647f491ce0ab3f6",
+      "bytes": 12299,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN11IdealSquare.lean",
+      "git_blob": "5d7b617b1db2a74177172c6be92adf6183411a37",
+      "bytes": 89382,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.BillingMahlerField",
+        "FLT.Assumptions.MazurProof.RationalPointsN11Descent",
+        "Mathlib.NumberTheory.NumberField.Ideal.KummerDedekind",
+        "Mathlib.NumberTheory.Padics.PadicVal.Basic",
+        "Mathlib.RingTheory.DedekindDomain.Factorization",
+        "scratch.KeystoneEDS",
+        "scratch.TateZ2xZ10Reduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN12.lean",
+      "git_blob": "e9266abb2e7f9fe67be175c7fdf15113cc6e9ff1",
+      "bytes": 214906,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.DescentBridgeN12Defs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN14.lean",
+      "git_blob": "effc8f9e9fb156966d30e68a07165f23d9e66aed",
+      "bytes": 1285,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "scratch.ObstructionN14"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN15C0.lean",
+      "git_blob": "dba3c7fa3ff61ba959b5993e2af259c755bf5074",
+      "bytes": 8788,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CyclicExclusion15"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN15Descent.lean",
+      "git_blob": "e1390ae815a5d20170f8d12b7605a4a3c51861db",
+      "bytes": 30622,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RationalPointsN15C0"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN15ExactSequence.lean",
+      "git_blob": "cb0a497cf92aaf95242a074dc0b555b1c4ca2fbf",
+      "bytes": 15403,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.GroupTheory.IndexNSmul",
+        "Mathlib.GroupTheory.FiniteAbelian.Basic",
+        "Mathlib.LinearAlgebra.FreeModule.ModN",
+        "FLT.Assumptions.MazurProof.RationalPointsN15Descent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN15Isogeny.lean",
+      "git_blob": "882456ea3167fc143f87578b159d9d130117dba2",
+      "bytes": 20507,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN15Descent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN15IsogenyHom.lean",
+      "git_blob": "5fd47ccfda0d4367bd4075fe58a96609f132c914",
+      "bytes": 67689,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN15Isogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN15IsogenyPreimages.lean",
+      "git_blob": "7c4e1a5a95bf1672add68c221669819adca94d08",
+      "bytes": 4981,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN15Isogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN15TwoTorsion.lean",
+      "git_blob": "8004348d4a38bfa533b4ef2ca777c1a8dc4fee02",
+      "bytes": 5684,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN15ExactSequence",
+        "FLT.Assumptions.MazurProof.RationalPointsN15Isogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN18.lean",
+      "git_blob": "1755c351620f8ad1d8b7451c76560db827d64823",
+      "bytes": 12038,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN18Descent.lean",
+      "git_blob": "2ec83e85a97a3920042050199526abc44a5879c2",
+      "bytes": 32751,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RationalPointsN18"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN18FiveDescent.lean",
+      "git_blob": "1b00c4ff254ec18cc4cddbf360a174bb92d33a12",
+      "bytes": 8149,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN18Descent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN18FiveDescent25.lean",
+      "git_blob": "cdd2b2d7c03f9e4e547abba4c8365a71b464c176",
+      "bytes": 9254,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN18FiveDescent",
+        "Mathlib.NumberTheory.Padics.PadicVal.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN18FiveDescentPrimitive.lean",
+      "git_blob": "d7449f6493463af5c75b24b93ea7597544d14f8b",
+      "bytes": 13850,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN18FiveDescent25"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN21.lean",
+      "git_blob": "f931ef4b9c80472e046b9ec5788e0f7b5c99f056",
+      "bytes": 6948,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CyclicExclusion21"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean",
+      "git_blob": "51627175e6519084ac8aa1b52dbe16a1bae39aed",
+      "bytes": 18445,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean",
+      "git_blob": "54d5308322438a37bb53511474ef2bd761db08c3",
+      "bytes": 35025,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25SutherlandBridge",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientAction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25DegreeTwoPullback.lean",
+      "git_blob": "d50956617c49a8d422d6531f86a1f3e6118a73b5",
+      "bytes": 3586,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25ReductionCardinality"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25NewformEulerCertificate.lean",
+      "git_blob": "4dc18d2e0ae27a9e957916fc69aa7fd37241f03f",
+      "bytes": 5205,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientZeta"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean",
+      "git_blob": "20e010be11bcb517fc49dc29dc49c15bb643ff22",
+      "bytes": 20951,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25CanonicalPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientBaseChange.lean",
+      "git_blob": "417b59704c0db1d36045a9fdf90ea7d4e9b1fa62",
+      "bytes": 3339,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean",
+      "git_blob": "27670db8fd885d23eab6265d06abd0663501286d",
+      "bytes": 18897,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Field",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF2"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientClassNumber.lean",
+      "git_blob": "079acd245dba5f1fad20831d46d30d4a26124141",
+      "bytes": 5498,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaClassNumber",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientZetaThree"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientExtensionPoints.lean",
+      "git_blob": "966610ce0b69731e0fa3d69a681c61c3ed552f40",
+      "bytes": 3976,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaPointOrbitClassification",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientZetaThree"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Add.lean",
+      "git_blob": "f3917aaeda80d64240c9db697e7af901de8295be",
+      "bytes": 1779,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Distrib.lean",
+      "git_blob": "cc393e54aa28d7b63ce3d8a993e835cd1f29a959",
+      "bytes": 1113,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Field.lean",
+      "git_blob": "86d56d95d81d79d3d51d864439c8f30b7aadd8fd",
+      "bytes": 2086,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Add",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Mul",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Distrib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Mul.lean",
+      "git_blob": "a6dc64ddc96af707dd8b51d66862169a4eff2e09",
+      "bytes": 1033,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean",
+      "git_blob": "76e6473b7dac0e5b37ca34968349da3087441fa9",
+      "bytes": 10793,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25CanonicalPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientF81Field.lean",
+      "git_blob": "d9617a894225a82cb8b0805a34b91d73246b2adf",
+      "bytes": 16996,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Algebra.CharP.CharAndCard",
+        "Mathlib.Algebra.Field.MinimalAxioms",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientFrobeniusOrbits.lean",
+      "git_blob": "ba58ccc52a908664211b13e26460e45f7d9d86ca",
+      "bytes": 13787,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaFrobeniusOrbitGrading",
+        "FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientExtensionPoints",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientThreeBaseChange"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientHilbert.lean",
+      "git_blob": "0b0b391ed2b2ca89ffe6e6aca82b6fe4d4670653",
+      "bytes": 12582,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra",
+        "Mathlib.Algebra.Order.Antidiag.FinsuppEquiv",
+        "Mathlib.RingTheory.Finiteness.Finsupp",
+        "Mathlib.RingTheory.Polynomial.HilbertPoly",
+        "Mathlib.Tactic.ComputeDegree"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean",
+      "git_blob": "fbde56d12391c7f6f20695c31466d250f087f70a",
+      "bytes": 38479,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.FieldTheory.Finite.Basic",
+        "Mathlib.GroupTheory.SpecificGroups.Cyclic",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeF81.lean",
+      "git_blob": "7415d1b8f7190b132ab6fea7e9421cd66b6f3777",
+      "bytes": 10084,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF81Field",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThree"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean",
+      "git_blob": "84daa8df8d9cc977c12e1fc42d02720e41a43241",
+      "bytes": 37693,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeF81"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientMiddleRiemannRoch.lean",
+      "git_blob": "440474add6e6b2dd0d2850b7527c1923519d3309",
+      "bytes": 12243,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence",
+        "FLT.Assumptions.MazurProof.CurveZetaMiddleRiemannRoch",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientFrobeniusOrbits"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeFields.lean",
+      "git_blob": "8ce402b3d9ffeb881332f7f7f3be80b78f84c704",
+      "bytes": 9996,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF81Field"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean",
+      "git_blob": "ac38826aa93d8afd56a04cba5623ea1f28e47394",
+      "bytes": 17480,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmallThreeFields",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeLinear"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean",
+      "git_blob": "b282d31c676297fcb4a2fd55464236615242abbc",
+      "bytes": 10636,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF3.lean",
+      "git_blob": "7f7e7d6ddd1dc8955b732c5963c2f36388625715",
+      "bytes": 15896,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmallThreeSemantic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean",
+      "git_blob": "3b66b00d0c56a042fed8572e160ecfdbff2c9e1c",
+      "bytes": 4748,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective",
+        "FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAdjunctionDescent.lean",
+      "git_blob": "a87a8281df3f0b5815ccf1e793a6cadfe418602f",
+      "bytes": 7808,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientTwistGlobalComparison"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineCanonicalDifferentials.lean",
+      "git_blob": "1b0b5c00765b28fbcf282f56b8cc31911c399c10",
+      "bytes": 20903,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth",
+        "FLT.Mathlib.LinearAlgebra.UnimodularCrossProduct"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineChart.lean",
+      "git_blob": "4480e7f448345923ed0167473215ba7d5776ef63",
+      "bytes": 17127,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoChartIdeal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineCharts.lean",
+      "git_blob": "01d535accd5441b43f3a0135ee1404b3d66ab87a",
+      "bytes": 18651,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChart"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+      "git_blob": "5848a044ec5838a89774c164292c99d9b10eec2c",
+      "bytes": 30675,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineCharts",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoStructuralJacobian",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF2",
+        "FLT.Mathlib.RingTheory.RingHom.SmoothJacobian"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineSmooth.lean",
+      "git_blob": "fffc0c9f7938d3022dadf7a43d117e988073d625",
+      "bytes": 18579,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChart",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF2",
+        "FLT.Mathlib.RingTheory.RingHom.SmoothJacobian"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientKoszulGeometry.lean",
+      "git_blob": "62ee61643a1c0aa2d7e9129aa9b1a7754bedf791",
+      "bytes": 13638,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientKoszulGlobal",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedImmersion",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.PushforwardUnit"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientKoszulGlobal.lean",
+      "git_blob": "ca3b2e51e9b8900d33bc9c97906e47181be807f7",
+      "bytes": 47383,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientTwistingMorphisms",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoChartKoszulSheaf"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientKoszulPullback.lean",
+      "git_blob": "bba7bb78d8eac56a99a18a43e05f99751d5c4d03",
+      "bytes": 24610,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientKoszulShifted"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientKoszulQuotient.lean",
+      "git_blob": "19f30934745665c437a89a74a51695b825d2ba3b",
+      "bytes": 47047,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientKoszulGeometry",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoIdealSheaf"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientKoszulShifted.lean",
+      "git_blob": "1dc4d6c5a39a40a346159defb2de0695ecee3af0",
+      "bytes": 23881,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientKoszulQuotient"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistGlobalComparison.lean",
+      "git_blob": "526123010655a8248181657a33378fb6499056a7",
+      "bytes": 54178,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientTwistRestriction",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoSmooth",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.RestrictionCover"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistRestriction.lean",
+      "git_blob": "393d92f1eeae3596f6065e7225417b27a39ea8bb",
+      "bytes": 23286,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientKoszulPullback",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistingDescent.lean",
+      "git_blob": "f645edee77a927a2c90cd90405fc43d954624dab",
+      "bytes": 12201,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientTwistingSheafCharts",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.PullbackUnit",
+        "Mathlib.CategoryTheory.Limits.Shapes.Pullback.ChosenPullback"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistingMorphisms.lean",
+      "git_blob": "7b1f7e01c5c6c8552b5a1473b20519d702b544b0",
+      "bytes": 8119,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientTwistingSheafGluing"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistingSheafCharts.lean",
+      "git_blob": "8b23a7e765e4b90b115936a0660eea21b8459bc8",
+      "bytes": 6565,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoKoszulSheafTransition"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistingSheafGluing.lean",
+      "git_blob": "3db1f998629851c417eb8509b364916d9f69304f",
+      "bytes": 86565,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientTwistingDescent",
+        "Mathlib.CategoryTheory.Limits.Shapes.Equalizers",
+        "Mathlib.CategoryTheory.Limits.Shapes.Products",
+        "Mathlib.CategoryTheory.Limits.Shapes.Pullback.Mono"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean",
+      "git_blob": "4cb16ba2d36c2950bf8addf39885cf3e752e6d4e",
+      "bytes": 4695,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientBinaryFieldSemantics",
+        "FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoCanonicalDifferentialCech.lean",
+      "git_blob": "4f081d9b7eaf5dbe8bf06d8962877ec9205afc25",
+      "bytes": 23501,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialRestriction",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAdjunctionDescent",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoCanonicalDifferentialCharts.lean",
+      "git_blob": "6a6c6c73591f759731acf9d318a02bbbeee4df1b",
+      "bytes": 6667,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineCanonicalDifferentials",
+        "FLT.Mathlib.RingTheory.Kaehler.AlgEquiv"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps.lean",
+      "git_blob": "8aba6226384a4591f8af0afadeb3e13a96dce1c4",
+      "bytes": 60308,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialCharts",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingTransition",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafCharts",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing",
+        "FLT.Mathlib.RingTheory.Kaehler.FormallyEtale"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoCanonicalDifferentialRestriction.lean",
+      "git_blob": "2e5199f996a9d94d36a2bf4f121862c1c2a16615",
+      "bytes": 32974,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialTilde",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.TildeAway"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoCanonicalDifferentialTilde.lean",
+      "git_blob": "17111903be7570a6e8392c05c8c38a07edb3bb01",
+      "bytes": 7374,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps",
+        "Mathlib.AlgebraicGeometry.Modules.Tilde"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoCanonicalDivisor.lean",
+      "git_blob": "c717bfb43a7ab8d25a30fb4adebf9c37dd2fcd6b",
+      "bytes": 9539,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveDivisorPicard",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFrobeniusOrbits",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoHyperplaneArtinLocal",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormalGrading",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingTransition",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafCharts",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingDescent",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartIdeal.lean",
+      "git_blob": "69ab4071b3d4f8b2dbcce3b02f927bfa58680f09",
+      "bytes": 11746,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoProper"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartKoszul.lean",
+      "git_blob": "dcba60769ce67f3f5d5fb788be81ef239bb2be0e",
+      "bytes": 9863,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineCharts",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedKoszul",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartKoszulSheaf.lean",
+      "git_blob": "5e273bc89d5b688f51c3925abd37adea06ab4687",
+      "bytes": 4797,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoChartKoszul",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.TildeExact"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoClosedImmersion.lean",
+      "git_blob": "e43053983008b35e3f7bf0d21e76e55a1ee75d58",
+      "bytes": 1182,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoProj",
+        "FLT.Mathlib.AlgebraicGeometry.ProjectiveSpectrum.ClosedImmersion"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoClosedPointChart.lean",
+      "git_blob": "aaae7fa4b2523822c0a95df08fbd681ee4218510",
+      "bytes": 2159,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoClosedPointEvaluation.lean",
+      "git_blob": "ad10c25abd0b6f7a0083d966686982f960669fa5",
+      "bytes": 14312,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointChart",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFrobeniusOrbits",
+        "Mathlib.RingTheory.Ideal.Quotient.Operations"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoClosedPointKernelNonzero.lean",
+      "git_blob": "d86378236894970390782f7415cc5a7ca05d214c",
+      "bytes": 5446,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineCanonicalDifferentials",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointResidueDegree",
+        "Mathlib.FieldTheory.Finite.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoClosedPointPartition.lean",
+      "git_blob": "a0a41ef31691afe909073525a3fa859be748cc2a",
+      "bytes": 7303,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenOrbitPrime"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoClosedPointPrime.lean",
+      "git_blob": "05cab3f8e66d9aef9e539fa93b7a97423b92eace",
+      "bytes": 6613,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFullClosedPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoClosedPointResidueDegree.lean",
+      "git_blob": "f5cf98d5db2a186623c47e25bffb171e704b2e7c",
+      "bytes": 15615,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointPrime",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFullClosedPoints",
+        "Mathlib.FieldTheory.IntermediateField.Algebraic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean",
+      "git_blob": "e63496bc9dcb90f6868d20c5ffd5d8748f7b2eaf",
+      "bytes": 11110,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF2",
+        "Mathlib.RingTheory.Kaehler.Polynomial",
+        "Mathlib.RingTheory.MvPolynomial.Homogeneous"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormalBasis.lean",
+      "git_blob": "706f2b344202dc6c01f29949323249f3f8f18075",
+      "bytes": 7644,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoKoszul",
+        "Mathlib.LinearAlgebra.Basis.Prod"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormalGrading.lean",
+      "git_blob": "79f0e6c8567953225e3b79d8f5d58943e1c3a995",
+      "bytes": 24334,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormalBasis",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra",
+        "Mathlib.Algebra.Module.GradedModule"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoExtensionPoints.lean",
+      "git_blob": "663bd0aa017b66880cfdecbe9271cb7150bc80dd",
+      "bytes": 3571,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaPointOrbitClassification",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientBinaryFieldSemantics"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoFrobeniusOrbits.lean",
+      "git_blob": "6e1f6ffac28c6f9baaa578588e912b866a1553f6",
+      "bytes": 5339,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaFrobeniusOrbitGrading",
+        "FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoBaseChange",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoExtensionPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoFullClosedPoints.lean",
+      "git_blob": "ad7f3ea9e3562b2dbad55af27e07d80fc8233f06",
+      "bytes": 19852,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFrobeniusOrbits",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointChart"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedAlgebra.lean",
+      "git_blob": "cda00b9180a7050b81b06953eff35a0e8e11a585",
+      "bytes": 9718,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoQuotientGrading",
+        "Mathlib.RingTheory.GradedAlgebra.RingHom"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedKoszul.lean",
+      "git_blob": "ca479a075e32e2e5f5d1f11a5a0a6e5ea37887cf",
+      "bytes": 13207,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoKoszul",
+        "Mathlib.RingTheory.MvPolynomial.Homogeneous",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoHyperplaneArtin.lean",
+      "git_blob": "4b6369a35cdf92ce933229a437473467f4092995",
+      "bytes": 19808,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2",
+        "Mathlib.Algebra.CharP.Algebra",
+        "Mathlib.Algebra.MvPolynomial.Equiv",
+        "Mathlib.RingTheory.AdjoinRoot",
+        "Mathlib.RingTheory.Localization.Away.Basic",
+        "Mathlib.RingTheory.Nilpotent.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoHyperplaneArtinKernel.lean",
+      "git_blob": "56f04c9fc0f552a5faa8bf3738d9bf28c5ea25fc",
+      "bytes": 9724,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoHyperplaneArtin"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoHyperplaneArtinLocal.lean",
+      "git_blob": "1480df945cbd204a7c2ead2d62cc6c95e918386d",
+      "bytes": 23454,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoHyperplaneArtinKernel",
+        "Mathlib.RingTheory.Localization.Algebra",
+        "Mathlib.RingTheory.Length",
+        "Mathlib.RingTheory.MvPolynomial.Ideal",
+        "FLT.Assumptions.MazurProof.CurveLocalIntersectionLength"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoIdealSheaf.lean",
+      "git_blob": "b8f77ed19aa20c219441aa42ece46bc6bdb55268",
+      "bytes": 4556,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoChartIdeal",
+        "Mathlib.AlgebraicGeometry.IdealSheaf.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoKoszul.lean",
+      "git_blob": "a08e93b6320d557be10715e29d7e69fc4c385cc8",
+      "bytes": 5531,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoRegularSequence",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoKoszulSheafTransition.lean",
+      "git_blob": "92bfc378b13969c82bdbe4c6e97ed6625d4eac8f",
+      "bytes": 11522,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoKoszulTransition",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.PullbackUnit"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoKoszulTransition.lean",
+      "git_blob": "5dab2c2692b7fb507853c5e488e877c649d692e3",
+      "bytes": 7789,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoChartKoszul",
+        "FLT.Mathlib.AlgebraicGeometry.ProjectiveSpectrum.TwistingTransition"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoMiddleRiemannRoch.lean",
+      "git_blob": "385f70fe24a8fa3a3678d759a43382e3b06e34c4",
+      "bytes": 16006,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence",
+        "FLT.Assumptions.MazurProof.CurveZetaMiddleRiemannRoch",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFullClosedPoints",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDivisor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean",
+      "git_blob": "973326ea5d44338791edfee3e2f6066ef196b0da",
+      "bytes": 15888,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneChartLocalization",
+        "Mathlib.RingTheory.Finiteness.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+      "git_blob": "e79757d85fd643f64ddca5e15db79579edd03b20",
+      "bytes": 6282,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneFunctionField",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartClosedPoints.lean",
+      "git_blob": "f5a76cd6966d9d3d540c7624a23b23bdf1a66cee",
+      "bytes": 7503,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneChartDimension",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDivisor",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenResidueDegree",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointKernelNonzero"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDimension.lean",
+      "git_blob": "f50a4c0f80eb6054d821c5a25684bb0ea68e66a8",
+      "bytes": 6302,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneChartDomain",
+        "Mathlib.RingTheory.DedekindDomain.Dvr",
+        "Mathlib.RingTheory.Finiteness.Cardinality",
+        "Mathlib.RingTheory.HopkinsLevitzki",
+        "Mathlib.RingTheory.Ideal.KrullsHeightTheorem",
+        "Mathlib.RingTheory.KrullDimension.Zero"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean",
+      "git_blob": "49a18426ea58197bb1906fb7229da21addd4e57a",
+      "bytes": 29420,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneChartBoundary",
+        "Mathlib.Algebra.Polynomial.RingDivision",
+        "Mathlib.Algebra.Ring.Regular",
+        "Mathlib.RingTheory.Flat.TorsionFree",
+        "Mathlib.RingTheory.Polynomial.UniqueFactorization"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean",
+      "git_blob": "d5056a7807473ee3333a2432541ea49ba286bcf8",
+      "bytes": 19686,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneChartBridge"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+      "git_blob": "0d711ee0eb8a62d6300f81a3b4dd05a76b0fa0ee",
+      "bytes": 13317,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF2",
+        "Mathlib.Algebra.Polynomial.Eval.Irreducible",
+        "Mathlib.FieldTheory.Finite.Extension"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneNormalization.lean",
+      "git_blob": "73471f071578b9f423999ef78da88650628a07c1",
+      "bytes": 8540,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneQuarticFunctionField",
+        "Mathlib.FieldTheory.SeparableClosure",
+        "Mathlib.NumberTheory.FunctionField",
+        "Mathlib.RingTheory.Ideal.Norm.RelNorm"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneQuarticFunctionField.lean",
+      "git_blob": "53d39d2e087f6d0ba23a82a6547ce25259877f90",
+      "bytes": 6829,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneQuarticSeparable"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneQuarticSeparable.lean",
+      "git_blob": "974fd440206e6c92f9f5e784d728931d5aebfcdb",
+      "bytes": 5314,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneFunctionField",
+        "Mathlib.FieldTheory.RatFunc.Basic",
+        "Mathlib.FieldTheory.Separable",
+        "Mathlib.FieldTheory.SeparableDegree",
+        "Mathlib.RingTheory.Polynomial.GaussLemma"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProj.lean",
+      "git_blob": "1fcb497f9c2f1263fc407367dd87c4033198ad48",
+      "bytes": 7116,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra",
+        "Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProper.lean",
+      "git_blob": "f36eeb23d21444edf5b1f8fb858743c06932b420",
+      "bytes": 3491,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedImmersion",
+        "Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoQuotientGrading.lean",
+      "git_blob": "98e3bf362d534b9737c69d43433982377e4dc34a",
+      "bytes": 8445,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedKoszul",
+        "Mathlib.LinearAlgebra.Isomorphisms",
+        "Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean",
+      "git_blob": "18d2e3de20c35dc914e8c350bedb9efc1e3b9f96",
+      "bytes": 17993,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormal",
+        "Mathlib.LinearAlgebra.Determinant",
+        "Mathlib.RingTheory.Norm.Basic",
+        "Mathlib.RingTheory.Regular.RegularSequence",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRelativeDifferentials.lean",
+      "git_blob": "6c730ca119ab7212ce192ff27947f04915799e53",
+      "bytes": 109651,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialCech",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.AffineDifferentials",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.RelativeDifferentials",
+        "Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification",
+        "Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits",
+        "Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers",
+        "Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products",
+        "Mathlib.CategoryTheory.Sites.PreservesLocallyBijective"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoSmooth.lean",
+      "git_blob": "47dd42c4fe12cfcc981ca5c481891aab43974c4c",
+      "bytes": 7414,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth",
+        "Mathlib.AlgebraicGeometry.Morphisms.Smooth"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean",
+      "git_blob": "ce969d4a1675f7be62b194abe36d26c4f6542a53",
+      "bytes": 16729,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineCharts",
+        "Mathlib.RingTheory.MvPolynomial.EulerIdentity"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingDescent.lean",
+      "git_blob": "b3d96899a82ec6df11cae752f2e19069e6623152",
+      "bytes": 13329,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafCharts",
+        "FLT.Mathlib.AlgebraicGeometry.Modules.PullbackUnit",
+        "Mathlib.CategoryTheory.Limits.Shapes.Pullback.ChosenPullback",
+        "Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingSheafCharts.lean",
+      "git_blob": "fa2b9aad6f89cbebb16099eed3d6f9b427a085cb",
+      "bytes": 8838,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingTransition",
+        "Mathlib.AlgebraicGeometry.Modules.Tilde"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingSheafGluing.lean",
+      "git_blob": "cff060dd1c47817b59d1f02e9754f90c93b20e60",
+      "bytes": 89371,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingDescent",
+        "Mathlib.CategoryTheory.Limits.Shapes.Equalizers",
+        "Mathlib.CategoryTheory.Limits.Shapes.Products",
+        "Mathlib.CategoryTheory.Limits.Shapes.Pullback.Mono"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingTransition.lean",
+      "git_blob": "04c831e77632ef3a4e5604b6f73e0f0a07351d3c",
+      "bytes": 7501,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoProj",
+        "FLT.Mathlib.AlgebraicGeometry.ProjectiveSpectrum.TwistingTransition"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryArtinLocal.lean",
+      "git_blob": "0dacb9b08b94c8f8e805e82de6dbcd5ec769a9ec",
+      "bytes": 29045,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryClosedPoints",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoHyperplaneArtinLocal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryChartArtin.lean",
+      "git_blob": "7dd2a3b0dcaf84ac8afa1ea9b5151327c9cb0539",
+      "bytes": 11708,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryArtinLocal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryClosedPoints.lean",
+      "git_blob": "cbd4248823e2fcff59885e21e456be030c898739",
+      "bytes": 14513,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFullClosedPoints",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDivisor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryLocalDivisor.lean",
+      "git_blob": "40bd61664a4dc51e685be0978687b62eca530aad",
+      "bytes": 7409,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointPartition",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryArtinLocal",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryYZLocal",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryXLocal.lean",
+      "git_blob": "8fcf421cd1d897766c2126af96c9c11f6a25135a",
+      "bytes": 15772,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin",
+        "Mathlib.RingTheory.LocalRing.Length",
+        "Mathlib.RingTheory.OrderOfVanishing.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryYZChartArtin.lean",
+      "git_blob": "46943556f244982b39059b117fb5d49883bb5a85",
+      "bytes": 8903,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryClosedPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryYZLocal.lean",
+      "git_blob": "d1dfc2e8b07b252e908a5b32af444df70fa238e9",
+      "bytes": 7849,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryYZChartArtin"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryZLocal.lean",
+      "git_blob": "bd4ca9299d029906af1c8b6c6f758733be2528d9",
+      "bytes": 23789,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryClosedPoints",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryXLocal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWChartClosedPointDegree.lean",
+      "git_blob": "38c9d5134ea47804dfa41ef95fcefb056b485978",
+      "bytes": 4372,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWChartNormalization",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenOrbitPrimeInjective"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWChartNormalization.lean",
+      "git_blob": "13312dbe3c5cec7fdef9576da6ead94843ae5c3e",
+      "bytes": 25231,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneNormalization",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneChartClosedPoints",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineCanonicalDifferentials",
+        "Mathlib.RingTheory.DiscreteValuationRing.TFAE",
+        "Mathlib.RingTheory.LocalProperties.IntegrallyClosed",
+        "Mathlib.RingTheory.Etale.Field",
+        "Mathlib.RingTheory.Etale.Kaehler",
+        "Mathlib.RingTheory.Jacobson.Ring"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenEvaluation.lean",
+      "git_blob": "8523290a73ebcd6ec25550578ca8b41c991d01c8",
+      "bytes": 13704,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoBaseChange"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenOrbitPrime.lean",
+      "git_blob": "e84814c39b065cceeae58145a315740c59b65f0f",
+      "bytes": 8531,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryClosedPoints",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneChartClosedPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenOrbitPrimeInjective.lean",
+      "git_blob": "c800f9a16754c4feb24c1bb8a82df46722ed3e17",
+      "bytes": 20522,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointPartition"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenPointConstruction.lean",
+      "git_blob": "d2a14f0d74ac1c5925476db3a32c25329d07f21f",
+      "bytes": 5735,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoPlaneFunctionField"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenPrimeSurjective.lean",
+      "git_blob": "70858f686df492af1b198b2c1a505698efccb472",
+      "bytes": 19233,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenPointConstruction",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenOrbitPrimeInjective",
+        "Mathlib.RingTheory.Jacobson.Ring"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenResidueDegree.lean",
+      "git_blob": "fc1179ca165e5f027f84260dc336f48f0b469faf",
+      "bytes": 10325,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWOpenEvaluation",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointResidueDegree"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoZProjectionXLocal.lean",
+      "git_blob": "2cba28b88c59e14de9b41220676cb0c0dc154615",
+      "bytes": 22937,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoClosedPointPartition",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryYZLocal",
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean",
+      "git_blob": "a276e116ee483bfa1255ee654a6a8fc4e8a9136e",
+      "bytes": 23070,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeDefs.lean",
+      "git_blob": "e42e1a1a473a9e333d48201c60a968f7eaf4426b",
+      "bytes": 8324,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean",
+      "git_blob": "992c08f09b601b8727a75fbe3f9baa11e1c2ad44",
+      "bytes": 8404,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientZeta.lean",
+      "git_blob": "34e2c48354b23a850c18537d6c6de913bb554104",
+      "bytes": 5953,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Field"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientZetaThree.lean",
+      "git_blob": "eed45d1eae702d62feeef39dee65eef5ff84049d",
+      "bytes": 5485,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientHilbert",
+        "FLT.Assumptions.MazurProof.RationalPointsN25NewformEulerCertificate"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25ReductionCardinality.lean",
+      "git_blob": "e6f0e77ecafc64a12010e72f2fff294da9c6c6c4",
+      "bytes": 3947,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25TwoPrimeReduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean",
+      "git_blob": "38306afdb0e34e3a8e00eb5f9fa8862b266c884f",
+      "bytes": 18715,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder25Factor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean",
+      "git_blob": "54911c2c6040800cd5935e65524b3290e8f488d7",
+      "bytes": 11176,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN25QuotientAction",
+        "FLT.Assumptions.MazurProof.TateOrder25ParameterAction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN25TwoPrimeReduction.lean",
+      "git_blob": "ebfd606afcfa613f9cf068afebb77dadb68554e6",
+      "bytes": 2042,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN27CM.lean",
+      "git_blob": "8f13dcb5540a54597246b726fc6822e3bc54f9d2",
+      "bytes": 11375,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.TateOriginDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN27ThreeDescent.lean",
+      "git_blob": "0a45cecb21d4013ac84d9d7b948aa100cecbbcb6",
+      "bytes": 37610,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN18",
+        "FLT.Assumptions.MazurProof.TateOrder18",
+        "FLT.Assumptions.MazurProof.TateOriginDivision",
+        "FLT.Assumptions.MazurProof.RationalPointsN27CM"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN49.lean",
+      "git_blob": "24542853447779b4341b07947ed9c2a9671e991c",
+      "bytes": 3561,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOriginDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsN49Composition.lean",
+      "git_blob": "ad4a9d72796d009765869d98b336a0ff53a6dc9c",
+      "bytes": 3511,
+      "code_flags": [
+        {
+          "line": 96,
+          "code": "sorry"
+        }
+      ],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN49"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsX115.lean",
+      "git_blob": "205e233ba58595d3d588e830471d9a4442b19a4e",
+      "bytes": 109811,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder18"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsX116.lean",
+      "git_blob": "6c00b2bd3d9b7b6609cb54886b306af0874540b5",
+      "bytes": 21707,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder16Cyclic",
+        "scratch.FermatFourthDifferenceN16"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsX121.lean",
+      "git_blob": "62810ecf0890607abbcb46d2ffcea746d6be76d5",
+      "bytes": 105018,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder18",
+        "FLT.Assumptions.MazurProof.RationalPointsN15Descent",
+        "Mathlib.RingTheory.Polynomial.RationalRoot"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsX135.lean",
+      "git_blob": "b834b4ab1efa58d813617d5286439182760d6b45",
+      "bytes": 37846,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.TateOriginDivision",
+        "FLT.Assumptions.MazurProof.RationalPointsX135Descent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsX135Descent.lean",
+      "git_blob": "9b1e5a47ede92d6562fbf376a4b279b45d6bbf4a",
+      "bytes": 57535,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RationalPointsX135Formal.lean",
+      "git_blob": "c532fea8d067d0366cf252f116c86d11bee89819",
+      "bytes": 50727,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsX135"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS1.lean",
+      "git_blob": "0a5aba3425b178c4aa37301ea59fbaa810b77f71",
+      "bytes": 1861,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS3"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS10Audit.lean",
+      "git_blob": "8148b6d7b6b11a29b92c7e2ff9b90e2e94daa4f0",
+      "bytes": 4128,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS9",
+        "FLT.Assumptions.MazurProof.RealTopologyS8",
+        "FLT.Assumptions.MazurProof.RealTopologyS7",
+        "FLT.Assumptions.MazurProof.RealTopologyS6",
+        "FLT.Assumptions.MazurProof.RealTopologyS5",
+        "FLT.Assumptions.MazurProof.RealTopologyS4"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS10Mixed.lean",
+      "git_blob": "43775b5ed5ecef2053dd18851c9ae40573c37c74",
+      "bytes": 75622,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS9"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS10T2.lean",
+      "git_blob": "d5214d1c3a1201fc05cb125cc23c59cc33d644bf",
+      "bytes": 28244,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS9"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS11Assembly.lean",
+      "git_blob": "df24f1446d9643f612222c0d4e43f163af04832c",
+      "bytes": 25055,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS9",
+        "FLT.Assumptions.MazurProof.RealTopologyS6",
+        "FLT.Assumptions.MazurProof.RealTopologyS5",
+        "FLT.Assumptions.MazurProof.RealTopologyS10T2",
+        "FLT.Assumptions.MazurProof.RealTopologyS10Mixed"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS2.lean",
+      "git_blob": "d60a17a8a3c377b870e8140fb6d98590bd2e8acf",
+      "bytes": 2447,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS3"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS3.lean",
+      "git_blob": "2aae430c1599e510574213f20237d7c69e1ad0c8",
+      "bytes": 29790,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS4.lean",
+      "git_blob": "7239ec7aaadd0320e71a5e63a4f800d8670224c3",
+      "bytes": 33452,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RealTopologyS1"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS5.lean",
+      "git_blob": "d1bdeeba49503524fb8e6042e9d20aa1b3daecd9",
+      "bytes": 24502,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS4"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS6.lean",
+      "git_blob": "b8ab2d14e4d562f267946b1b03ac4f89ceb3862d",
+      "bytes": 23655,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS5"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS7.lean",
+      "git_blob": "302d7028ec30af31893fa33b70b04b2737c0a362",
+      "bytes": 17419,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS4"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS8.lean",
+      "git_blob": "fa2fc0e45adf5ef4478c604c90888c4f775373fb",
+      "bytes": 60631,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS6",
+        "FLT.Assumptions.MazurProof.RealTopologyS7"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTopologyS9.lean",
+      "git_blob": "0b12a769b6e97688c7793cdfd9eb46d8b3aad6ea",
+      "bytes": 9127,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RealTopologyS8",
+        "Mathlib.Topology.LocallyConstant.Basic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTorsionBound.lean",
+      "git_blob": "7938e3bf6d8ea65486dcd398b914170834b78869",
+      "bytes": 31305,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RealTopologyS3",
+        "FLT.Assumptions.MazurProof.RealTopologyS11Assembly",
+        "FLT.Assumptions.MazurProof.TorsionDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RealTorsionBridge.lean",
+      "git_blob": "3b44ca10ef0f8e9644c85c04d3664075fea02533",
+      "bytes": 3790,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RealTorsionBound"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/RootsOfUnity.lean",
+      "git_blob": "bd80d9b4e37e9f4a0993f6383e3c444e7614fd89",
+      "bytes": 1271,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticFunctionConjugation.lean",
+      "git_blob": "3c41ab2491ab37a08a93bc4566009eb268abcf13",
+      "bytes": 2552,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumford.lean",
+      "git_blob": "5c198c75b14da93851a8b5bdf3fe08aff4cda02c",
+      "bytes": 9910,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordBaseChange.lean",
+      "git_blob": "9a6c879564e616e9ba49a4ba7c74d49db1432e01",
+      "bytes": 2602,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumford"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordBasis.lean",
+      "git_blob": "1ee3b7bc6218d6c3f4f3aac03c5396d05c6929df",
+      "bytes": 7344,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumford"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordCantorReduction.lean",
+      "git_blob": "d70c01c131d2d9f3eeb50ea4d8acc0538ed8ce0c",
+      "bytes": 30760,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordRepresentative",
+        "FLT.Assumptions.MazurProof.SexticMumfordIdealConjugation"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordFixedUnit.lean",
+      "git_blob": "6fade72a531ffec72251dd5fa5b573efba4873d4",
+      "bytes": 3758,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordNorm"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordGroup.lean",
+      "git_blob": "0577548911492af8c40653bc3ef1166670104970",
+      "bytes": 3188,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticOrientedPic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordIdeal.lean",
+      "git_blob": "231bd943c9a02c8a9e59bf7c72a99ff5840e34b9",
+      "bytes": 6023,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordIdealConjugation.lean",
+      "git_blob": "f4e2c34d15ebeb08df098e5cbd981c13c4b4682a",
+      "bytes": 7024,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticFunctionConjugation",
+        "FLT.Assumptions.MazurProof.SexticMumfordUnit"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordNorm.lean",
+      "git_blob": "157ac9c58fe1532448e33fa6604cfe7af3dd75fe",
+      "bytes": 3200,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordNormalForm.lean",
+      "git_blob": "ec6f24c4f48866af754f9e7bfe679363072909b9",
+      "bytes": 1135,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordBasis"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordOrientedBaseChange.lean",
+      "git_blob": "4b2dbd8c7936d645d4c4264a749585f0600e412b",
+      "bytes": 14083,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordBaseChange",
+        "FLT.Assumptions.MazurProof.SexticOrientedPic",
+        "FLT.Assumptions.MazurProof.SexticMumfordBasis",
+        "Mathlib.RingTheory.FractionalIdeal.Extended"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordPrimitivePart.lean",
+      "git_blob": "dc698d692812be6d14bd0d59e5be6413e048d1dd",
+      "bytes": 16491,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordRepresentative"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordPrincipalNumerator.lean",
+      "git_blob": "7a170df2e70d6f18d023b2b233eb93929d82d2ee",
+      "bytes": 5584,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordIdealConjugation"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordPrincipalScale.lean",
+      "git_blob": "f770ded878f3b32d52a4db98c06bd2d88930bf75",
+      "bytes": 4987,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordPrincipalNumerator",
+        "FLT.Assumptions.MazurProof.SexticMumfordNorm"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordQuotientBasis.lean",
+      "git_blob": "81e5e809dcde97da57c2cce55620fe5901863e27",
+      "bytes": 3481,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordIdeal",
+        "Mathlib.Data.Fin.VecNotation",
+        "Mathlib.RingTheory.AdjoinRoot"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordRecover.lean",
+      "git_blob": "913f8e628084a2161b88588f20b53f1bd29ea293",
+      "bytes": 2509,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordIdeal"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordRepresentative.lean",
+      "git_blob": "d0007c76ab990744dc5d9e018ce3fddd8cc499c7",
+      "bytes": 16178,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordNormalForm",
+        "FLT.Assumptions.MazurProof.SexticOrientedPic",
+        "FLT.Assumptions.MazurProof.SexticMumfordNorm"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordStructuralReduction.lean",
+      "git_blob": "ebc20f60c85f57cfe77a3b6f0d13850ae5be5df9",
+      "bytes": 6602,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordPrimitivePart",
+        "FLT.Assumptions.MazurProof.SexticMumfordCantorReduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticMumfordUnit.lean",
+      "git_blob": "8a8a0739f09a57cc39d08f3e0dba5161a96c6f6c",
+      "bytes": 7553,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordIdeal",
+        "Mathlib.RingTheory.FractionalIdeal.Inverse"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SexticOrientedPic.lean",
+      "git_blob": "7c5785edeb3c419410b0b42220677190fdc16a3e",
+      "bytes": 3017,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.SexticMumfordUnit"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/SquareRootUnitLift.lean",
+      "git_blob": "0ef87b1f6e8c7b9e54e53cfe71e5465acb315538",
+      "bytes": 1186,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Algebra.Group.Units.Defs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/StandardTwoIsogenyDualHom.lean",
+      "git_blob": "a88c4740a0ea8500a32b7f86c5bb0eb276f8dabd",
+      "bytes": 6056,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.VeluTwoIsogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/StandardTwoIsogenyPreimages.lean",
+      "git_blob": "147151e6997bb705e1b1845cfdda2855da415ffd",
+      "bytes": 5070,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.VeluTwoIsogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateNFDivision.lean",
+      "git_blob": "676c5bd7dd957d12add96af2b964479e70a3a11b",
+      "bytes": 10527,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateNonsingularN18.lean",
+      "git_blob": "1a7fc410b0cf04a152d542b6c224f3ad7a0b315a",
+      "bytes": 3869,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateNormalFormBridge.lean",
+      "git_blob": "509cab0eb6b976ff3fa7a04e3f20a984846c61e3",
+      "bytes": 11768,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "scratch.TateZ2xZ10Reduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder11.lean",
+      "git_blob": "3bfc3bfa4cafcc6df9bbe7962a48ae8a35e2df1f",
+      "bytes": 8885,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder13.lean",
+      "git_blob": "99b86fdfcbad218b2397f0a86d1e5ca5bbbaf9ba",
+      "bytes": 9123,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder16Cyclic.lean",
+      "git_blob": "a8927c48811f62503e031b425f1dfc46083e093c",
+      "bytes": 14817,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOriginDivision",
+        "FLT.Assumptions.MazurProof.KubertBridgeN16"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder17.lean",
+      "git_blob": "182e18093744e6056946780c56a420126d45246a",
+      "bytes": 11057,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder17Quotient.lean",
+      "git_blob": "a26d8d11baef97b8e244d29f80d351ea3ac306c5",
+      "bytes": 19092,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.X017RationalPoints"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder18.lean",
+      "git_blob": "01d9777f8de828c87e4aed264aac884077f24296",
+      "bytes": 23905,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder19.lean",
+      "git_blob": "a58987ababd4214a8a64ac30cb84847fbfb43d59",
+      "bytes": 10612,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder19Quotient.lean",
+      "git_blob": "1c6bb8317f6021cc79a768aa815395f30639c9be",
+      "bytes": 3144,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N19SutherlandModels"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder25Factor.lean",
+      "git_blob": "2d51550ae4e81a63f8fa23d3bd7dc59ce95927a6",
+      "bytes": 22042,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOriginDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder25ParameterAction.lean",
+      "git_blob": "da9109dedb9d2cf415fe4faf9967a12399e03a85",
+      "bytes": 41841,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder25Factor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder27.lean",
+      "git_blob": "4e238a954f569a78591c260d0816eb59d2c4cb82",
+      "bytes": 14697,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOriginDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder49Bridge.lean",
+      "git_blob": "5645c7721ebb5aa804fa9f764040168c95510fed",
+      "bytes": 2578,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder49Factor",
+        "FLT.Assumptions.MazurProof.CyclicExclusion49"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOrder49Factor.lean",
+      "git_blob": "b34830781e2e847e81a67da028b105c639e86d71",
+      "bytes": 14503,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder25Factor"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TateOriginDivision.lean",
+      "git_blob": "eacc689257de208e00432cf7dec6ef166f622552",
+      "bytes": 8309,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateNFDivision",
+        "FLT.Assumptions.MazurProof.TateNormalFormBridge",
+        "FLT.Assumptions.MazurProof.TorsionDefs",
+        "scratch.KeystoneEDS"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TorsionBound.lean",
+      "git_blob": "313986b23fb28a3992342849d89f47ba03f27eb5",
+      "bytes": 3324,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TorsionFiniteFromOrderBound"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TorsionDefs.lean",
+      "git_blob": "7c2a861c6a922204dec5e7a76f03555e4cb22f58",
+      "bytes": 1221,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TorsionFinite.lean",
+      "git_blob": "1118e13aa304713c1bc8964064a4240960f53c13",
+      "bytes": 2234,
+      "code_flags": [
+        {
+          "line": 14,
+          "code": "axiom mordell_weil_fg (E : WeierstrassCurve ℚ) [E.IsElliptic] :"
+        }
+      ],
+      "import_headers": [
+        "Mathlib"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TorsionFiniteFromOrderBound.lean",
+      "git_blob": "ab7d20a747767e7aefda2d3fcfe6f4102f227dc7",
+      "bytes": 2130,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.Axioms",
+        "FLT.Assumptions.MazurProof.RealTorsionBound"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TowerDiscriminant.lean",
+      "git_blob": "35fd8321562b857597cc4ddd98c4c2b8f18143cf",
+      "bytes": 5523,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.RingTheory.Discriminant",
+        "Mathlib.Tactic.Ring"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/TwoInvariantFactors.lean",
+      "git_blob": "60c43f3598d6c3d88cb127404cf43f0d9c5fb54f",
+      "bytes": 18137,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.GroupTheory"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/VeluTwoIsogeny.lean",
+      "git_blob": "d8a4a531599f28219531eccec6e64fb7708f15a2",
+      "bytes": 80881,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point",
+        "FLT.Assumptions.MazurProof.N18RouteC_VariableChangePoints",
+        "FLT.Assumptions.MazurProof.TorsionDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/WeilPairingInterface.lean",
+      "git_blob": "bf914431fd2b7eddab86649258549d80313aeeae",
+      "bytes": 9244,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.RealTorsionBound",
+        "FLT.Assumptions.MazurProof.TorsionDefs"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017Descent.lean",
+      "git_blob": "75d7b0b0bc8670d040692487ea92e6ccca2e3b4c",
+      "bytes": 3420,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017IsogenySequence",
+        "FLT.Assumptions.MazurProof.RationalPointsN15Descent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017ExactSequence.lean",
+      "git_blob": "499eb35d03356b8641bb36bddd60c3f6bfd5dbb6",
+      "bytes": 7865,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsN15ExactSequence"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017FirstCoset.lean",
+      "git_blob": "5bd829c19a8421ed4efdde78927b7408fbe40d72",
+      "bytes": 15688,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017Descent",
+        "FLT.Assumptions.MazurProof.X017ExactSequence",
+        "FLT.Assumptions.MazurProof.StandardTwoIsogenyPreimages"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017FormalTwoCore.lean",
+      "git_blob": "d0a0fca13350b68ab94581a2ff1abe44f0b03172",
+      "bytes": 20184,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017Model"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017FormalTwoReduction.lean",
+      "git_blob": "bfdca20453955cddf7037b7e43ea29f7bca07bdb",
+      "bytes": 19303,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017FormalTwoCore"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017FourTorsion.lean",
+      "git_blob": "550598c160964f931c8e4cc4da19e1ef97b41d5e",
+      "bytes": 4935,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017RankZero"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017HeightDescent.lean",
+      "git_blob": "b5a42f13d8948e84bd257acd8105947228d8da0d",
+      "bytes": 7933,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.GroupTheory.Descent",
+        "FLT.Assumptions.MazurProof.X017ExactSequence"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017IsogenySequence.lean",
+      "git_blob": "0354a6b3dd2c213da7a73d1548910424275d52aa",
+      "bytes": 5136,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017Model",
+        "FLT.Assumptions.MazurProof.StandardTwoIsogenyDualHom"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017Model.lean",
+      "git_blob": "d5ea736c01ef9460c68a389f7af0965bb5628401",
+      "bytes": 9177,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.N18RouteC_VariableChangePoints",
+        "FLT.Assumptions.MazurProof.VeluTwoIsogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017RankZero.lean",
+      "git_blob": "f649b6bb87171a8745ce0de7905183a62bbe0ae8",
+      "bytes": 2592,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017HeightDescent",
+        "FLT.Assumptions.MazurProof.X017SecondCoset",
+        "FLT.Assumptions.MazurProof.X017TwoTorsion",
+        "scratch.A6TorsionFinite"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017RationalPoints.lean",
+      "git_blob": "404e79397048bc50f85045dbaac0fe66ef5c0f0b",
+      "bytes": 4062,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017FormalTwoReduction",
+        "FLT.Assumptions.MazurProof.X017FourTorsion",
+        "FLT.Assumptions.MazurProof.X017SecondCoset"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017Reduction.lean",
+      "git_blob": "cfb94dd33117d23aa180ed724085925fc1058ec5",
+      "bytes": 2312,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Data.ZMod.Basic",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017SecondCoset.lean",
+      "git_blob": "082ef3f325be4d941ec0a5630079004d692079c1",
+      "bytes": 11292,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017FirstCoset"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X017TwoTorsion.lean",
+      "git_blob": "9353649d3c717bfe8f9c2841eea3d1b02cd092d2",
+      "bytes": 3202,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.X017Model",
+        "FLT.Assumptions.MazurProof.RationalPointsN15ExactSequence"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/X049DescentObstruction.lean",
+      "git_blob": "03eb8c4fbbc22deb3283ba1014299815686018bf",
+      "bytes": 6196,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib.Data.ZMod.Basic",
+        "Mathlib.Tactic"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19Descent.lean",
+      "git_blob": "b923e2442b321b79cf09844accc9498c369697a2",
+      "bytes": 13935,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsX135Descent",
+        "FLT.Assumptions.MazurProof.XDelta19Model"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodDescent.lean",
+      "git_blob": "3958a088e2ba04e6e0caefe401a42f2c1e1a8260",
+      "bytes": 17746,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.RationalPointsX135Descent",
+        "FLT.Assumptions.MazurProof.XDelta19GoodIsogeny"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodDualDescent.lean",
+      "git_blob": "3a6008ddbf0fbbc1f27368e8c9fa24eb5ac59cd4",
+      "bytes": 24696,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.XDelta19GoodDescent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodFormalCore.lean",
+      "git_blob": "9cbaddd7e3657d14fa66bc3176e3703fb240f623",
+      "bytes": 19919,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.XDelta19GoodWeakDescent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodFormalReduction.lean",
+      "git_blob": "40710eb93b7b25740b89af9e0c0d2eb9a7dec7d3",
+      "bytes": 44271,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.XDelta19GoodFormalCore"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodIsogeny.lean",
+      "git_blob": "ed6aee57443140860c67dff712158bad13d92b37",
+      "bytes": 16652,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOriginDivision",
+        "FLT.Assumptions.MazurProof.XDelta19GoodModel"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodModel.lean",
+      "git_blob": "e5170c72ddddd340cf0973e9e8397fef697091c1",
+      "bytes": 6430,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.XDelta19Model"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodRationalPoints.lean",
+      "git_blob": "a603c91370177fc1a4f649343274f75bb54733ad",
+      "bytes": 3553,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.XDelta19GoodFormalReduction"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19GoodWeakDescent.lean",
+      "git_blob": "60d05ccbc2b80c9305b2a22eeebdf05218b518d8",
+      "bytes": 8425,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.XDelta19GoodDescent",
+        "FLT.Assumptions.MazurProof.XDelta19GoodDualDescent"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19Isogeny.lean",
+      "git_blob": "9169cadfe3aaec7174272ecd371764579c32aa3e",
+      "bytes": 11898,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.XDelta19Model"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19Model.lean",
+      "git_blob": "b5ae3e5d0cfd9cca4cff9b2e2a8ba9a5ee99ac42",
+      "bytes": 9214,
+      "code_flags": [],
+      "import_headers": [
+        "Mathlib",
+        "FLT.Assumptions.MazurProof.TateOriginDivision"
+      ]
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/XDelta19RationalPoints.lean",
+      "git_blob": "50f90c96f0cc2c86a48af98b51b71868f5424730",
+      "bytes": 3383,
+      "code_flags": [],
+      "import_headers": [
+        "FLT.Assumptions.MazurProof.TateOrder19Quotient",
+        "FLT.Assumptions.MazurProof.XDelta19Descent",
+        "FLT.Assumptions.MazurProof.XDelta19GoodRationalPoints"
+      ]
+    }
+  ]
+}
