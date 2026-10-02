@@ -1,0 +1,133 @@
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:63:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:80:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_ZBoundaryOrder.zWGerm_ne_zero`:
+  [Fact (pointEval zW = 0)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Fact (pointEval zW = 0)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:85:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZBoundaryOrder.zChartToFraction_isUnit_of_primeCompl`:
+  [Fact (pointEval zW = 0)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Fact (pointEval zW = 0)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:156:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZBoundaryOrder.ordFrac_image_eq_exp`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+@MazurProof.N25F_ZBoundaryOrder.zW_ne_zero : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW ≠ 0
+'MazurProof.N25F_ZBoundaryOrder.zW_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW ∈ RingHom.ker pointEval.toRingHom
+'MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zPrime_ne_bot : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)], RingHom.ker pointEval.toRingHom ≠ ⊥
+'MazurProof.N25F_ZBoundaryOrder.zPrime_ne_bot' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalRing_isDiscreteValuationRing : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  IsDiscreteValuationRing (N25ZLocalFamilyCheck.LocalRing pointEval)
+'MazurProof.N25F_ZBoundaryOrder.zLocalRing_isDiscreteValuationRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zWGerm_ne_zero : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  N25ZLocalFamilyCheck.germ pointEval ≠ 0
+'MazurProof.N25F_ZBoundaryOrder.zWGerm_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalToFraction : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2} →
+      [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)] →
+        N25ZLocalFamilyCheck.LocalRing pointEval →ₐ[ZMod 2] FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_ZBoundaryOrder.zLocalToFraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_injective : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [inst_2 : Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  Function.Injective ⇑MazurProof.N25F_ZBoundaryOrder.zLocalToFraction
+'MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_zWGerm : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [inst_2 : Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  MazurProof.N25F_ZBoundaryOrder.zLocalToFraction (N25ZLocalFamilyCheck.germ pointEval) =
+    1 /
+      (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+          (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+        MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz
+'MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_zWGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_isFractionRing : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [inst_2 : Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  IsFractionRing (N25ZLocalFamilyCheck.LocalRing pointEval) (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)
+'MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2} →
+      [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)] →
+        FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W →*₀ WithZero (Multiplicative ℤ)
+'MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2} →
+      [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)] →
+        Additive (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)ˣ →+ ℤ
+'MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder_zWGerm : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [inst_2 : Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)]
+  [Fact (Ring.ord (N25ZLocalFamilyCheck.LocalRing pointEval) (N25ZLocalFamilyCheck.germ pointEval) = 2)],
+  MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder
+      (MazurProof.N25F_ZBoundaryOrder.zLocalToFraction (N25ZLocalFamilyCheck.germ pointEval)) =
+    WithZero.exp 2
+'MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder_zWGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder_qz : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [inst_2 : Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)]
+  [Fact (Ring.ord (N25ZLocalFamilyCheck.LocalRing pointEval) (N25ZLocalFamilyCheck.germ pointEval) = 2)],
+  MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder
+      (Additive.ofMul
+        (Units.mk0
+          ((algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+              (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+            MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz)
+          ⋯)) =
+    -2
+'MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder_qz' depends on axioms: [propext, Classical.choice, Quot.sound]

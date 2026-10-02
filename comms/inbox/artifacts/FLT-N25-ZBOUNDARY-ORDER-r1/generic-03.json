@@ -1,0 +1,10 @@
+{
+  "name": "generic-03",
+  "args": [
+    "/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 22.10119151500112,
+  "peak_child_rss_kib": 2765020,
+  "source_sha256": "fd8d7284b498f6a27c7a616e6867d1ab2edc7f1f9404106c769e09b5cd2a6776"
+}

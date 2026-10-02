@@ -1,0 +1,10 @@
+import FLT.Assumptions.MazurProof.N25F_ZBoundaryOrder
+
+#check @MazurProof.N25F_ZBoundaryOrder.zLocalToFraction
+#check @MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_isFractionRing
+#check @MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder_qz
+#print axioms MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime
+#print axioms MazurProof.N25F_ZBoundaryOrder.zLocalRing_isDiscreteValuationRing
+#print axioms MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_injective
+#print axioms MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_isFractionRing
+#print axioms MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder_qz

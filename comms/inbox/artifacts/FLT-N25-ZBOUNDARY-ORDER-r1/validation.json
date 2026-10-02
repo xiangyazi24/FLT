@@ -1,0 +1,50 @@
+{
+  "accepted_source": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "check_kind": "generalized point-localization feedback, not actual point specialization",
+  "actual_point_specialization_compiled": false,
+  "full_FLT_imports_compiled": false,
+  "production_added_premises": false,
+  "candidate_sha256": "0fe460853e80dd040998bbc7b189b403616855bbbd922fd30a53de62882bbb38",
+  "harness_sha256": "fd8d7284b498f6a27c7a616e6867d1ab2edc7f1f9404106c769e09b5cd2a6776",
+  "check": {
+    "name": "generic-03",
+    "args": [
+      "/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 22.10119151500112,
+    "peak_child_rss_kib": 2765020,
+    "source_sha256": "fd8d7284b498f6a27c7a616e6867d1ab2edc7f1f9404106c769e09b5cd2a6776"
+  },
+  "parameters": [
+    "accepted W torsion-free and Dedekind structures",
+    "pointEval : actual ZChartRing \u2192\u2090[ZMod 2] ZMod 2",
+    "Fact(pointEval zW = 0), corresponding to existing private zPointEval_zW",
+    "Fact(Ring.ord (localization at ker pointEval) (image zW) = 2), corresponding to existing zWGerm_ord_eq_two"
+  ],
+  "audited_declarations": 13,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "import_environment": {
+    "LEAN_PATH": "/workspace/shared/flt-n25-zfield-equivalence:/workspace/shared/flt-n25-zfraction-injective"
+  },
+  "accepted_point_facts": [
+    {
+      "name": "zPointEval_zW",
+      "first_line": 178,
+      "declaration": "private theorem zPointEval_zW : zPointEval zW = 0 := by\n  rw [zPointEval, zW, chartMap]\n  change chartPointAffineEval 2 zChartPoint\n    (ambientDehomogenize 2 (MvPolynomial.X 3)) = 0\n  simp [ambientDehomogenize, dehomogenizedVariable, chartPointAffineEval,\n    zChartPoint, hyperplanePointZ, coordinates4ToFun,\n    normalizedCoordinates25, NormalizedProjective4.coordinates,\n    fieldBinaryOperations]",
+      "sha256": "7f5e1d3c6191bcec3a30e274ce93787f46df657a82dbb3051d0e4ef455c9ac4d"
+    },
+    {
+      "name": "zWGerm_ord_eq_two",
+      "first_line": 590,
+      "declaration": "theorem zWGerm_ord_eq_two : Ring.ord ZLocalRing zWGerm = 2 := by\n  unfold Ring.ord\n  change Module.length ZLocalRing (ZLocalRing \u29f8 zWGermIdeal) = 2\n  exact zLocalBoundary_local_length",
+      "sha256": "7aa460f801a5ca471104f163b6af546da026fc0aec15bd27aa2fa4f02f43d20a"
+    }
+  ]
+}

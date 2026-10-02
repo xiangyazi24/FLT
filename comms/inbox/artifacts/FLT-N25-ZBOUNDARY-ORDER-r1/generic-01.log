@@ -1,0 +1,190 @@
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:48:39: error: no macro or `[quot_precheck]` instance for syntax kind `Lean.Parser.Term.show` found
+  show Ring.ord ZLocalRing zWGerm = 2 from Fact.out
+This means we cannot eagerly check your notation/quotation for unbound identifiers; you can use `set_option quotPrecheck false` to disable this check.
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:49:17: error(lean.unknownIdentifier): Unknown identifier `«zPrime».IsPrime`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:49:35: error(lean.unknownIdentifier): Unknown identifier `«zPrime_isMaximal».isPrime`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:59:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:66:13: error: typeclass instance problem is stuck
+  Fact (?m.45 zW = 0)
+
+Note: Lean will not try to resolve this typeclass instance problem because the type argument to `Fact` contains metavariables. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:72:2: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  (RingHom.ker (AlgHom.toRingHom ?m.29)).IsPrime
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:78:41: error(lean.unknownIdentifier): Unknown identifier `«zPrime».primeCompl_le_nonZeroDivisors`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:81:59: error(lean.unknownIdentifier): Unknown identifier `«zPrime».primeCompl`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:87:48: error(lean.unknownIdentifier): Unknown identifier `«zPrime».zero_mem`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:82:50: error: unsolved goals
+inst✝¹ : Module.IsTorsionFree (Polynomial (ZMod 2)) W
+inst✝ : IsDedekindDomain W
+s : sorry
+h : zChartToFraction sorry = 0
+hs : sorry = 0
+⊢ False
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:91:2: error: typeclass instance problem is stuck
+  IsLocalization ?m.34 ZLocalRing
+
+Note: Lean will not try to resolve this typeclass instance problem because the third type argument to `IsLocalization` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:100:8: error: typeclass instance problem is stuck
+  IsLocalization ?m.34 ?m.35
+
+Note: Lean will not try to resolve this typeclass instance problem because the third, fourth, fifth, and sixth type arguments to `IsLocalization` are metavariables. These arguments must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:103:37: error: don't know how to synthesize implicit argument `α`
+  @Function.Injective (N25ZLocalFamilyCheck.LocalRing ?m.23) K ⇑zLocalToFraction
+context:
+inst✝² : Module.IsTorsionFree (Polynomial (ZMod 2)) W
+inst✝¹ : IsDedekindDomain W
+pointEval : ZChartRing →ₐ[ZMod 2] ZMod 2
+inst✝ : Fact (pointEval zW = 0)
+⊢ Type
+
+Note: All parameter types and holes (e.g., `_`) in the header of a theorem are resolved before the proof is processed; information from the proof cannot be used to infer what these values should be
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:103:56: error: don't know how to synthesize implicit argument `pointEval`
+  @zLocalToFraction ?m.23
+context:
+inst✝² : Module.IsTorsionFree (Polynomial (ZMod 2)) W
+inst✝¹ : IsDedekindDomain W
+pointEval : ZChartRing →ₐ[ZMod 2] ZMod 2
+inst✝ : Fact (pointEval zW = 0)
+⊢ ZChartRing →ₐ[ZMod 2] ZMod 2
+
+Note: All parameter types and holes (e.g., `_`) in the header of a theorem are resolved before the proof is processed; information from the proof cannot be used to infer what these values should be
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:105:31: error: unknown free variable `_fvar.76434`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:133:4: error(lean.unknownIdentifier): Unknown identifier `«zPrime».primeCompl`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:133:35: error(lean.unknownIdentifier): Unknown identifier `«zPrime».primeCompl_le_nonZeroDivisors`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:144:39: error: typeclass instance problem is stuck
+  Fact ((?m.40 0) zW = 0)
+
+Note: Lean will not try to resolve this typeclass instance problem because the type argument to `Fact` contains metavariables. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:145:18: error: unsolved goals
+inst✝² : Module.IsTorsionFree (Polynomial (ZMod 2)) W
+inst✝¹ : IsDedekindDomain W
+pointEval : ZChartRing →ₐ[ZMod 2] ZMod 2
+inst✝ : Fact (pointEval zW = 0)
+f g : Additive Kˣ
+⊢ (zLocalFractionOrder ↑(Additive.toMul f) * zLocalFractionOrder ↑(Additive.toMul g)).log =
+    (zLocalFractionOrder ↑(Additive.toMul f)).log + (zLocalFractionOrder ↑(Additive.toMul g)).log
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:152:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZBoundaryOrder.ordFrac_image_eq_exp`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:166:4: error: typeclass instance problem is stuck
+  Fact (?m.27 zW = 0)
+
+Note: Lean will not try to resolve this typeclass instance problem because the type argument to `Fact` contains metavariables. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:176:23: error: typeclass instance problem is stuck
+  Fact (?m.48 zW = 0)
+
+Note: Lean will not try to resolve this typeclass instance problem because the type argument to `Fact` contains metavariables. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+@MazurProof.N25F_ZBoundaryOrder.zW_ne_zero : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW ≠ 0
+'MazurProof.N25F_ZBoundaryOrder.zW_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW ∈ RingHom.ker pointEval.toRingHom
+'MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zPrime_ne_bot : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)], RingHom.ker pointEval.toRingHom ≠ ⊥
+'MazurProof.N25F_ZBoundaryOrder.zPrime_ne_bot' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalRing_isDiscreteValuationRing : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2},
+  IsDiscreteValuationRing (N25ZLocalFamilyCheck.LocalRing pointEval)
+'MazurProof.N25F_ZBoundaryOrder.zLocalRing_isDiscreteValuationRing' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zWGerm_ne_zero : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  N25ZLocalFamilyCheck.germ pointEval ≠ 0
+'MazurProof.N25F_ZBoundaryOrder.zWGerm_ne_zero' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalToFraction : {pointEval :
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2} →
+  N25ZLocalFamilyCheck.LocalRing pointEval →ₐ[ZMod 2] FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_ZBoundaryOrder.zLocalToFraction' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:196:8: error(lean.unknownIdentifier): Unknown identifier `MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_injective`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:197:14: error(lean.unknownIdentifier): Unknown constant `MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_injective`
+@MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_zWGerm : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  MazurProof.N25F_ZBoundaryOrder.zLocalToFraction (N25ZLocalFamilyCheck.germ pointEval) =
+    1 /
+      (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+          (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+        MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz
+'MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_zWGerm' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_isFractionRing : ∀
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2}
+  [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)],
+  IsFractionRing (N25ZLocalFamilyCheck.LocalRing pointEval) (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)
+'MazurProof.N25F_ZBoundaryOrder.zLocalToFraction_isFractionRing' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    {pointEval : MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.ZChartRing →ₐ[ZMod 2] ZMod 2} →
+      [Fact (pointEval MazurProof.RationalPointsN25QuotientTwoWBoundaryZLocal.zW = 0)] →
+        FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W →*₀ WithZero (Multiplicative ℤ)
+'MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+@MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder : [Module.IsTorsionFree (Polynomial (ZMod 2))
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  [IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+    Additive (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)ˣ →+ ℤ
+'MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:206:8: error(lean.unknownIdentifier): Unknown identifier `MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder_zWGerm`
+/workspace/shared/flt-n25-zboundary-order/GenericZBoundaryOrderCheck.lean:207:14: error(lean.unknownIdentifier): Unknown constant `MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder_zWGerm`
+@MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder_qz : ∀
+  [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  [Fact (Ring.ord (N25ZLocalFamilyCheck.LocalRing sorry) (N25ZLocalFamilyCheck.germ sorry) = 2)],
+  MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder
+      (Additive.ofMul
+        (Units.mk0
+          ((algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+              (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+            MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz)
+          ⋯)) =
+    -2
+'MazurProof.N25F_ZBoundaryOrder.zBoundaryOrder_qz' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
