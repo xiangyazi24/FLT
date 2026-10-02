@@ -1,0 +1,41 @@
+/workspace/shared/flt-n25-xchart-iso/XChartEquivCheck.lean:590:43: warning: This simp argument is unused:
+  map_one
+
+Hint: Omit it from the simp argument list.
+  simp only [wChartToXChart_qz, map_add, m̵a̵p̵_̵o̵n̵e̵,̵ ̵xChartToWChart_xY,
+  ̵  ̵ ̵ ̵ ̵ ̵xChartToWChart_xZ, xChartToWChart_xW]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+@MazurProof.N25F_XChartWChartEquiv.quadric_linearTransform : ∀ {A : Type u_1} [inst : CommRing A] [Algebra (ZMod 2) A]
+  (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo
+      (MazurProof.N25F_XChartWChartEquiv.linearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_XChartWChartEquiv.quadric_linearTransform' depends on axioms: [propext, Quot.sound]
+@MazurProof.N25F_XChartWChartEquiv.cubic_linearTransform : ∀ {A : Type u_1} [inst : CommRing A] [Algebra (ZMod 2) A]
+  (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo
+      (MazurProof.N25F_XChartWChartEquiv.linearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo P +
+      (P.x + P.y + P.z + P.w) * MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_XChartWChartEquiv.cubic_linearTransform' depends on axioms: [propext, Quot.sound]
+@MazurProof.N25F_XChartWChartEquiv.quadric_inverseLinearTransform : ∀ {A : Type u_1} [inst : CommRing A]
+  [Algebra (ZMod 2) A] (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo
+      (MazurProof.N25F_XChartWChartEquiv.inverseLinearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_XChartWChartEquiv.quadric_inverseLinearTransform' depends on axioms: [propext, Quot.sound]
+@MazurProof.N25F_XChartWChartEquiv.cubic_inverseLinearTransform : ∀ {A : Type u_1} [inst : CommRing A]
+  [Algebra (ZMod 2) A] (P : MazurProof.RationalPointsN25QuotientF2.Coordinates4 A),
+  MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo
+      (MazurProof.N25F_XChartWChartEquiv.inverseLinearTransform P) =
+    MazurProof.RationalPointsN25QuotientSmoothF2.canonicalCubic25CharTwo P +
+      (P.z + P.w) * MazurProof.RationalPointsN25QuotientSmoothF2.canonicalQuadric25CharTwo P
+'MazurProof.N25F_XChartWChartEquiv.cubic_inverseLinearTransform' depends on axioms: [propext, Quot.sound]
+MazurProof.N25F_XChartWChartEquiv.xChartAlgEquivWChart : MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing ≃ₐ[ZMod
+    2]
+  MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_XChartWChartEquiv.xChartAlgEquivWChart' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XChartWChartEquiv.xChartRing_isDomain : ∀ [IsDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsDomain MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing
+'MazurProof.N25F_XChartWChartEquiv.xChartRing_isDomain' depends on axioms: [propext, Classical.choice, Quot.sound]

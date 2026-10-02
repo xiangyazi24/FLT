@@ -1,0 +1,10 @@
+{
+  "name": "check-02",
+  "args": [
+    "/workspace/shared/flt-n25-xchart-iso/XChartEquivCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 15.262596198999745,
+  "peak_child_rss_kib": 2160428,
+  "source_sha256": "62a57bba4c08820f9e66573b7747fe57c45d9db69c28c378e89d1c70860d5539"
+}

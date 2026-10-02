@@ -1,0 +1,17 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "source_ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "mathlib_ref": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "lean": "4.31.0-rc2",
+  "candidate_sha256": "b002466dc2e6dcf6de5197bc5f21714da13d259793d7cba9acf68aa3dcc743fd",
+  "check_sha256": "62a57bba4c08820f9e66573b7747fe57c45d9db69c28c378e89d1c70860d5539",
+  "full_FLT_imports_compiled": false,
+  "checked_equivalence_has_extra_parameters": false,
+  "harness_only_parameter": "[IsDomain N25F_NonBoundaryPrincipalDivisor.W] inserted immediately before xChartRing_isDomain",
+  "forbidden_declarations_present": false,
+  "checked_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

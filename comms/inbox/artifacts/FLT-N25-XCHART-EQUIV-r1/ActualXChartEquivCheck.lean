@@ -1,0 +1,13 @@
+import FLT.Assumptions.MazurProof.N25F_XChartWChartEquiv
+
+#check MazurProof.N25F_XChartWChartEquiv.xChartAlgEquivWChart
+#check MazurProof.N25F_XChartWChartEquiv.xChartRing_isDomain
+#print axioms MazurProof.N25F_XChartWChartEquiv.quadric_linearTransform
+#print axioms MazurProof.N25F_XChartWChartEquiv.cubic_linearTransform
+#print axioms MazurProof.N25F_XChartWChartEquiv.quadric_inverseLinearTransform
+#print axioms MazurProof.N25F_XChartWChartEquiv.cubic_inverseLinearTransform
+#print axioms MazurProof.N25F_XChartWChartEquiv.xChartAlgEquivWChart
+#print axioms MazurProof.N25F_XChartWChartEquiv.xChartRing_isDomain
+
+example : IsDomain
+    MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing := inferInstance
