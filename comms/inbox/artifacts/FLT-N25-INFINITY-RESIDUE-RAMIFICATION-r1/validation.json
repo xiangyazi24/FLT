@@ -1,0 +1,32 @@
+{
+  "source_commit": "98799a3c5fc56c910d538bbeafc3a8134840d81c",
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "residue_check": {
+    "name": "generic-06",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-residue/GenericResidueCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 4.458061254998029,
+    "peak_child_rss_kib": 2610832,
+    "source_sha256": "32d6711733a6cefb5e92e302dabcd934283a396d3074914891f078f9ec9c1c6c"
+  },
+  "ramification_check": {
+    "name": "generic-01",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-ramification/GenericRamificationCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 35.01627284899587,
+    "peak_child_rss_kib": 2778548,
+    "source_sha256": "a218b303dbb9733029784ecb9ac2628560f66cea30577bf9325d52c86be07241"
+  },
+  "helper_body_byte_comparison": "PASS for both candidate/helper sections",
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "new_public_declarations": 18
+}

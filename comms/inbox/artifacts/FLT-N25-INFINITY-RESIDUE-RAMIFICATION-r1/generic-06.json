@@ -1,0 +1,10 @@
+{
+  "name": "generic-06",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-residue/GenericResidueCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 4.458061254998029,
+  "peak_child_rss_kib": 2610832,
+  "source_sha256": "32d6711733a6cefb5e92e302dabcd934283a396d3074914891f078f9ec9c1c6c"
+}

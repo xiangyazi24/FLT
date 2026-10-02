@@ -1,0 +1,13 @@
+'_private._stdin.0.MazurProof.N25F_InfinityResidueFields.sampleBaseResidueEquiv' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityResidueFields.residueRingEquivOfQuotient' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityResidueFields.residueRingEquivOfEq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityResidueFields.finrank_eq_one_of_binary_ringEquivs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityResidueFields.inertiaDeg_eq_one_of_binary_ringEquivs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,101 @@
+{
+  "source_commit": "98799a3c5fc56c910d538bbeafc3a8134840d81c",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 30122,
+      "sha256": "82606a34d834644469303fb68de61432f1dc477039641fdf44a31f7d0e4a2ae2"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityRamificationIndices.lean",
+      "encoding": "utf-8",
+      "bytes": 2609,
+      "sha256": "af71c14f489fda17ece4a527e67b622c95a9ddffc3876269cbdee8cc68e89257"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityResidueFields.lean",
+      "encoding": "utf-8",
+      "bytes": 6947,
+      "sha256": "61871a9d017523174fa875ff5f6f709d4ce719bced5455f25eb7a99ece4a523e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/ActualInfinityResidueRamificationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1657,
+      "sha256": "e2c06471ce393dc287ad41446835c7d0c1abb04bbb4996ea01636a5d70995651"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/GenericResidueCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 4450,
+      "sha256": "32d6711733a6cefb5e92e302dabcd934283a396d3074914891f078f9ec9c1c6c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/cache/ramification-inertia-cache-receipt.json",
+      "encoding": "utf-8",
+      "bytes": 1008,
+      "sha256": "b52c1ea15b4ac3f769676429297aaf87058058388762d67359b204e1b1a15af6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/cache/ramification-inertia-cache.log",
+      "encoding": "utf-8",
+      "bytes": 3634,
+      "sha256": "1fb7c3b62514dc1d29016679905f4dcdb1c7af32bd0ad35886a089a4ecead9ef"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/generic-06.json",
+      "encoding": "utf-8",
+      "bytes": 288,
+      "sha256": "91d1fc241f73234c97697636e92a6306354ca5b67460ef393336e815ed3d2ccb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/generic-06.log",
+      "encoding": "utf-8",
+      "bytes": 667,
+      "sha256": "938e4650cfb5282728711aa134b4760d62ade537ded9fb7fbdd5f847e9d3e8b3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/ramification/GenericRamificationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1148,
+      "sha256": "a218b303dbb9733029784ecb9ac2628560f66cea30577bf9325d52c86be07241"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/ramification/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "12fcd1eb6dd1a70eaec2ae14aeef4f0413506c856bb6eeaedeb9c86186c23ee7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/ramification/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 145,
+      "sha256": "b618ad38c872196f1aa2791f2977373950cd77b812455267bdf29a0d57e236ef"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/ramification/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 883,
+      "sha256": "9ee990e96008c39cb27e9c5b9c0d282afa3c1db5c9f574ef99e7b75774df2216"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 878,
+      "sha256": "9bb3abff9131760df7eb6b0f70e554f7caba4f24dcdf895c8cd8b60424b58a16"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 999,
+      "sha256": "f199cfd26d4fe97068a92969f350863aabbf3c511f9d31bfe075e3b61f23ce40"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-INFINITY-RESIDUE-RAMIFICATION-r1.md",
+      "encoding": "utf-8",
+      "bytes": 5045,
+      "sha256": "1e3c8d259b9d4018eee264a1b186cb5705711bb9f4fe64f6b7be56e78f9779e5"
+    }
+  ]
+}

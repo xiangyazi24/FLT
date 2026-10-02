@@ -1,0 +1,32 @@
+{
+  "verified_at_utc": "2026-10-02T13:41:39Z",
+  "mathlib_pin": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "root": "Mathlib.RingTheory.RamificationInertia.Basic",
+  "cache_exit_code": 0,
+  "new_modules": 115,
+  "already_decompressed": 2549,
+  "bounds": {
+    "cpu_count": 1,
+    "timeout_seconds": 180,
+    "gate": "with-compiler-slot"
+  },
+  "modules": [
+    {
+      "module": "Mathlib.RingTheory.RamificationInertia.Inertia",
+      "bytes": 69648,
+      "sha256": "cdb4af58d95d6e35572adf644fcdb68d08577b31a49309a966783ee0917d0b67"
+    },
+    {
+      "module": "Mathlib.RingTheory.RamificationInertia.Ramification",
+      "bytes": 66208,
+      "sha256": "91b106eb4b2e9969381dc9f40a763cca2fc76c4f4071773df9749c91180d3597"
+    },
+    {
+      "module": "Mathlib.RingTheory.RamificationInertia.Basic",
+      "bytes": 39520,
+      "sha256": "b4aaed48acbb7e504694ce717d832c5e1d1593ad68b368b7c705dd6148296a40"
+    }
+  ],
+  "log": "logs/ramification-inertia-cache.log",
+  "project_or_mathlib_build": "NOT RUN"
+}

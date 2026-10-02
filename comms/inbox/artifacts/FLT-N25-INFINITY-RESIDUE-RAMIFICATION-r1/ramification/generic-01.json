@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-ramification/GenericRamificationCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 35.01627284899587,
+  "peak_child_rss_kib": 2778548,
+  "source_sha256": "a218b303dbb9733029784ecb9ac2628560f66cea30577bf9325d52c86be07241"
+}
