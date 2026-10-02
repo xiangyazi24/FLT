@@ -54,7 +54,7 @@ theorem xInfinityParameter_order :
         infinityParameter) = 1 :=
   parameter_order_transport xInfinityPrime xInfinityLocalizationEquiv.toRingEquiv
     infinityParameter xInverseZGerm 1
-    (by rw [xInfinityLocalizationEquiv_algebraMap, infinityNormalizationToX_parameter])
+    (by change xInfinityLocalizationEquiv _ = _; rw [xInfinityLocalizationEquiv_algebraMap, infinityNormalizationToX_parameter])
     xInverseZGerm_ord_eq_one
 
 @[simp]
@@ -71,7 +71,7 @@ theorem yzInfinityParameter_order :
         infinityParameter) = 1 :=
   parameter_order_transport yzInfinityPrime yzInfinityLocalizationEquiv.toRingEquiv
     infinityParameter yzInverseZGerm 1
-    (by rw [yzInfinityLocalizationEquiv_algebraMap, infinityNormalizationToYZ_parameter])
+    (by change yzInfinityLocalizationEquiv _ = _; rw [yzInfinityLocalizationEquiv_algebraMap, infinityNormalizationToYZ_parameter])
     yzInverseZGerm_ord_eq_one
 
 @[simp]
@@ -88,7 +88,7 @@ theorem zInfinityParameter_order :
         infinityParameter) = 2 :=
   parameter_order_transport zInfinityPrime zInfinityLocalizationEquiv.toRingEquiv
     infinityParameter zWGerm 2
-    (by rw [zInfinityLocalizationEquiv_algebraMap, infinityNormalizationToZ_parameter])
+    (by change zInfinityLocalizationEquiv _ = _; rw [zInfinityLocalizationEquiv_algebraMap, infinityNormalizationToZ_parameter])
     zWGerm_ord_eq_two
 
 theorem xInfinityPrime_ne_zInfinityPrime : xInfinityPrime ≠ zInfinityPrime := by

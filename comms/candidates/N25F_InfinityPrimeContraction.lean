@@ -39,21 +39,21 @@ theorem xInfinityPrime_under :
     xInfinityPrime.under BasePolynomial = infinityBasePrime :=
   contraction_eq_span_X xInfinityPrime infinityParameter_mem_xInfinityPrime
 
-instance xInfinityPrime_liesOver : xInfinityPrime.LiesOver infinityBasePrime where
-  over := xInfinityPrime_under.symm
+instance xInfinityPrime_liesOver : xInfinityPrime.LiesOver infinityBasePrime :=
+  ⟨xInfinityPrime_under.symm⟩
 
 theorem yzInfinityPrime_under :
     yzInfinityPrime.under BasePolynomial = infinityBasePrime :=
   contraction_eq_span_X yzInfinityPrime infinityParameter_mem_yzInfinityPrime
 
-instance yzInfinityPrime_liesOver : yzInfinityPrime.LiesOver infinityBasePrime where
-  over := yzInfinityPrime_under.symm
+instance yzInfinityPrime_liesOver : yzInfinityPrime.LiesOver infinityBasePrime :=
+  ⟨yzInfinityPrime_under.symm⟩
 
 theorem zInfinityPrime_under :
     zInfinityPrime.under BasePolynomial = infinityBasePrime :=
   contraction_eq_span_X zInfinityPrime infinityParameter_mem_zInfinityPrime
 
-instance zInfinityPrime_liesOver : zInfinityPrime.LiesOver infinityBasePrime where
-  over := zInfinityPrime_under.symm
+instance zInfinityPrime_liesOver : zInfinityPrime.LiesOver infinityBasePrime :=
+  ⟨zInfinityPrime_under.symm⟩
 
 end MazurProof.N25F_InfinityPrimeContraction
