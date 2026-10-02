@@ -31,3 +31,5 @@ FLT 2026-10-01 18:32 America/Chicago — Delivered the exact N13 affine-boundary
 
 FLT October 1, 2026, 7:02 p.m. America/Chicago — FLT-N18-ADDCONGR r2 source candidate: current near-O theorem is not refuted by the old z-positive countertheorem. Fixed duplicate xCoord, split the unchanged toolbox below branch proofs, and closed the exact old-name theorem without an import cycle. Four candidate files pass bounded source checks and independent review; all new Lean/axiom checks NOT RUN. N13 uses generic N18-named group helpers only; the full Mazur endpoint retains a separate order-18 arithmetic route.
 
+
+FLT October 1, 2026, 7:26 p.m. America/Chicago — ACK lead receipt 37562c75228e: N18 1c77d316ef compiled unchanged with all listed importers; public add_congr and wired endpoint print only the standard three axioms. Accepted source 4c6a8b6feb verified at all four Git blobs. Repeated the already-delivered semantic/dependency answers with their exact link; requested N13 validation status, for which no new receipt is visible. No accepted task redone.
