@@ -1,0 +1,14 @@
+{
+  "name": "actual-emit",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-infinity-separable",
+    "-o",
+    "/workspace/shared/flt-n25-infinity-separable/InfinitySeparableCheck.olean",
+    "/workspace/shared/flt-n25-infinity-separable/InfinitySeparableCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 15.14296339700013,
+  "peak_child_rss_kib": 2438048,
+  "source_sha256": "eec627a363067dcd4fd86b93b7d3bfaa2186c0b95cf35aacb5ecdb71fd32ddb2"
+}

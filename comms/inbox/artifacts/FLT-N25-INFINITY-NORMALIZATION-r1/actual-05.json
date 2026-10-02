@@ -1,0 +1,10 @@
+{
+  "name": "actual-05",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-normalization/InfinityNormalizationCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 55.11608580000029,
+  "peak_child_rss_kib": 2318216,
+  "source_sha256": "f6d6cd93b00d40d95352498e60c00544048aaaba71523d695aa03c005889b89e"
+}

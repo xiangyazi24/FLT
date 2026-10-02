@@ -1,0 +1,16 @@
+'MazurProof.N25F_IntegralBoundaryFactor.exists_preimage' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_IntegralBoundaryFactor.integralClosureToRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_IntegralBoundaryFactor.algebraMap_integralClosureToRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_IntegralBoundaryFactor.toAlgHom_comp_integralClosureToRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_IntegralBoundaryFactor.integralClosureToRing_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_IntegralBoundaryFactor.integralClosureToRing_unique' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,15 @@
+@affineRationalBaseToField_eq_canonicalLift : ∀ [inst : Module.IsTorsionFree BasePolynomial W]
+  [inst_1 : IsDedekindDomain W] [inst_2 : Module.Finite BasePolynomial W],
+  affineRationalBaseToField.toRingHom = IsFractionRing.lift ⋯
+@infinityRationalBaseToField_isSeparable : ∀ [inst : Module.IsTorsionFree BasePolynomial W]
+  [inst_1 : IsDedekindDomain W] [inst_2 : Module.Finite BasePolynomial W],
+  Algebra.IsSeparable BaseField CurveField → Algebra.IsSeparable BaseField CurveField
+'MazurProof.N25F_InfinitySeparable.affineRationalBaseToField_eq_canonicalLift' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinitySeparable.affineRationalBaseToField_isSeparable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinitySeparable.infinityRationalBaseToField_isSeparable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

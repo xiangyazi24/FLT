@@ -1,0 +1,39 @@
+{
+  "source_commit": "078432313380bb9603096339caf21fb3114ce325",
+  "production_normalization_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "accepted_r24": {
+    "sha": "34119526d14d7b0f9b03ebcd97cc7584a6bd6e30",
+    "source": "078432313380bb9603096339caf21fb3114ce325",
+    "byte_equal": true
+  },
+  "normalization_check": {
+    "name": "actual-05",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-normalization/InfinityNormalizationCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 55.11608580000029,
+    "peak_child_rss_kib": 2318216,
+    "source_sha256": "f6d6cd93b00d40d95352498e60c00544048aaaba71523d695aa03c005889b89e"
+  },
+  "normalization_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "normalization_fixture_explicit_existing_facts": [
+    "W torsionfree over BasePolynomial",
+    "W Dedekind",
+    "W finite over BasePolynomial",
+    "W BasePolynomial finrank four",
+    "reciprocal-action Algebra.IsSeparable BaseField CurveField (accepted r24)"
+  ],
+  "generic_production_check": "check-02.log exit0",
+  "generic_axiom_audit": "axioms.log all6 standard-three",
+  "rejected_attempts": [
+    "actual-01: fixture instance-parameter error",
+    "actual-02,03,04: exit0 but audit exposes sorryAx, rejected"
+  ],
+  "generic_source_sha256": "4272b28a1097eabc81fc7b6485baa8b029c7da0e0bca553049f11dcfdf5887a7"
+}
