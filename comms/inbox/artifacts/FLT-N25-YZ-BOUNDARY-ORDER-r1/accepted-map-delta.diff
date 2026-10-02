@@ -1,0 +1,20 @@
+--- delivered
++++ accepted-r15
+@@ -226,7 +226,7 @@
+     zYOpenToFraction_invSelf, zYOpenToFraction_algebraMap,
+     zChartToFraction_zY, zChartToFraction_zW]
+   field_simp [fraction_qz_ne_zero, fraction_qy_ne_zero]
+-  exact div_self fraction_qz_ne_zero
++  rw [mul_comm (algebraMap W (FractionRing W) qy), ← div_div, div_self fraction_qz_ne_zero]
+ 
+ @[simp] theorem yzLocalToFraction_yX :
+     yzLocalToFraction
+@@ -236,7 +236,7 @@
+     zYOpenToFraction_invSelf, zYOpenToFraction_algebraMap,
+     zChartToFraction_zY, zChartToFraction_zX]
+   field_simp [fraction_qz_ne_zero, fraction_qy_ne_zero]
+-  exact mul_div_cancel_left₀ _ fraction_qz_ne_zero
++  rw [mul_comm (algebraMap W (FractionRing W) qy), mul_div_mul_left _ _ fraction_qz_ne_zero]
+ 
+ theorem yzLocalToFraction_unique
+     (g : YZLocalRing →ₐ[ZMod 2] FractionRing W)

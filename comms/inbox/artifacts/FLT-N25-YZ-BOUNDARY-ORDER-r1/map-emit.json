@@ -1,0 +1,13 @@
+{
+  "name": "map-emit",
+  "args": [
+    "--root=/workspace/shared/flt-n25-yz-fraction-embedding",
+    "-o",
+    "/workspace/shared/flt-n25-yz-fraction-embedding/CurvePointFractionCheck.olean",
+    "/workspace/shared/flt-n25-yz-fraction-embedding/CurvePointFractionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 22.171377773996937,
+  "peak_child_rss_kib": 2521964,
+  "source_sha256": "cfc2e7b02424445667be505ade97b520c50e322bd4079938e225fc53cda2f239"
+}

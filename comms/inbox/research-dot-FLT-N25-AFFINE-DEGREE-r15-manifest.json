@@ -1,0 +1,143 @@
+{
+  "source_commit": "d74efae7f82cdc56e4ee7f396fc0c0c1a2605c5a",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 23233,
+      "sha256": "4dafb78cef3ca28849a8345bdb786a77adb5b248867bd49cda84685483106dab"
+    },
+    {
+      "path": "comms/candidates/N25F_XBoundaryZOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 2642,
+      "sha256": "eb069454e574d39cf56a131b0afee6ee0399dc9e615508910b69831255f2e8ca"
+    },
+    {
+      "path": "comms/candidates/N25F_YZBoundaryOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 4347,
+      "sha256": "a57f316ea277f060b6e04a087c798fd77b8db3b8b06560ce31c4bdcfeb816c73"
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalFractionEmbedding.lean",
+      "encoding": "utf-8",
+      "bytes": 11771,
+      "sha256": "6543c4d6ad162de2b517305ba61c5b33fa06cb389f2674549ff7893526ef0606"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-BOUNDARY-Z-ORDER-r1/ActualXBoundaryZOrderCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 324,
+      "sha256": "e50e542d7a1d07c062faeb1328631ff54ce0c984cf0475d8a56630f9870faa3f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-BOUNDARY-Z-ORDER-r1/XBoundaryZOrderCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 19805,
+      "sha256": "6598f8642ea6a821ec664776b52df9d327ca7ad505f2eafc8acd4644fb7aede7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-BOUNDARY-Z-ORDER-r1/actual-02.json",
+      "encoding": "utf-8",
+      "bytes": 280,
+      "sha256": "2404f48c5fc4469a152af590395b64921b749b2c855905e72ac9d90a5e6dc954"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-BOUNDARY-Z-ORDER-r1/actual-02.log",
+      "encoding": "utf-8",
+      "bytes": 5434,
+      "sha256": "4c20475a07d36eaee712e24b009fa02fbad78d42470a2aec9531ee038f0a7ca7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-BOUNDARY-Z-ORDER-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 1836,
+      "sha256": "bdd1b99f6d41b9a277dfbe413b494400f454a89093df5cf5e1dc3e2aacfeae96"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-BOUNDARY-Z-ORDER-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 871,
+      "sha256": "ca85331e2532b2cda954ca1f1936a809a466b7a3cc270e395dd9f3438c3f1a9b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/ActualYZBoundaryOrderCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 530,
+      "sha256": "018140ede5b0235dd6a40de983b5d8e62bf35d82599122aeea87a23b7ef5e83a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/CurvePointBoundaryOrderCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 7599,
+      "sha256": "5573020c02536f0d75148bb360f9194cf98ee82abf43f410739f3c6106d32462"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/accepted-map-delta.diff",
+      "encoding": "utf-8",
+      "bytes": 834,
+      "sha256": "ea9908364f8ba7c50a7a451fbb96488ebcdecb40a0ad03122e2ebe90b9892a4c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/lead-receipt-r15.md",
+      "encoding": "utf-8",
+      "bytes": 1018,
+      "sha256": "eb49f08f103f7801084c0af8d51a0066205b593bbb2978dfd2dd1b29c0b2fa16"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/make_point_check.py",
+      "encoding": "utf-8",
+      "bytes": 3360,
+      "sha256": "884a9acd54aafa3cbaece693615323a7905afc56f80f4da1f214a86662a1afe2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/map-emit.json",
+      "encoding": "utf-8",
+      "bytes": 453,
+      "sha256": "68ad046744260aa1f1f34df37962e9b17aeb46f2a028144c4cdd4b8c29eff77c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/map-emit.log",
+      "encoding": "utf-8",
+      "bytes": 1598,
+      "sha256": "ffd8acd92e329eb2dc7f48d5e935b6b68f869af58d4be74c238f35bb2b33810c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/point-03.json",
+      "encoding": "utf-8",
+      "bytes": 296,
+      "sha256": "35071d8fbc6fd15f817451019d0a6153568f8d36da0e2fb9b34254876bbd514c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/point-03.log",
+      "encoding": "utf-8",
+      "bytes": 5409,
+      "sha256": "e022d7d55bbd2b68727605073c445beed856c75d188bd56ab5f314ed92822626"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 880,
+      "sha256": "0b4fb92df26f325042443480253b8393577964e36887f54e477f30d43af26885"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-BOUNDARY-ORDER-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 958,
+      "sha256": "090b6416d44b6564660cd1a86f9d6b9179909c74f876ef93e4d1f0b03d9f007b"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r15.md",
+      "encoding": "utf-8",
+      "bytes": 4788,
+      "sha256": "87b8b14a4e4d3b0d92664a62d521188050fc040bc02355834a1cc3db3979cb78"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-X-BOUNDARY-Z-ORDER-r1.md",
+      "encoding": "utf-8",
+      "bytes": 2820,
+      "sha256": "5e6ffa3f71cedc92ae45e5d8011b32be0962b8b122c3fa3362efac921f3b910a"
+    }
+  ]
+}

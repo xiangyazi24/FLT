@@ -1,0 +1,24 @@
+{
+  "status": "point-03 PASS; production full imports NOT RUN",
+  "point_check": {
+    "name": "point-03",
+    "args": [
+      "/workspace/shared/flt-n25-yz-boundary-orders/CurvePointBoundaryOrderCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 83.3516904609969,
+    "peak_child_rss_kib": 2786388,
+    "source_sha256": "5573020c02536f0d75148bb360f9194cf98ee82abf43f410739f3c6106d32462"
+  },
+  "audited_public_declarations": 6,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "fixture_map_source_sha256": "cfc2e7b02424445667be505ade97b520c50e322bd4079938e225fc53cda2f239",
+  "fixture_map_olean_sha256": "cedbe3775cd5a113535ff86b0602ce89376c5c4bc01323b91be89d1cd8ebcd78",
+  "fixture_map_variant": "historical pre-r15 proof variant, same mathematical statements; not byte-equal to repaired full-import source",
+  "accepted_source_commit": "d74efae7f82cdc56e4ee7f396fc0c0c1a2605c5a",
+  "production_additional_assumptions": []
+}

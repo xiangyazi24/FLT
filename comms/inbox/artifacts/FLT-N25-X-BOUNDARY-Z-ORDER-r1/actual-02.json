@@ -1,0 +1,10 @@
+{
+  "name": "actual-02",
+  "args": [
+    "/workspace/shared/flt-n25-xqz-order/XBoundaryZOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 96.5206648789972,
+  "peak_child_rss_kib": 2926752,
+  "source_sha256": "6598f8642ea6a821ec664776b52df9d327ca7ad505f2eafc8acd4644fb7aede7"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "point-03",
+  "args": [
+    "/workspace/shared/flt-n25-yz-boundary-orders/CurvePointBoundaryOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 83.3516904609969,
+  "peak_child_rss_kib": 2786388,
+  "source_sha256": "5573020c02536f0d75148bb360f9194cf98ee82abf43f410739f3c6106d32462"
+}

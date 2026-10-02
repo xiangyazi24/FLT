@@ -1,0 +1,89 @@
+/workspace/shared/flt-n25-yz-boundary-orders/CurvePointBoundaryOrderCheck.lean:33:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.N25YZBoundaryPointCheck.yzWGerm_ne_zero`:
+  [IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain
+  (Localization.AtPrime
+    (RingHom.ker
+      f.toRingHom))] [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-yz-boundary-orders/CurvePointBoundaryOrderCheck.lean:40:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.N25YZBoundaryPointCheck.yzZGerm_isUnit`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+  [IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2))
+  W] [IsDedekindDomain
+  W] [IsDedekindDomain
+  (Localization.AtPrime
+    (RingHom.ker
+      f.toRingHom))] [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+@yzLocalFractionOrder : [Module.IsTorsionFree (Polynomial (ZMod 2)) W] →
+  [IsDedekindDomain W] →
+    {f : YChartRing →ₐ[ZMod 2] ZMod 2} →
+      {hf : f yZ = 1} →
+        [IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))] → K →*₀ WithZero (Multiplicative ℤ)
+'N25YZBoundaryPointCheck.yzLocalFractionOrder' depends on axioms: [propext, Classical.choice, Quot.sound]
+@yzBoundaryOrder : [Module.IsTorsionFree (Polynomial (ZMod 2)) W] →
+  [IsDedekindDomain W] →
+    {f : YChartRing →ₐ[ZMod 2] ZMod 2} →
+      {hf : f yZ = 1} → [IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))] → Additive Kˣ →+ ℤ
+'N25YZBoundaryPointCheck.yzBoundaryOrder' depends on axioms: [propext, Classical.choice, Quot.sound]
+@yzLocalFractionOrder_yzWGerm : ∀ [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) W] [inst_1 : IsDedekindDomain W]
+  {f : YChartRing →ₐ[ZMod 2] ZMod 2} {hf : f yZ = 1}
+  [inst_2 : IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+      (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+          ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+        1)],
+  yzLocalFractionOrder
+      ((N25CurvePointFractionCheck.yzLocalToFraction f hf)
+        ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW)) =
+    WithZero.exp 1
+'N25YZBoundaryPointCheck.yzLocalFractionOrder_yzWGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+@yzLocalFractionOrder_yzZGerm : ∀ [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) W] [inst_1 : IsDedekindDomain W]
+  {f : YChartRing →ₐ[ZMod 2] ZMod 2} {hf : f yZ = 1}
+  [inst_2 : IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+      (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+          ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+        1)],
+  yzLocalFractionOrder
+      ((N25CurvePointFractionCheck.yzLocalToFraction f hf)
+        ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yZ)) =
+    1
+'N25YZBoundaryPointCheck.yzLocalFractionOrder_yzZGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+@yzBoundaryOrder_qy : ∀ [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) W] [inst_1 : IsDedekindDomain W]
+  {f : YChartRing →ₐ[ZMod 2] ZMod 2} {hf : f yZ = 1}
+  [inst_2 : IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+      (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+          ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+        1)],
+  yzBoundaryOrder (Additive.ofMul (Units.mk0 ((algebraMap W K) qy) ⋯)) = -1
+'N25YZBoundaryPointCheck.yzBoundaryOrder_qy' depends on axioms: [propext, Classical.choice, Quot.sound]
+@yzBoundaryOrder_qz : ∀ [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) W] [inst_1 : IsDedekindDomain W]
+  {f : YChartRing →ₐ[ZMod 2] ZMod 2} {hf : f yZ = 1}
+  [inst_2 : IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+      (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+          ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+        1)],
+  yzBoundaryOrder (Additive.ofMul (Units.mk0 ((algebraMap W K) qz) ⋯)) = -1
+'N25YZBoundaryPointCheck.yzBoundaryOrder_qz' depends on axioms: [propext, Classical.choice, Quot.sound]

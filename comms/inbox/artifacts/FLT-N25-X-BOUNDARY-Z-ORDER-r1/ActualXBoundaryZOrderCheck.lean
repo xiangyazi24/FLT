@@ -1,0 +1,6 @@
+import FLT.Assumptions.MazurProof.N25F_XBoundaryZOrder
+
+#print axioms MazurProof.N25F_XBoundaryZOrder.xLocalToFraction_xZGerm
+#print axioms MazurProof.N25F_XBoundaryZOrder.xZGerm_ne_zero
+#print axioms MazurProof.N25F_XBoundaryZOrder.xLocalFractionOrder_xZGerm
+#print axioms MazurProof.N25F_XBoundaryZOrder.xBoundaryOrder_qz
