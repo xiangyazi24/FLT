@@ -1,0 +1,53 @@
+/workspace/shared/flt-n25-polynomial-boundary-orders/YZPolynomialBoundaryCheck.lean:35:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.N25YZBoundaryPointCheck.yzWGerm_ne_zero`:
+  [IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain
+  (Localization.AtPrime
+    (RingHom.ker
+      f.toRingHom))] [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/YZPolynomialBoundaryCheck.lean:42:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.N25YZBoundaryPointCheck.yzZGerm_isUnit`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+  [IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2))
+  W] [IsDedekindDomain
+  W] [IsDedekindDomain
+  (Localization.AtPrime
+    (RingHom.ker
+      f.toRingHom))] [Fact
+  (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+      ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+    1)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/YZPolynomialBoundaryCheck.lean:106:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.N25YZBoundaryPointCheck.ordFrac_aeval_at_pole`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+@yzLocalFractionOrder_aeval_qz : ∀ [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) W] [inst_1 : IsDedekindDomain W]
+  {f : YChartRing →ₐ[ZMod 2] ZMod 2} {hf : f yZ = 1}
+  [inst_2 : IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))]
+  [Fact
+      (Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+          ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+        1)]
+  (p : Polynomial (ZMod 2)),
+  p ≠ 0 → yzLocalFractionOrder ((Polynomial.aeval ((algebraMap W K) qz)) p) = WithZero.exp (-(1 * ↑p.natDegree))
+'N25YZBoundaryPointCheck.yzLocalFractionOrder_aeval_qz' depends on axioms: [propext, Classical.choice, Quot.sound]

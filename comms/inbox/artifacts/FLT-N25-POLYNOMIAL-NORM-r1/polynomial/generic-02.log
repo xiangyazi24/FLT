@@ -1,0 +1,1 @@
+'N25PolynomialPoleCheck.ordFrac_aeval_at_pole' depends on axioms: [propext, Classical.choice, Quot.sound]

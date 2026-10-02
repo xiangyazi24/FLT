@@ -1,0 +1,10 @@
+{
+  "name": "z-01",
+  "args": [
+    "/workspace/shared/flt-n25-polynomial-boundary-orders/ZPolynomialBoundaryCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 34.09282676799921,
+  "peak_child_rss_kib": 2944084,
+  "source_sha256": "ef17a9a3bf64d3d650e7ad0e8c0897d15c1645278242dc5b1bf0781d54b39191"
+}

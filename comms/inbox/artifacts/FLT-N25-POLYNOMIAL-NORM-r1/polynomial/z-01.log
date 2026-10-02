@@ -1,0 +1,38 @@
+/workspace/shared/flt-n25-polynomial-boundary-orders/ZPolynomialBoundaryCheck.lean:66:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_ZBoundaryOrder.zW_mem_zPrime`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/ZPolynomialBoundaryCheck.lean:83:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_ZBoundaryOrder.zWGerm_ne_zero`:
+  [Fact (pointEval zW = 0)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Fact (pointEval zW = 0)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/ZPolynomialBoundaryCheck.lean:88:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZBoundaryOrder.zChartToFraction_isUnit_of_primeCompl`:
+  [Fact (pointEval zW = 0)]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Fact (pointEval zW = 0)] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/ZPolynomialBoundaryCheck.lean:159:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZBoundaryOrder.ordFrac_image_eq_exp`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/ZPolynomialBoundaryCheck.lean:190:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_ZBoundaryOrder.ordFrac_aeval_at_pole`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+@zLocalFractionOrder_aeval_qz : ∀ [inst : Module.IsTorsionFree (Polynomial (ZMod 2)) W] [inst_1 : IsDedekindDomain W]
+  {pointEval : ZChartRing →ₐ[ZMod 2] ZMod 2} [inst_2 : Fact (pointEval zW = 0)] [Fact (Ring.ord ZLocalRing zWGerm = 2)]
+  (p : Polynomial (ZMod 2)),
+  p ≠ 0 → zLocalFractionOrder ((Polynomial.aeval ((algebraMap W K) qz)) p) = WithZero.exp (-(2 * ↑p.natDegree))
+'MazurProof.N25F_ZBoundaryOrder.zLocalFractionOrder_aeval_qz' depends on axioms: [propext, Classical.choice, Quot.sound]

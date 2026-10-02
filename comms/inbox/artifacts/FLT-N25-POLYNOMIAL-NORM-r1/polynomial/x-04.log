@@ -1,0 +1,80 @@
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:113:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_XLocalDVR.xW_mem_xPrime`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:153:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XCoordinateOrders.coordinate_orders`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:210:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XCoordinateOrders.x_quadric_relation`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:215:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XCoordinateOrders.x_cubic_relation`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:224:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XCoordinateOrders.germ_isUnit_of_eval_one`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:233:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XCoordinateOrders.xYGerm_not_isUnit`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:238:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XCoordinateOrders.xZGerm_not_isUnit`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+@xYGerm_ord_eq_one : ∀ [IsDedekindDomain W], Ring.ord XLocalRing xWGerm = 3 → Ring.ord XLocalRing xYGerm = 1
+@xZGerm_ord_eq_two : ∀ [IsDedekindDomain W], Ring.ord XLocalRing xWGerm = 3 → Ring.ord XLocalRing xZGerm = 2
+'MazurProof.N25F_XCoordinateOrders.xYGerm_ord_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XCoordinateOrders.xZGerm_ord_eq_two' depends on axioms: [propext, Classical.choice, Quot.sound]
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:380:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XBoundaryOrder.ordFrac_image_eq_exp`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:440:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XBoundaryZOrder.ordFrac_image_eq_exp`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+@xBoundaryOrder_qz : ∀ [inst : IsDedekindDomain W],
+  Ring.ord XLocalRing xWGerm = 3 →
+    ∀ (fraction_qz_ne_zero : (algebraMap W K) qz ≠ 0),
+      xBoundaryOrder (Additive.ofMul (Units.mk0 ((algebraMap W K) qz) fraction_qz_ne_zero)) = -1
+'MazurProof.N25F_XBoundaryZOrder.xLocalToFraction_xZGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XBoundaryZOrder.xZGerm_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XBoundaryZOrder.xLocalFractionOrder_xZGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XBoundaryZOrder.xBoundaryOrder_qz' depends on axioms: [propext, Classical.choice, Quot.sound]
+/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean:487:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_PolynomialBoundaryOrders.ordFrac_aeval_at_pole`:
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+@xLocalFractionOrder_aeval_qz : ∀ [inst : IsDedekindDomain W],
+  Ring.ord XLocalRing xWGerm = 3 →
+    (algebraMap W K) qz ≠ 0 →
+      ∀ (p : Polynomial (ZMod 2)),
+        p ≠ 0 → xLocalFractionOrder ((Polynomial.aeval ((algebraMap W K) qz)) p) = WithZero.exp (-(1 * ↑p.natDegree))
+'MazurProof.N25F_PolynomialBoundaryOrders.xLocalFractionOrder_aeval_qz' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

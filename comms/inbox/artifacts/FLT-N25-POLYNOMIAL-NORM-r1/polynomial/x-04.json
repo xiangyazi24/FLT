@@ -1,0 +1,10 @@
+{
+  "name": "x-04",
+  "args": [
+    "/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 38.3738773139994,
+  "peak_child_rss_kib": 2788196,
+  "source_sha256": "522c9281a300afbaab2a092351ef8fe217ab7eb8d17a3cf379aa234c8a5e9160"
+}

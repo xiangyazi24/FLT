@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-polynomial-boundary-orders/GenericPolynomialPole.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 3.870883348001371,
+  "peak_child_rss_kib": 2908924,
+  "source_sha256": "151b01c406bea1ed2b818b433288aecc7ce85d6bfd87d73abcf16fd7ce7d91ee"
+}

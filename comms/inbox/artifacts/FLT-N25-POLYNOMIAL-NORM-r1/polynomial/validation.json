@@ -1,0 +1,85 @@
+{
+  "source_commit": "50263205b429bcafde5abb0935ae3011c0e845ae",
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "polynomial_checks": [
+    {
+      "name": "generic-02",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-boundary-orders/GenericPolynomialPole.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 3.870883348001371,
+      "peak_child_rss_kib": 2908924,
+      "source_sha256": "151b01c406bea1ed2b818b433288aecc7ce85d6bfd87d73abcf16fd7ce7d91ee"
+    },
+    {
+      "name": "x-04",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-boundary-orders/XPolynomialBoundaryCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 38.3738773139994,
+      "peak_child_rss_kib": 2788196,
+      "source_sha256": "522c9281a300afbaab2a092351ef8fe217ab7eb8d17a3cf379aa234c8a5e9160"
+    },
+    {
+      "name": "yz-01",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-boundary-orders/YZPolynomialBoundaryCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 62.850668766001036,
+      "peak_child_rss_kib": 2943176,
+      "source_sha256": "659948e2998ad464eae7fe58d27449e50ecbc34bc1c37b945501af4c3089b0fc"
+    },
+    {
+      "name": "z-01",
+      "args": [
+        "/workspace/shared/flt-n25-polynomial-boundary-orders/ZPolynomialBoundaryCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 34.09282676799921,
+      "peak_child_rss_kib": 2944084,
+      "source_sha256": "ef17a9a3bf64d3d650e7ad0e8c0897d15c1645278242dc5b1bf0781d54b39191"
+    }
+  ],
+  "base_norm_check": {
+    "name": "generic-02",
+    "args": [
+      "/workspace/shared/flt-n25-base-norm/GenericBaseNorm.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 48.63077623299978,
+    "peak_child_rss_kib": 2432300,
+    "source_sha256": "7cf5ad981376026e3f8864df6f0c1e197c4dc6a978d9b0b480623a73174322b5"
+  },
+  "all_final_audits": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "r16_byte_check": {
+    "source": "8d67705d40adc07ab5274cd2e5c1f252f2ba1291",
+    "file": "N25F_XCoordinateOrders.lean",
+    "sha": "b589d9f86757ea23cf65a1d2c21f0f8be25e03c1",
+    "byte_equal": true
+  },
+  "r17_byte_checks": [
+    {
+      "name": "N25F_YZBoundaryOrder.lean",
+      "sha": "091f237cf3917847f3eac83a9d9c046175cc888a",
+      "byte_equal": true
+    },
+    {
+      "name": "N25F_XBoundaryZOrder.lean",
+      "sha": "a11c854d364024821c322ccaef1924d9a7e48f04",
+      "byte_equal": true
+    },
+    {
+      "name": "N25F_YZLocalFractionEmbedding.lean",
+      "sha": "98c1ee8ae299dd3a6ae3abf030df0490b75f4957",
+      "byte_equal": true
+    }
+  ]
+}

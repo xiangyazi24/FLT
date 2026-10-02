@@ -1,0 +1,14 @@
+[
+  {
+    "name": "RationalPointsN25QuotientTwoWChartNormalization.lean",
+    "git_blob_sha": "13312dbe3c5cec7fdef9576da6ead94843ae5c3e"
+  },
+  {
+    "name": "RationalPointsN25QuotientTwoPlaneQuarticFunctionField.lean",
+    "git_blob_sha": "53d39d2e087f6d0ba23a82a6547ce25259877f90"
+  },
+  {
+    "name": "N25F_WChartNormDimension.lean",
+    "git_blob_sha": "f0fa6ff9a110359ab1aafa012dab03c63b2415fb"
+  }
+]

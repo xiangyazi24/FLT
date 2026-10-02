@@ -1,0 +1,191 @@
+{
+  "source_commit": "50263205b429bcafde5abb0935ae3011c0e845ae",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 23672,
+      "sha256": "45bf6ed77fef619d0cc819d8c473f3f166a3398b66a6e621fe69feab380a4246"
+    },
+    {
+      "path": "comms/candidates/N25F_PolynomialBoundaryOrders.lean",
+      "encoding": "utf-8",
+      "bytes": 5383,
+      "sha256": "f5daa6dba10e9dc096e0b13162a489b954f9eadb9298240b7116ce46f1287005"
+    },
+    {
+      "path": "comms/candidates/N25F_WChartBaseNorm.lean",
+      "encoding": "utf-8",
+      "bytes": 2385,
+      "sha256": "ac3d934e61be2dd60880f208d1e0411bf3343de6c34d5670206e81f133141e85"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/base-norm/GenericBaseNorm.lean",
+      "encoding": "utf-8",
+      "bytes": 2038,
+      "sha256": "7cf5ad981376026e3f8864df6f0c1e197c4dc6a978d9b0b480623a73174322b5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/base-norm/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 277,
+      "sha256": "f6db935357477a20a03b3841d70f60949b37b060445b1306c74e2fb4aae88544"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/base-norm/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 311,
+      "sha256": "54148862b6e8e595a2790edde49a4b6ad73472523cb6340f75005d5c0751e774"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/base-norm/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 871,
+      "sha256": "4ef501fc113c0b1756af49ff17e887d98ba552852b7c71e948950c99d53d4673"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/inputs/N25F_WChartNormDimension.lean",
+      "encoding": "utf-8",
+      "bytes": 1123,
+      "sha256": "52866e8d6e29083dd145d31a35d8da129412f534fdfd0b2858013dfaf9b4e597"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/inputs/RationalPointsN25QuotientTwoPlaneQuarticFunctionField.lean",
+      "encoding": "utf-8",
+      "bytes": 6829,
+      "sha256": "5f5f4f1e1350c69ee03fa315d23c3d64f9a326b2e06b8ce6b13a3e8595735211"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/inputs/RationalPointsN25QuotientTwoWChartNormalization.lean",
+      "encoding": "utf-8",
+      "bytes": 25231,
+      "sha256": "df8aec7145f2c4b5acf097da8c238effe7778157e60436ceec46d11693bb71c7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/inputs/source-blob-receipt.json",
+      "encoding": "utf-8",
+      "bytes": 406,
+      "sha256": "bf98ec49507790a4cdbc29ceb6a7b3ae9f408cbc35f6bfd9caea88244db0492b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/ActualPolynomialNormCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 655,
+      "sha256": "afde75536ffa8a96bf6635dcbb967844f603d32c232248d2a9f2d6397d95374f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/GenericPolynomialPole.lean",
+      "encoding": "utf-8",
+      "bytes": 1679,
+      "sha256": "151b01c406bea1ed2b818b433288aecc7ce85d6bfd87d73abcf16fd7ce7d91ee"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/XPolynomialBoundaryCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 22821,
+      "sha256": "522c9281a300afbaab2a092351ef8fe217ab7eb8d17a3cf379aa234c8a5e9160"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/YZPolynomialBoundaryCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 10846,
+      "sha256": "659948e2998ad464eae7fe58d27449e50ecbc34bc1c37b945501af4c3089b0fc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/ZPolynomialBoundaryCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 11764,
+      "sha256": "ef17a9a3bf64d3d650e7ad0e8c0897d15c1645278242dc5b1bf0781d54b39191"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 300,
+      "sha256": "47b75c45e0e7f31b146f4b2b6c2df7ee5d958d51731da9a44964f7aee1fad486"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 106,
+      "sha256": "08a83cda72f29a76bbfabb0b687428d7717d5ca5c6361cd9d2412af7028d006a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/make_other_checks.py",
+      "encoding": "utf-8",
+      "bytes": 2855,
+      "sha256": "fab7123c9c9593ecaea83cea041542331dbfdeb722e7aeeea093e3175e5eec04"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/make_specializations.py",
+      "encoding": "utf-8",
+      "bytes": 3869,
+      "sha256": "d63523f219a166db8b1285f0591e33eb8ccf2315d070b7bacb0225f691066980"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 888,
+      "sha256": "aaf1f61b5592583da9890c4df00bec020394c26433c6e326d963c486901948ac"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2592,
+      "sha256": "21c40ad8ee079cef92814b926edd569289e1d06dc1aade98853ddcb6777fc2ca"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/x-04.json",
+      "encoding": "utf-8",
+      "bytes": 296,
+      "sha256": "92abb824e4a6d114ad19d559e1983c6c32a089ff461dd52a160044c6be332584"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/x-04.log",
+      "encoding": "utf-8",
+      "bytes": 6563,
+      "sha256": "d499d4c8ad25fde2af3218a1ae3a6300224b6062b070c2a01d8c404483bc4308"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/yz-01.json",
+      "encoding": "utf-8",
+      "bytes": 300,
+      "sha256": "f97cb4a18f77ff692db5ab87b25f2ac1881cee91485f09a4a4cc9bdc57fa0547"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/yz-01.log",
+      "encoding": "utf-8",
+      "bytes": 3267,
+      "sha256": "fd5c4752383f090401c74001ec179049ea6695c384b7b7f7d8b99a272d54ca4a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/z-01.json",
+      "encoding": "utf-8",
+      "bytes": 297,
+      "sha256": "4f2dda92534688acac0e00e6087b651add4ef0df0a7ba295135a9a149fdd11fb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/polynomial/z-01.log",
+      "encoding": "utf-8",
+      "bytes": 3281,
+      "sha256": "4ac0a9ae6085cd8668c28efc108c3886a8f26b6778cbf66fbdf777557021b9f4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/receipt_r16.md",
+      "encoding": "utf-8",
+      "bytes": 558,
+      "sha256": "f7f05e3f4d4804ce02eaf2711de7dd50d26baa1ee3edb845eef3b6adeb729d39"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-POLYNOMIAL-NORM-r1/receipt_r17.md",
+      "encoding": "utf-8",
+      "bytes": 542,
+      "sha256": "c77a768f3d40e1b75bb8a2396809d59c39875912cca301786f1071f4d6a965c1"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-BOUNDARY-ORDERS-r17.md",
+      "encoding": "utf-8",
+      "bytes": 6037,
+      "sha256": "cdad694a095b9d5372f8a49cc737fd3afebf1bd5ebb0d78fa86b44c96e2eefec"
+    }
+  ]
+}
