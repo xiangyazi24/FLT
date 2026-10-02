@@ -1,0 +1,101 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "accepted_source_pin": "22f88d43187caf0e57affcc6ded92cdf9b49714a",
+  "lead_receipt_commit": "1222d33fa09e5a00d29c6ad294f3dfb32baf26ce",
+  "historical_r4_source_pin": "6aef0f8bdea96652f4879d0f74acd6bf189f306c",
+  "historical_n13_candidate_pin": "62968808d859114cb9ed61b478d1d692b3e71c52",
+  "scope": "N13 acceptance synchronization, current three-boundary map, exact N25 next-lemma plan; no new proof candidate or code change",
+  "files": [
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/SOURCE_MAP.md",
+      "encoding": "utf-8",
+      "bytes": 14357,
+      "sha256": "c6128b69b668e96735e5d20d93fb77eb022d2fadf9c2274003a7e39ce550bedc",
+      "git_blob": "3f4bdf8b18f29c9468de6a2c189fdf0c9472a3a4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/N25_PLAN.md",
+      "encoding": "utf-8",
+      "bytes": 14623,
+      "sha256": "44f039949bf721b7c9ccaa6dcd874d3c3f92a74f900a4d4966bf1a541f1eb11d",
+      "git_blob": "2b7ecd50fa093bb44e9aec3c61e8c10e2ef1331f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/N25_N49_REVIEW.md",
+      "encoding": "utf-8",
+      "bytes": 13610,
+      "sha256": "3208a6ee0e2a04c6e8ad2cb6194b42cb1c33621ae44dd35caa643b9507c7d402",
+      "git_blob": "2e835de6648662294380c3f712a13f6d48d14536"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/N13_ACCEPTED_CHAIN.md",
+      "encoding": "utf-8",
+      "bytes": 12255,
+      "sha256": "458b5f5440026127b93357896ea3ac0b6722d86ebb87f4fd2ada098fc9b556d9",
+      "git_blob": "8e8f1e342d43fb82267ff3ecaf9993d5220ad59b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/HISTORICAL_R4_SOURCE_MAP.md",
+      "encoding": "utf-8",
+      "bytes": 16574,
+      "sha256": "8beb6a452b9af79e445a6b8c6b7d39892a1419e06172a87e6723379e350db6b8",
+      "git_blob": "405a6bd32ca9adae67654793a10aeee606f30578"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/SOURCE_AUDIT.json",
+      "encoding": "utf-8",
+      "bytes": 239111,
+      "sha256": "a4c297dacd0a2f88d3660d0412a57d995bda854dcd57a321809d8af5592ae155",
+      "git_blob": "b1cd480c959c663e11f5c75c232bec01cc3d13df"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/CURRENT_SOURCE_AUDIT.json",
+      "encoding": "utf-8",
+      "bytes": 198853,
+      "sha256": "adec602b8db0ff09e193375f85934a28a9f5b2e15df0c7be64d2ed56093eadb6",
+      "git_blob": "e6957bfc3fb9d81f75cabf4ac0546e8bf94a5332"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/SOURCE_BLOB_VERIFICATION.json",
+      "encoding": "utf-8",
+      "bytes": 208818,
+      "sha256": "9ec0f8b05c4b61da517248dda4e28c556285c0521689e6bb6effd526908d2d7c",
+      "git_blob": "bf9219a5f5e2027cc91defc3948bbd2ce906991d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/SOURCE_CHECKS.json",
+      "encoding": "utf-8",
+      "bytes": 1804,
+      "sha256": "982cabec6d47eca6870548c1bba223aad347ae9408765e45ac140f08b664b6d0",
+      "git_blob": "406210e07884789386fe1db9c6d9c4364785face"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/INDEPENDENT_REVIEW.md",
+      "encoding": "utf-8",
+      "bytes": 2084,
+      "sha256": "a3946cacfab1f1fb4110b8386a88ebcca357c67a7e2382b3794804fbc647f34f",
+      "git_blob": "4b2c31d5f7480ce9f19c42e016371c07ca6bb5a4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-MAZUR-AXIOM-BOUNDARIES-r1/LEAD_R5_RECEIPT.md",
+      "encoding": "utf-8",
+      "bytes": 2157,
+      "sha256": "276619897fd8c3a97ef04b4ab008bca3aae5441bc860e017cbac86cb5e5444a4",
+      "git_blob": "0f740f670784f7acd4788ed7bf1b8ea1e5f72836"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N13-ENDPOINT-r5.md",
+      "encoding": "utf-8",
+      "bytes": 4055,
+      "sha256": "c3934cb68f30e9876e48e19fda4ece68a6f97965060f782c95d4894db50e5761",
+      "git_blob": "0c30074cb8cd922b6496430b851f1db43396dcfc"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 10681,
+      "sha256": "b0767cca2ee5a2218f145305b561e22c8ff11c7f5aecaf2cead892df3c583f17",
+      "git_blob": "b5fa6cab0cbd7b741dc66770ac2a1905da54b5dd"
+    }
+  ]
+}

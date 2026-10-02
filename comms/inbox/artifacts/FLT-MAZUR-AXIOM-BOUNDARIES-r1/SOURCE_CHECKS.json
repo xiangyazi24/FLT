@@ -1,0 +1,78 @@
+{
+  "baseline": {
+    "files": 213,
+    "external": 90,
+    "unreached_supplied_files": [],
+    "cycles": [],
+    "flags": [
+      {
+        "path": "FLT/Assumptions/MazurProof/CyclicExclusion13.lean",
+        "token": "axiom",
+        "line": 36
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/CyclicExclusion25.lean",
+        "token": "axiom",
+        "line": 47
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/CyclicExclusion49.lean",
+        "token": "axiom",
+        "line": 43
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/CyclicOrderAssembly.lean",
+        "token": "axiom",
+        "line": 102
+      },
+      {
+        "path": "scratch/DischargeN14.lean",
+        "token": "sorry",
+        "line": 190
+      },
+      {
+        "path": "FLT/EllipticCurve/Torsion.lean",
+        "token": "sorry",
+        "line": 46
+      },
+      {
+        "path": "FLT/EllipticCurve/Torsion.lean",
+        "token": "sorry",
+        "line": 51
+      },
+      {
+        "path": "FLT/EllipticCurve/Torsion.lean",
+        "token": "sorry",
+        "line": 55
+      },
+      {
+        "path": "FLT/EllipticCurve/Torsion.lean",
+        "token": "sorry",
+        "line": 133
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/KubertBridgeN16.lean",
+        "token": "sorry",
+        "line": 342
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/KubertBridgeN16.lean",
+        "token": "sorry",
+        "line": 361
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/CyclicOrderReduction.lean",
+        "token": "axiom",
+        "line": 31
+      }
+    ]
+  },
+  "later_n13": {
+    "files": 335,
+    "external": 132,
+    "unreached_supplied_files": [],
+    "cycles": [],
+    "flags": []
+  },
+  "exact_n13_statement_equal_whitespace_normalized": true
+}
