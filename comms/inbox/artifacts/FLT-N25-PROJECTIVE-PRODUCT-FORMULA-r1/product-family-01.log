@@ -1,0 +1,6 @@
+'MazurProof.N25F_ProjectiveProductFormula.projectivePrincipalDivisor_degree_regular' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ProjectiveProductFormula.projectivePrincipalDivisor_degree_eq_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

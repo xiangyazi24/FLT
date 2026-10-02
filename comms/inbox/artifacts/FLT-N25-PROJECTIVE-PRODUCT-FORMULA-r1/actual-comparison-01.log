@@ -1,0 +1,7 @@
+'MazurProof.N25F_NormBaseTwist.norm_twist' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityAffineNormComparison.affineFieldNorm' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityAffineNormComparison.infinity_norm_eq_baseInversion_affine_norm' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

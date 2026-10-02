@@ -1,0 +1,275 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependencies": [
+    "6a4110a03ca7bee2db5fb2e506eb75edd3643ce0",
+    "b6bae08bf96ddbd1fe1c81db4705ec2524a5ac83",
+    "fc653e9e48c5e2c66c3d315652b59f2b741bc85c",
+    "06f02da731842a497c13bf2d4a5b4189b8bea3e9"
+  ],
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 33776,
+      "sha256": "86dde9e8567ef60ed6c7df433510c5bf82eba1ed6fcbd3e9c8c96c91b26b1e10"
+    },
+    {
+      "path": "comms/candidates/N25F_AffineNormPolynomial.lean",
+      "encoding": "utf-8",
+      "bytes": 2439,
+      "sha256": "f6e04a92c8202349a5a49704165a3fff76b0ff03f710add8ec36d6cbf80db2ed"
+    },
+    {
+      "path": "comms/candidates/N25F_BaseInversionOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 5150,
+      "sha256": "4a1955ab8a502ae4e15005931a9d5eb3d32ed20cc359a1a8a58e6cdf70e5c86b"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityAffineNormComparison.lean",
+      "encoding": "utf-8",
+      "bytes": 1300,
+      "sha256": "97744cf4801476edd4a257101c6e374b639fc69f33481231da9115e9ec6c9d93"
+    },
+    {
+      "path": "comms/candidates/N25F_NormBaseTwist.lean",
+      "encoding": "utf-8",
+      "bytes": 821,
+      "sha256": "7cfb01b6465fcb99ce1696bbcf05f0d939e327a0518b500926021a4d9f4ddbfa"
+    },
+    {
+      "path": "comms/candidates/N25F_ProjectiveProductFormula.lean",
+      "encoding": "utf-8",
+      "bytes": 4073,
+      "sha256": "14f7b93fbbe2b04ec9be5b298c1984f917484beeb09514a8ee2bd3febfe20ebb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/ActualProjectiveProductFormulaCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 733,
+      "sha256": "565201e894ec1a4cb35ea2982c5eee318d983f4248b22b11e043bdd5ccbdf758"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/ProjectiveFractionExtensionCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1419,
+      "sha256": "ee9c041669ea3f7075e32302ed306ca8c3414bafd5275140c4f4bf54d45038ae"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/ProjectiveProductFormulaFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 14424,
+      "sha256": "01912e7af2e2c70de61b7cae859a2813514f5fa431f1cb8068c4858a562097bc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/actual-comparison-01.json",
+      "encoding": "utf-8",
+      "bytes": 315,
+      "sha256": "13b6e1a927a3c2ff6976d9ce570d99041b111c7b42a46afb4ccad95f398e3354"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/actual-comparison-01.log",
+      "encoding": "utf-8",
+      "bytes": 377,
+      "sha256": "f90c2b3305161e715dcb79c9e86cf095bb75978af2a40daa6e4ffeef2b2f912e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/affine-polynomial-01.json",
+      "encoding": "utf-8",
+      "bytes": 308,
+      "sha256": "faf7c7fd8451a6ab35cfbddbe4991f167d9166ed992977f47511fa7d768afa50"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/affine-polynomial-01.log",
+      "encoding": "utf-8",
+      "bytes": 127,
+      "sha256": "263fcd81d3dfc9cf118f0063d26f095e88a07c1b3b1355c5ed4a2e5b82349186"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/base-order-05.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "0582406137bf015d508234364ad2c3bec809eeaa5db6619cb8894e02fb825115"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/base-order-05.log",
+      "encoding": "utf-8",
+      "bytes": 262,
+      "sha256": "2c379b29c1e4cb14f93e9ed3789d5a861950f3f3033fe95765f14a9663958fe2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-01.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "bbff10767a404160b2daec9584cfb5c99e7389383a09c568a65c67cd3e314d34"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-01.log",
+      "encoding": "utf-8",
+      "bytes": 1177,
+      "sha256": "9d51a32394f1a25c3bb0a450b2c5d0364943bb9e94ea1e608f61bb1568bb9f9f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-02.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "52aec93ee10808d66305abcc253bc20eb146c875419d49eb9520f77ed6e7732b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-02.log",
+      "encoding": "utf-8",
+      "bytes": 779,
+      "sha256": "5d08e2abecc8cb68b5206ffd989330bc282ab92cc068848565438a450ca34d07"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-03.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "67933b0db6bb94a72bbf6e575204e6c1a8561c038547fe836b00683edf9af077"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-03.log",
+      "encoding": "utf-8",
+      "bytes": 738,
+      "sha256": "fc4198f50c1d2f87cc827ec82fe6206c19424435750c757747c6732898da63bb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-04.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "77a3c4ed1ecec44475c8a08ad9d0a807f61d574d50a4b015b9e8bdc34f664037"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/base-order-04.log",
+      "encoding": "utf-8",
+      "bytes": 921,
+      "sha256": "5eb7eca930c30e7a7e8d551d0e8e61819c3dc685085cbd0c83384d43e5fb485e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/fraction-extension-01.json",
+      "encoding": "utf-8",
+      "bytes": 323,
+      "sha256": "cc82093a76ebdfc6be7be76e0bed1bc2118eb89b6d50a2cc102c2b547f87d094"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/fraction-extension-01.log",
+      "encoding": "utf-8",
+      "bytes": 444,
+      "sha256": "5fed9779f201c803925db5c9660583de8ece59ea6c97f8e6d38f2fd5e34da725"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/twist-01.json",
+      "encoding": "utf-8",
+      "bytes": 289,
+      "sha256": "997a87019b7401d0383b89e7c9a5954079d2237a0a3f175bda77b72fef562fc8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/failed/twist-01.log",
+      "encoding": "utf-8",
+      "bytes": 506,
+      "sha256": "512434abe295d8b94d02b7decb1868a7cfd1dc6f367b7ad694a8ee0754d9c512"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/fraction-extension-02.json",
+      "encoding": "utf-8",
+      "bytes": 323,
+      "sha256": "17e69bee4be74c4aedd3b9ebfe0bf280e804535e7f7c04345eb29b03c7b5a4fa"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/fraction-extension-02.log",
+      "encoding": "utf-8",
+      "bytes": 142,
+      "sha256": "82f4efc67eaa1efb8067381164e905f9c775f53cd085d53f06fd720aa3eee3a0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/make_product_family.py",
+      "encoding": "utf-8",
+      "bytes": 3467,
+      "sha256": "a834e4aa5d0e83d556b81708d88939f0f7edd448f6b98a5ba992219220024814"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/norm/AffineNormPolynomialCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 4752,
+      "sha256": "3a74f54e173ad71e05c8fea191f2e42b8337e18d097e08a0e80c77cd452b1db0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/norm/BaseInversionOrderCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 5559,
+      "sha256": "b82c4e27442d142770ef09892465f0f599949ecbc97b6014d51b38111dd529bc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/norm/InfinityAffineNormComparisonCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 2404,
+      "sha256": "0de2ae1da9ebe9eafb14a264b56312bea58d33bd2bdd78875df86a3574bcbe7a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/norm/NormBaseTwistCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 877,
+      "sha256": "16543a3189337a5a70e18308d1bda0af133262db80582f20a1022784e1bcbfe8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/norm/make_checks.py",
+      "encoding": "utf-8",
+      "bytes": 3037,
+      "sha256": "211536917931468207892a8aac9223cf3c34e485446ebc257b3cb2eb6aea8455"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/norm/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 881,
+      "sha256": "378e2c646a07f545404becc9582c630558ee188128df57696c8d19063c7e8e42"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/product-family-01.json",
+      "encoding": "utf-8",
+      "bytes": 321,
+      "sha256": "4d134e06b31e195671435d13fced0a7a28ae51ae51867434f72e9dd5fe93634c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/product-family-01.log",
+      "encoding": "utf-8",
+      "bytes": 292,
+      "sha256": "7ce00e35830bfc22fd25d99e02e938add5268663b3bdcc6190bb74e8a3428cf5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 888,
+      "sha256": "5011d07d6bf01c71db38e2cec59572bfc563efb94a7bca369dfc038d377da8db"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/source-readback.json",
+      "encoding": "utf-8",
+      "bytes": 1166,
+      "sha256": "0879806395d3160b67963e8b7a1d6e4498a8a3e448eaba9f27c1db969952044c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/twist-02.json",
+      "encoding": "utf-8",
+      "bytes": 289,
+      "sha256": "202820164d003d4f2c9f8df8296de9c06dcf172b3ce5812d11580cfb48d5eadb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/twist-02.log",
+      "encoding": "utf-8",
+      "bytes": 102,
+      "sha256": "4ef803e14c9b57f5953898fc46c75266f9e156d94c03866d0ef50caa67ea27a3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 5430,
+      "sha256": "e3770ec91702b1dafae3a1bff04f8223242d21c31d7ba62295389b31a662c047"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-PROJECTIVE-PRODUCT-FORMULA-r1.md",
+      "encoding": "utf-8",
+      "bytes": 6881,
+      "sha256": "0c8717ce6ca1e2d3f10d1cf15b137ec95e8ca85e269ab9b6fef209cf2ec3621e"
+    }
+  ]
+}

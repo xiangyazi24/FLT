@@ -1,0 +1,17 @@
+/workspace/shared/flt-n25-norm-base-inversion/BaseInversionOrderCheck.lean:73:2: error: Type mismatch
+  Module.length_eq_one
+has type
+  ∀ (R : Type ?u.53) (M : Type ?u.52) [inst : Ring R] [inst_1 : AddCommGroup M] [inst_2 : Module R M]
+    [IsSimpleModule R M], Module.length R M = 1
+but is expected to have type
+  Module.length (Localization.AtPrime infinityBasePrime)
+      (Localization.AtPrime infinityBasePrime ⧸ IsLocalRing.maximalIdeal (Localization.AtPrime infinityBasePrime)) =
+    1
+'MazurProof.N25F_BaseInversionOrder.baseVariable_inverse_fractionOrder' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BaseInversionOrder.baseInversion_polynomial_order' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

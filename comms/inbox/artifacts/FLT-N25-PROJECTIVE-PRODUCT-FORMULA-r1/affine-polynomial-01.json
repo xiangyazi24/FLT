@@ -1,0 +1,10 @@
+{
+  "name": "affine-polynomial-01",
+  "args": [
+    "/workspace/shared/flt-n25-norm-base-inversion/AffineNormPolynomialCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 12.243875724001555,
+  "peak_child_rss_kib": 2711316,
+  "source_sha256": "3a74f54e173ad71e05c8fea191f2e42b8337e18d097e08a0e80c77cd452b1db0"
+}

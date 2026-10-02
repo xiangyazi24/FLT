@@ -1,0 +1,9 @@
+/workspace/shared/flt-n25-norm-base-inversion/NormBaseTwistCheck.lean:14:26: error: Application type mismatch: The argument
+  A'
+has type
+  @Algebra ?m.20 ?m.21 ?m.22 CommSemiring.toSemiring
+but is expected to have type
+  @Algebra B L CommRing.toCommSemiring inst✝.toSemiring
+in the application
+  @Algebra.norm B L inst✝¹ inst✝ A'
+/workspace/shared/flt-n25-norm-base-inversion/NormBaseTwistCheck.lean:21:14: error(lean.unknownIdentifier): Unknown constant `MazurProof.N25F_NormBaseTwist.norm_twist`

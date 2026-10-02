@@ -1,0 +1,10 @@
+{
+  "name": "base-order-04",
+  "args": [
+    "/workspace/shared/flt-n25-norm-base-inversion/BaseInversionOrderCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 5.978039232002629,
+  "peak_child_rss_kib": 2906472,
+  "source_sha256": "765d1d6b1fbf6cd18e0bd3fd7e372ad0ac8094cf23606b5c3c274a6ba169dff7"
+}

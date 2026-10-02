@@ -1,0 +1,10 @@
+{
+  "name": "twist-02",
+  "args": [
+    "/workspace/shared/flt-n25-norm-base-inversion/NormBaseTwistCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 30.812880756995582,
+  "peak_child_rss_kib": 2385308,
+  "source_sha256": "16543a3189337a5a70e18308d1bda0af133262db80582f20a1022784e1bcbfe8"
+}

@@ -1,0 +1,36 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_RationalBaseInversion.lean",
+      "sha": "fd91633415b572fc0233f35e54ae6ac8f580017d",
+      "equal": true
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityFunctionField.lean",
+      "sha": "24effc2e9208373e6e93607a1c6d588e8b5ea1d5",
+      "equal": true
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityNormalization.lean",
+      "sha": "e287c76528c8e6a982b1a3c9ff3f26fd6ea7a0df",
+      "equal": true
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_WChartNormDimension.lean",
+      "sha": "f0fa6ff9a110359ab1aafa012dab03c63b2415fb"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_WChartPrincipalDegree.lean",
+      "sha": "97ab5831af501f135c2182d5f7a20dad6210afaa"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectiveDivisorDegree.lean",
+      "sha": "30b90a32ee153c3c7eedb0b4746a882d25be34b4"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectivePrincipalDivisor.lean",
+      "sha": "27befd6841c09076f5581c9f64bc87e9b8d09343"
+    }
+  ]
+}

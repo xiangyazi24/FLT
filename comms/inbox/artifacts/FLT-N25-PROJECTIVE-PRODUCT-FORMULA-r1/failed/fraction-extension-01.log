@@ -1,0 +1,10 @@
+/workspace/shared/flt-n25-projective-product-formula/ProjectiveFractionExtensionCheck.lean:28:4: error: Type mismatch
+  Eq.symm heq
+has type
+  ↑(Additive.toMul f) = (algebraMap R L) a / (algebraMap R L) b
+but is expected to have type
+  ↑(Additive.toMul f) = ↑(Additive.toMul (fa - fb))
+'_private._stdin.0.MazurProof.N25F_ProjectiveProductFormula.hom_zero_of_regular' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

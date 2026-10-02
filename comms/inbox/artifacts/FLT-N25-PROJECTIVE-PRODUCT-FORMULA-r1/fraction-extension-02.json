@@ -1,0 +1,10 @@
+{
+  "name": "fraction-extension-02",
+  "args": [
+    "/workspace/shared/flt-n25-projective-product-formula/ProjectiveFractionExtensionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 2.8049074439986725,
+  "peak_child_rss_kib": 1925500,
+  "source_sha256": "ee9c041669ea3f7075e32302ed306ca8c3414bafd5275140c4f4bf54d45038ae"
+}

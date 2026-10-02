@@ -1,0 +1,10 @@
+{
+  "name": "actual-comparison-01",
+  "args": [
+    "/workspace/shared/flt-n25-norm-base-inversion/InfinityAffineNormComparisonCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 16.11921682299726,
+  "peak_child_rss_kib": 2514584,
+  "source_sha256": "0de2ae1da9ebe9eafb14a264b56312bea58d33bd2bdd78875df86a3574bcbe7a"
+}

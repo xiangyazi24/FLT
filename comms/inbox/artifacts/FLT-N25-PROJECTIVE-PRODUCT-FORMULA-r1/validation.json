@@ -1,0 +1,153 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependencies": [
+    "6a4110a03ca7bee2db5fb2e506eb75edd3643ce0",
+    "b6bae08bf96ddbd1fe1c81db4705ec2524a5ac83",
+    "fc653e9e48c5e2c66c3d315652b59f2b741bc85c",
+    "06f02da731842a497c13bf2d4a5b4189b8bea3e9"
+  ],
+  "production_full_imports": "NOT RUN",
+  "production_endpoint": "PENDING FULL NAMED ACCEPTANCE",
+  "public_declarations": [
+    "MazurProof.N25F_NormBaseTwist.norm_twist",
+    "MazurProof.N25F_InfinityAffineNormComparison.affineFieldNorm",
+    "MazurProof.N25F_InfinityAffineNormComparison.infinity_norm_eq_baseInversion_affine_norm",
+    "MazurProof.N25F_BaseInversionOrder.baseVariable_inverse_fractionOrder",
+    "MazurProof.N25F_BaseInversionOrder.baseInversion_polynomial_order",
+    "MazurProof.N25F_AffineNormPolynomial.affineFieldNorm_algebraMap",
+    "MazurProof.N25F_ProjectiveProductFormula.projectivePrincipalDivisor_degree_regular",
+    "MazurProof.N25F_ProjectiveProductFormula.projectivePrincipalDivisor_degree_eq_zero"
+  ],
+  "production_additional_hypotheses": [],
+  "passed": [
+    {
+      "name": "twist-02",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/NormBaseTwistCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 30.812880756995582,
+      "peak_child_rss_kib": 2385308,
+      "source_sha256": "16543a3189337a5a70e18308d1bda0af133262db80582f20a1022784e1bcbfe8"
+    },
+    {
+      "name": "actual-comparison-01",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/InfinityAffineNormComparisonCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 16.11921682299726,
+      "peak_child_rss_kib": 2514584,
+      "source_sha256": "0de2ae1da9ebe9eafb14a264b56312bea58d33bd2bdd78875df86a3574bcbe7a"
+    },
+    {
+      "name": "base-order-05",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/BaseInversionOrderCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 8.565783979000116,
+      "peak_child_rss_kib": 2903636,
+      "source_sha256": "b82c4e27442d142770ef09892465f0f599949ecbc97b6014d51b38111dd529bc"
+    },
+    {
+      "name": "affine-polynomial-01",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/AffineNormPolynomialCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 12.243875724001555,
+      "peak_child_rss_kib": 2711316,
+      "source_sha256": "3a74f54e173ad71e05c8fea191f2e42b8337e18d097e08a0e80c77cd452b1db0"
+    },
+    {
+      "name": "fraction-extension-02",
+      "args": [
+        "/workspace/shared/flt-n25-projective-product-formula/ProjectiveFractionExtensionCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 2.8049074439986725,
+      "peak_child_rss_kib": 1925500,
+      "source_sha256": "ee9c041669ea3f7075e32302ed306ca8c3414bafd5275140c4f4bf54d45038ae"
+    },
+    {
+      "name": "product-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-projective-product-formula/ProjectiveProductFormulaFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 47.36668118899979,
+      "peak_child_rss_kib": 2961832,
+      "source_sha256": "01912e7af2e2c70de61b7cae859a2813514f5fa431f1cb8068c4858a562097bc"
+    }
+  ],
+  "failed": [
+    {
+      "name": "twist-01",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/NormBaseTwistCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 38.633975791999546,
+      "peak_child_rss_kib": 2436948,
+      "source_sha256": "f8fb79a46181dabfdb6a3d8e18dfa4c2dc5ec30af0eecf1e9d27115bb137fb13"
+    },
+    {
+      "name": "base-order-01",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/BaseInversionOrderCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 6.759925177997502,
+      "peak_child_rss_kib": 2902880,
+      "source_sha256": "9227f2d1c9464b696229fb4df0accd9d298529e35d76809e86aebeedb54438a4"
+    },
+    {
+      "name": "base-order-02",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/BaseInversionOrderCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 5.316862489002233,
+      "peak_child_rss_kib": 2905332,
+      "source_sha256": "7049610a3fd7682725cd95008b52ff194b4e5ef0f42d900e9b7df739cb226e50"
+    },
+    {
+      "name": "base-order-03",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/BaseInversionOrderCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 6.246773587001371,
+      "peak_child_rss_kib": 2903576,
+      "source_sha256": "79b80c5781cc2b5eb60aef68fc8614bc42371dca193d1d0e6950cff922b520a9"
+    },
+    {
+      "name": "base-order-04",
+      "args": [
+        "/workspace/shared/flt-n25-norm-base-inversion/BaseInversionOrderCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 5.978039232002629,
+      "peak_child_rss_kib": 2906472,
+      "source_sha256": "765d1d6b1fbf6cd18e0bd3fd7e372ad0ac8094cf23606b5c3c274a6ba169dff7"
+    },
+    {
+      "name": "fraction-extension-01",
+      "args": [
+        "/workspace/shared/flt-n25-projective-product-formula/ProjectiveFractionExtensionCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 2.4784174659944256,
+      "peak_child_rss_kib": 1923536,
+      "source_sha256": "77d9710008976437e687e8ed4e822fb000e56b428d767cd6422610cfc1da6410"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "passed_sources_current_hashes_verified": true,
+  "wrapper_elapsed_includes_gate_wait": true
+}

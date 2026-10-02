@@ -1,0 +1,10 @@
+{
+  "name": "product-family-01",
+  "args": [
+    "/workspace/shared/flt-n25-projective-product-formula/ProjectiveProductFormulaFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 47.36668118899979,
+  "peak_child_rss_kib": 2961832,
+  "source_sha256": "01912e7af2e2c70de61b7cae859a2813514f5fa431f1cb8068c4858a562097bc"
+}
