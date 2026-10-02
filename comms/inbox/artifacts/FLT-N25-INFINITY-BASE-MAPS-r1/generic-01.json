@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-base/GenericInfinityBase.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 20.3476094990001,
+  "peak_child_rss_kib": 2525928,
+  "source_sha256": "73e59559996cf54ccf87061eba6f98c5055897b9bd81951b2ccb749b508d2af7"
+}

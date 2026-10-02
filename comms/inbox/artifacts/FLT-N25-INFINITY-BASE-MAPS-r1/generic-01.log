@@ -1,0 +1,4 @@
+'N25InfinityBaseCheck.inverse_germ_image' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25InfinityBaseCheck.inverse_germ_ord' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25InfinityBaseCheck.aeval_comp_map' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25InfinityBaseCheck.inverse_aeval_injective' depends on axioms: [propext, Classical.choice, Quot.sound]

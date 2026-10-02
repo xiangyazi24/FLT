@@ -1,0 +1,17 @@
+import FLT.Assumptions.MazurProof.N25F_InfinityBaseMaps
+
+#print axioms MazurProof.N25F_InfinityBaseMaps.yzInverseZGerm
+#print axioms MazurProof.N25F_InfinityBaseMaps.yzLocalToFraction_yzInverseZGerm
+#print axioms MazurProof.N25F_InfinityBaseMaps.yzInverseZGerm_ne_zero
+#print axioms MazurProof.N25F_InfinityBaseMaps.yzInverseZGerm_ord_eq_one
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToField
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToField_injective
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToX
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToYZ
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToZ
+#print axioms MazurProof.N25F_InfinityBaseMaps.xLocalToFraction_comp_infinityBase
+#print axioms MazurProof.N25F_InfinityBaseMaps.yzLocalToFraction_comp_infinityBase
+#print axioms MazurProof.N25F_InfinityBaseMaps.zLocalToFraction_comp_infinityBase
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToX_injective
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToYZ_injective
+#print axioms MazurProof.N25F_InfinityBaseMaps.infinityBaseToZ_injective

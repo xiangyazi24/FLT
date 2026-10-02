@@ -1,0 +1,83 @@
+{
+  "source_commit": "8a8daa4e41c0d852b4b4a8a34aaed9c530012ea3",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 24959,
+      "sha256": "e879d4333e60f2e61e3d6ee6e51dad8c00ba4b4375c0c9e9eeb787abc3a7991c"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityBaseMaps.lean",
+      "encoding": "utf-8",
+      "bytes": 5197,
+      "sha256": "2b9c97e1bff38203b4669e0c2a57345c288cde3a325c104f5d76f5699d476c07"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/ActualInfinityBaseMapsCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1143,
+      "sha256": "4f5e66b15a01609020a7d235a651fb2b3ffc03c95b16dcc3510ce197f72d215e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/GenericInfinityBase.lean",
+      "encoding": "utf-8",
+      "bytes": 1574,
+      "sha256": "73e59559996cf54ccf87061eba6f98c5055897b9bd81951b2ccb749b508d2af7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/InfinityFieldCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 2961,
+      "sha256": "12ab66ee717c47c84d7a55ad2d5e7eb9501a2033450dfdff2337272139f047ed"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/field-01.json",
+      "encoding": "utf-8",
+      "bytes": 283,
+      "sha256": "994a45ccb41c3844487b35eba3b4cb2fe74be61fd316eaec8ef7823d42c336be"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/field-01.log",
+      "encoding": "utf-8",
+      "bytes": 976,
+      "sha256": "bb6f3e14b3ed142b76330fafc851856d29b72be7b2f1b2252d686019b3808ff7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 284,
+      "sha256": "2eafcd4c8897c375b2d519daf64ad3677c409dc8924c177d6de83f6ea52bcd52"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 403,
+      "sha256": "97706581e33cbd9a1dff7d840c7bf38781e6849ca197f6a22709d22f990a9400"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/make_field_check.py",
+      "encoding": "utf-8",
+      "bytes": 1704,
+      "sha256": "ae58ba58bf2168ec6dbaa0b5b2a42b1a4cbe1442ad7823cf1cb04b03e989f3cf"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 875,
+      "sha256": "f08ee1d14265695c53bf8e2ce99d7ffaa7685ea873c1d50bf8a19b219fcd4a04"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-BASE-MAPS-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1938,
+      "sha256": "8ab7afdd921b7e927432acd0939720e91aad0f9639bb09400efaf7445557ca28"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-INFINITY-BASE-MAPS-r1.md",
+      "encoding": "utf-8",
+      "bytes": 4169,
+      "sha256": "bf0000499488e598825beaf7e720467030dd2b4f7765e7fad2a9d8228ae052cf"
+    }
+  ]
+}

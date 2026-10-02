@@ -1,0 +1,60 @@
+{
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "public_declarations": [
+    "yzInverseZGerm",
+    "yzLocalToFraction_yzInverseZGerm",
+    "yzInverseZGerm_ne_zero",
+    "yzInverseZGerm_ord_eq_one",
+    "infinityBaseToField",
+    "infinityBaseToField_injective",
+    "infinityBaseToX",
+    "infinityBaseToYZ",
+    "infinityBaseToZ",
+    "xLocalToFraction_comp_infinityBase",
+    "yzLocalToFraction_comp_infinityBase",
+    "zLocalToFraction_comp_infinityBase",
+    "infinityBaseToX_injective",
+    "infinityBaseToYZ_injective",
+    "infinityBaseToZ_injective"
+  ],
+  "checks": [
+    {
+      "name": "generic-01",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-base/GenericInfinityBase.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 20.3476094990001,
+      "peak_child_rss_kib": 2525928,
+      "source_sha256": "73e59559996cf54ccf87061eba6f98c5055897b9bd81951b2ccb749b508d2af7"
+    },
+    {
+      "name": "field-01",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-base/InfinityFieldCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 15.504306759001338,
+      "peak_child_rss_kib": 2474156,
+      "source_sha256": "12ab66ee717c47c84d7a55ad2d5e7eb9501a2033450dfdff2337272139f047ed"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "fixture_imports": [
+    {
+      "path": "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.lean",
+      "source_sha256": "f25ea10e112b5959eed4b18113a25056d4563ae1f4e4221811ebaf37c54fe24c",
+      "olean_sha256": "6037a2b6b4a9e7c353e2aca8036595f8bfb3cfe2c8290063c59b474b714662ef"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean",
+      "source_sha256": "525985ce211f4c05c0b916949c026346d266f060263dfcbda296c28dc3daed17",
+      "olean_sha256": "244000f7f98bb99214bb655d62ef27a55c7886825ac5477d25abe170be3f0844"
+    }
+  ]
+}
