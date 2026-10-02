@@ -1,0 +1,15 @@
+'MazurProof.N25F_FullPicardDegree.fullProjectivePrincipalSubgroup25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardDegree.fullProjectivePrincipalSubgroup25Two_le_degree_ker' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardDegree.fullProjectiveClassDegree25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardDegree.fullProjectiveClassDegree25Two_classOf' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardDegree.fullProjectiveClassOf_eq_iff_exists_principal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

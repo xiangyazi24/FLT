@@ -1,0 +1,7 @@
+import FLT.Assumptions.MazurProof.N25F_FullPicardDegree
+
+#print axioms MazurProof.N25F_FullPicardDegree.fullProjectivePrincipalSubgroup25Two
+#print axioms MazurProof.N25F_FullPicardDegree.fullProjectivePrincipalSubgroup25Two_le_degree_ker
+#print axioms MazurProof.N25F_FullPicardDegree.fullProjectiveClassDegree25Two
+#print axioms MazurProof.N25F_FullPicardDegree.fullProjectiveClassDegree25Two_classOf
+#print axioms MazurProof.N25F_FullPicardDegree.fullProjectiveClassOf_eq_iff_exists_principal

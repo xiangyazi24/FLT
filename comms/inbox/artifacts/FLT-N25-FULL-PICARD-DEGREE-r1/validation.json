@@ -1,0 +1,30 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "8517a259e9d16fd5fc88635294bea0a964de01f8",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "fullProjectivePrincipalSubgroup25Two",
+    "fullProjectivePrincipalSubgroup25Two_le_degree_ker",
+    "fullProjectiveClassDegree25Two",
+    "fullProjectiveClassDegree25Two_classOf",
+    "fullProjectiveClassOf_eq_iff_exists_principal"
+  ],
+  "production_additional_hypotheses": [],
+  "family": {
+    "name": "family-01",
+    "args": [
+      "/workspace/shared/flt-n25-full-picard-degree/FullPicardDegreeFamilyCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 28.408869518003485,
+    "peak_child_rss_kib": 1765888,
+    "source_sha256": "c2f8ae0bf5230a2747fa60ceb2eb66d5a9b69329a6963be20e971233cd971749"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "grading": "fullClosedPointGrading25Two",
+  "principal_subgroup": "projectivePrincipalDivisor.range"
+}

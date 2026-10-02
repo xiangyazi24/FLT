@@ -1,0 +1,10 @@
+{
+  "name": "family-01",
+  "args": [
+    "/workspace/shared/flt-n25-full-picard-degree/FullPicardDegreeFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 28.408869518003485,
+  "peak_child_rss_kib": 1765888,
+  "source_sha256": "c2f8ae0bf5230a2747fa60ceb2eb66d5a9b69329a6963be20e971233cd971749"
+}
