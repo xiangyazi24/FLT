@@ -1,0 +1,17 @@
+'MazurProof.N25F_InfinityBoundaryCenters.infinityParameter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityBoundaryCenters.infinityParameter_ne_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryCenters.boundaryCenter' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityBoundaryCenters.boundaryCenter_isPrime' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryCenters.infinityParameter_mem_boundaryCenter' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryCenters.boundaryCenter_ne_bot' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryCenters.boundaryCenter_isMaximal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

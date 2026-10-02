@@ -1,0 +1,62 @@
+{
+  "source_commit": "0045a84739791e85efbb83a2c3c9336a99016dde",
+  "accepted_files": [
+    {
+      "file": "N25F_InfinityBoundaryMaps.lean",
+      "sha": "e1e28e58504e8ce511aa2e9fc90ff95866ec4657",
+      "equal": true
+    },
+    {
+      "file": "N25F_LocalValuationRigidity.lean",
+      "sha": "0651f4e74b491a2bae28b8659e0a62adfe11be08",
+      "equal": true
+    }
+  ],
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "family_check": {
+    "name": "family-04",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-centers/InfinityBoundaryCentersCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 25.973162915001012,
+    "peak_child_rss_kib": 2629352,
+    "source_sha256": "e22a91e07a9f8d1e6fd910ed250e204ab8a36113d2d170b2a8f94d0a391ee40a"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "production_public_declarations": [
+    "infinityParameter",
+    "infinityParameter_ne_zero",
+    "xInfinityPrime",
+    "xInfinityPrime_isPrime",
+    "infinityParameter_mem_xInfinityPrime",
+    "xInfinityPrime_ne_bot",
+    "xInfinityPrime_isMaximal",
+    "yzInfinityPrime",
+    "yzInfinityPrime_isPrime",
+    "infinityParameter_mem_yzInfinityPrime",
+    "yzInfinityPrime_ne_bot",
+    "yzInfinityPrime_isMaximal",
+    "zInfinityPrime",
+    "zInfinityPrime_isPrime",
+    "infinityParameter_mem_zInfinityPrime",
+    "zInfinityPrime_ne_bot",
+    "zInfinityPrime_isMaximal"
+  ],
+  "family_assumptions": [
+    "Existing W Dedekind/domain and base torsionfree structures",
+    "Boundary map into a local ring whose actual reciprocal-parameter image has nonzero order"
+  ],
+  "new_results_not_claimed": [
+    "center localization identification",
+    "full base-prime contraction equality",
+    "center distinctness",
+    "fiber completeness",
+    "general product formula"
+  ]
+}

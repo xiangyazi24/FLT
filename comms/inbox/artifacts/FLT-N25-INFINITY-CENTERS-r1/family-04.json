@@ -1,0 +1,10 @@
+{
+  "name": "family-04",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-centers/InfinityBoundaryCentersCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 25.973162915001012,
+  "peak_child_rss_kib": 2629352,
+  "source_sha256": "e22a91e07a9f8d1e6fd910ed250e204ab8a36113d2d170b2a8f94d0a391ee40a"
+}
