@@ -1,0 +1,4 @@
+'N25LocalDedekindCheck.local_dedekind_of_away_equiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+@curve_point_local_isDedekind : ∀ [IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+  (f : YChartRing →ₐ[ZMod 2] ZMod 2), f yZ = 1 → IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))
+'N25ActualCurvePointCheck.curve_point_local_isDedekind' depends on axioms: [propext, Classical.choice, Quot.sound]

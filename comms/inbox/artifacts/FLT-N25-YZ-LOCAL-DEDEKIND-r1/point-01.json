@@ -1,0 +1,10 @@
+{
+  "name": "point-01",
+  "args": [
+    "/workspace/shared/flt-n25-yz-local-dedekind/CurvePointLocalDedekindCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 12.381593698999495,
+  "peak_child_rss_kib": 2595828,
+  "source_sha256": "dc4379fbf52827fa0d61f0dd9f63b4394fa9fcfb4ca56b49e0887fa6967a48a8"
+}

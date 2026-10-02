@@ -1,0 +1,90 @@
+{
+  "accepted_source_commit": "e1c6b91316a978b35eb4c11655fdf820fd4ef7a0",
+  "dispatch_commit": "506a3c3991b8e1c8b88d9805474c4cc1b8468874",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 21489,
+      "sha256": "0bf1fc1ef69ffa99fb6a6243e1b4f456124279d6a50b0fe6081bef7dca7793e7"
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalDedekind.lean",
+      "encoding": "utf-8",
+      "bytes": 3504,
+      "sha256": "28dd5d67ab14204f2a0b200b784fd3dd3842be69a9755f19377077e7c4c58ccd"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/ActualYZLocalDedekindCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 247,
+      "sha256": "7ef8ce9088d1cd5baaa1776b65f0969afa98b0d46c6360e142fd3854c5e44323"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/CurvePointLocalDedekindCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 3680,
+      "sha256": "dc4379fbf52827fa0d61f0dd9f63b4394fa9fcfb4ca56b49e0887fa6967a48a8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/GenericLocalDedekindCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 2590,
+      "sha256": "87e6b1010ecd6c7106d6f21090ecda2a1c51a71d2ba8d8d4a8ec506c2589b7df"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/accepted-overlap-byte-check.json",
+      "encoding": "utf-8",
+      "bytes": 270,
+      "sha256": "5602b01d21172cfdf6b2265b64992939129f356e24c4554eb42ca89816730c38"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 295,
+      "sha256": "88813e6fa685f87e328255d8f993aacff8dc75a1ba0623fa5981969031792d7f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 112,
+      "sha256": "433fd7f83469e4eb8d8cf358fc14ebc4fe4c1b17d8bc324fbfef4f1557c0450c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/lead-receipt-r12.md",
+      "encoding": "utf-8",
+      "bytes": 693,
+      "sha256": "52560a368639030c1743f26ebfc71e6aed9a4e9416868f996051e1f3b7b221a9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/make_point_check.py",
+      "encoding": "utf-8",
+      "bytes": 1668,
+      "sha256": "a2795774f6dfcb0242fcf80814d47f4888291d1f32273726e126edd6f5384b59"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/point-01.json",
+      "encoding": "utf-8",
+      "bytes": 297,
+      "sha256": "6b4b9833d9526f20b10758a3e3e17021daa972f51ef15772c0e336ef3efbd04f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/point-01.log",
+      "encoding": "utf-8",
+      "bytes": 438,
+      "sha256": "b714005febd467fd4a1d5ad98e46b9c8ee58a88836638d298d40d238ffd549bb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DEDEKIND-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 879,
+      "sha256": "a04ad81f4ff933fe70b838953b3af0b414151c9010e948b3750e32945846d2e1"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r12.md",
+      "encoding": "utf-8",
+      "bytes": 3518,
+      "sha256": "32cb28997a89cf07c831b929b1d4d72e0b589d8eede6f80b5e7db2c7b3bb7c87"
+    }
+  ]
+}

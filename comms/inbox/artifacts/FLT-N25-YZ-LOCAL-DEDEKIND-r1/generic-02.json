@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-yz-local-dedekind/GenericLocalDedekindCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 21.27465955400112,
+  "peak_child_rss_kib": 2602264,
+  "source_sha256": "87e6b1010ecd6c7106d6f21090ecda2a1c51a71d2ba8d8d4a8ec506c2589b7df"
+}
