@@ -1,0 +1,14 @@
+{
+  "name": "emit-01",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-xqz-order",
+    "-o",
+    "/workspace/shared/flt-n25-xqz-order/XBoundaryZOrderCheck.olean",
+    "/workspace/shared/flt-n25-xqz-order/XBoundaryZOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 41.88546361200133,
+  "peak_child_rss_kib": 2932912,
+  "source_sha256": "6598f8642ea6a821ec664776b52df9d327ca7ad505f2eafc8acd4644fb7aede7"
+}

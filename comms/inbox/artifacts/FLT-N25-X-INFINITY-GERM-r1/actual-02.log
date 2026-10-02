@@ -1,0 +1,10 @@
+@xInverseZGerm_ord_eq_one : ∀ [inst : IsDedekindDomain W] (hord : Ring.ord XLocalRing xWGerm = 3),
+  (algebraMap W K) qz ≠ 0 → Ring.ord XLocalRing (xInverseZGerm hord) = 1
+'MazurProof.N25F_XInfinityGerm.xZGerm_dvd_xWGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XInfinityGerm.xInverseZGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XInfinityGerm.xZGerm_mul_xInverseZGerm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XInfinityGerm.xLocalToFraction_xInverseZGerm' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_XInfinityGerm.xInverseZGerm_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_XInfinityGerm.xInverseZGerm_ord_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound]

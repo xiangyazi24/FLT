@@ -1,0 +1,8 @@
+import FLT.Assumptions.MazurProof.N25F_XInfinityGerm
+
+#print axioms MazurProof.N25F_XInfinityGerm.xZGerm_dvd_xWGerm
+#print axioms MazurProof.N25F_XInfinityGerm.xInverseZGerm
+#print axioms MazurProof.N25F_XInfinityGerm.xZGerm_mul_xInverseZGerm
+#print axioms MazurProof.N25F_XInfinityGerm.xLocalToFraction_xInverseZGerm
+#print axioms MazurProof.N25F_XInfinityGerm.xInverseZGerm_ne_zero
+#print axioms MazurProof.N25F_XInfinityGerm.xInverseZGerm_ord_eq_one

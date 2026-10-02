@@ -1,0 +1,33 @@
+{
+  "accepted_source_commit": "8a8daa4e41c0d852b4b4a8a34aaed9c530012ea3",
+  "production_full_imports": "NOT RUN",
+  "final_check": {
+    "name": "actual-02",
+    "args": [
+      "/workspace/shared/flt-n25-x-infinity-germ/XInfinityGermCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 22.615987064000365,
+    "peak_child_rss_kib": 2921820,
+    "source_sha256": "d447d3dc46490038a4b6baec7c9a9bbbe49cdf1c93a8f0de40ed661bab8feb4e"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "fixture_imports": [
+    {
+      "path": "/workspace/shared/flt-n25-xqz-order/XBoundaryZOrderCheck.lean",
+      "source_sha256": "6598f8642ea6a821ec664776b52df9d327ca7ad505f2eafc8acd4644fb7aede7",
+      "olean_sha256": "9bfe4738a7cfce43d8cbcf9577e833549fd27ceec4e8b06499882516300d6be2"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean",
+      "source_sha256": "f57fe127aafc8f04721675974801c323eba429977c69e55f8547d944ff20355b",
+      "olean_sha256": "719dfca2f146f2e12053b52784a786bbc395da32369bf2da73aa36adaee22e9e"
+    }
+  ],
+  "accepted_principal_blob": "27befd6841c09076f5581c9f64bc87e9b8d09343",
+  "accepted_principal_delta": "only full qualification of all sixteen bare W tokens"
+}

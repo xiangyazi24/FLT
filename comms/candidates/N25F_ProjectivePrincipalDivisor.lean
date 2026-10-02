@@ -19,7 +19,7 @@ open N25F_ProjectiveDivisorDegree N25F_PolynomialBoundaryOrders
 open N25F_XBoundaryOrder N25F_YZBoundaryOrder N25F_ZBoundaryOrder
 open N25F_ZChartFractionMap
 
-local notation "K" => FractionRing W
+local notation "K" => FractionRing N25F_NonBoundaryPrincipalDivisor.W
 
 /-- The three genuine local orders, in the existing X,YZ,Z coefficient order. -/
 def boundaryPrincipalOrders : Additive Kˣ →+ BoundaryCoefficients25Two :=
@@ -54,15 +54,15 @@ theorem projectivePrincipalDivisor_degree (f : Additive Kˣ) :
 /-- The fixed normalization coefficient map is evaluation at the actual
 common-field coordinate qz, not at a renamed or independent variable. -/
 theorem basePolynomial_inFunctionField (p : Polynomial (ZMod 2)) :
-    algebraMap W K (algebraMap (Polynomial (ZMod 2)) W p) =
-      p.aeval (algebraMap W K qz) := by
-  have h : (algebraMap W K).comp (algebraMap (Polynomial (ZMod 2)) W) =
-      (Polynomial.aeval (algebraMap W K qz)).toRingHom := by
+    algebraMap N25F_NonBoundaryPrincipalDivisor.W K (algebraMap (Polynomial (ZMod 2)) N25F_NonBoundaryPrincipalDivisor.W p) =
+      p.aeval (algebraMap N25F_NonBoundaryPrincipalDivisor.W K qz) := by
+  have h : (algebraMap N25F_NonBoundaryPrincipalDivisor.W K).comp (algebraMap (Polynomial (ZMod 2)) N25F_NonBoundaryPrincipalDivisor.W) =
+      (Polynomial.aeval (algebraMap N25F_NonBoundaryPrincipalDivisor.W K qz)).toRingHom := by
     apply Polynomial.ringHom_ext'
     · exact RingHom.ext_zmod _ _
-    · change algebraMap W K
-        (algebraMap (Polynomial (ZMod 2)) W Polynomial.X) =
-        (Polynomial.aeval (algebraMap W K qz)) Polynomial.X
+    · change algebraMap N25F_NonBoundaryPrincipalDivisor.W K
+        (algebraMap (Polynomial (ZMod 2)) N25F_NonBoundaryPrincipalDivisor.W Polynomial.X) =
+        (Polynomial.aeval (algebraMap N25F_NonBoundaryPrincipalDivisor.W K qz)) Polynomial.X
       rw [Polynomial.aeval_X, algebraMap_Rz_X]
   exact congrArg (fun h : Polynomial (ZMod 2) →+* K => h p) h
 
@@ -71,9 +71,9 @@ base polynomial. The same function and actual coefficient map are retained. -/
 theorem projectivePrincipalDivisor_degree_base_polynomial
     (p : Polynomial (ZMod 2)) (hp : p ≠ 0) (f : Additive Kˣ)
     (hf : (f.toMul : K) =
-      algebraMap W K (algebraMap (Polynomial (ZMod 2)) W p)) :
+      algebraMap N25F_NonBoundaryPrincipalDivisor.W K (algebraMap (Polynomial (ZMod 2)) N25F_NonBoundaryPrincipalDivisor.W p)) :
     fullClosedPointGrading25Two.divisorDegree (projectivePrincipalDivisor f) = 0 := by
-  have heval : (f.toMul : K) = p.aeval (algebraMap W K qz) :=
+  have heval : (f.toMul : K) = p.aeval (algebraMap N25F_NonBoundaryPrincipalDivisor.W K qz) :=
     hf.trans (basePolynomial_inFunctionField p)
   have hx : xBoundaryOrder f = -(1 * p.natDegree : ℤ) := by
     change WithZero.log (xLocalFractionOrder (f.toMul : K)) = _
@@ -84,10 +84,10 @@ theorem projectivePrincipalDivisor_degree_base_polynomial
   have hz : zBoundaryOrder f = -(2 * p.natDegree : ℤ) := by
     change WithZero.log (zLocalFractionOrder (f.toMul : K)) = _
     rw [heval, zLocalFractionOrder_aeval_qz p hp, WithZero.log_exp]
-  have hmap : algebraMap (Polynomial (ZMod 2)) W p ≠ 0 :=
-    (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (Polynomial (ZMod 2)) W)).mpr hp
+  have hmap : algebraMap (Polynomial (ZMod 2)) N25F_NonBoundaryPrincipalDivisor.W p ≠ 0 :=
+    (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (Polynomial (ZMod 2)) N25F_NonBoundaryPrincipalDivisor.W)).mpr hp
   have haff := wChart_principal_degree_eq_quotient_finrank
-    (algebraMap (Polynomial (ZMod 2)) W p) hmap f hf
+    (algebraMap (Polynomial (ZMod 2)) N25F_NonBoundaryPrincipalDivisor.W p) hmap f hf
   rw [wChart_quotient_finrank_base_polynomial p hp] at haff
   rw [projectivePrincipalDivisor_degree, hx, hyz, hz, haff]
   push_cast

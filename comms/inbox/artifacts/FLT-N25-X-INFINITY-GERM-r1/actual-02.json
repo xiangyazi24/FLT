@@ -1,0 +1,10 @@
+{
+  "name": "actual-02",
+  "args": [
+    "/workspace/shared/flt-n25-x-infinity-germ/XInfinityGermCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 22.615987064000365,
+  "peak_child_rss_kib": 2921820,
+  "source_sha256": "d447d3dc46490038a4b6baec7c9a9bbbe49cdf1c93a8f0de40ed661bab8feb4e"
+}

@@ -1,0 +1,95 @@
+{
+  "source_commit": "8a8daa4e41c0d852b4b4a8a34aaed9c530012ea3",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 24526,
+      "sha256": "18ad113c620759619e1bbaf02d8f194266d9ad3128bb3a04a3152b806dbab630"
+    },
+    {
+      "path": "comms/candidates/N25F_ProjectivePrincipalDivisor.lean",
+      "encoding": "utf-8",
+      "bytes": 5560,
+      "sha256": "4828df2b381740ca7a8e03bccc3568d74cf2d6b8d607c3712b72b470df5d18a6"
+    },
+    {
+      "path": "comms/candidates/N25F_XInfinityGerm.lean",
+      "encoding": "utf-8",
+      "bytes": 2706,
+      "sha256": "9570e8962e38e7816a08d78468376c17690c4f817126b5f3c4bb719903a6b7ac"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/ActualXInfinityGermCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 453,
+      "sha256": "0db3cc505cfb400ac583d1cbb91469d99799e1461fdac04d96a8e04f2846b175"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/XInfinityGermCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 3271,
+      "sha256": "d447d3dc46490038a4b6baec7c9a9bbbe49cdf1c93a8f0de40ed661bab8feb4e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/accepted-principal-delta.diff",
+      "encoding": "utf-8",
+      "bytes": 3625,
+      "sha256": "edd6dc834cc2cd4aeb026e399467238df1a5ff05c7aa1797504ef48040b8067c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/actual-02.json",
+      "encoding": "utf-8",
+      "bytes": 286,
+      "sha256": "b4e426716879e7d0e7818dedce520b9c03dc5378ccd584e0c79c6b129b630604"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/actual-02.log",
+      "encoding": "utf-8",
+      "bytes": 861,
+      "sha256": "ead7223d89df8fcce6f5f96a789e1a7bb04fac9fc0734eb8cdab90f9f441dbf7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/inputs/emit-01.json",
+      "encoding": "utf-8",
+      "bytes": 412,
+      "sha256": "a3564067b56cf6ec1d296d6b02931a5e9ec71acdf6bff15fc4932c8d869a3abb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/inputs/emit-01.log",
+      "encoding": "utf-8",
+      "bytes": 5546,
+      "sha256": "992da538138f4c90dead5123a7f2fe38323a4af3001249ab19db3e16836d3a0a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 2318,
+      "sha256": "92de95b86adbca8361613e4709a9b0209d964d64ada3ab4b9e77cde0b243fb7f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/receipt_r19.md",
+      "encoding": "utf-8",
+      "bytes": 1012,
+      "sha256": "25fd875f10345d32724e8b45b0b64f956d511c157945f101e92cf237a0da7831"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 877,
+      "sha256": "82e2bb86e4891164cfc588f28f1eb3da71361b7387e67ef236adfee1dc9aa45c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-X-INFINITY-GERM-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1254,
+      "sha256": "122b6a3403ce9aefd2149a6f4d86e0b2b943c1eff0e34f4e9045528e31643992"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-PROJECTIVE-PRINCIPAL-DIVISOR-r19.md",
+      "encoding": "utf-8",
+      "bytes": 4619,
+      "sha256": "f19460d12ecfc2216c9342b991caa7314127b0a89898b02a0b10fe38cb4da60c"
+    }
+  ]
+}
