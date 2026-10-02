@@ -1,0 +1,78 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "d7822bff78034fa127f596ef37d18031ece6bd47",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 34569,
+      "sha256": "9213617352261f75fbe52f3e8599b4d146ef6069be272766699cfe80224e5ebd"
+    },
+    {
+      "path": "comms/candidates/N25F_FullPicardBasePoint.lean",
+      "encoding": "utf-8",
+      "bytes": 2249,
+      "sha256": "6d1eae89bb2d1c5ab8249e2bff2d7e5b340876ba0b9d76f32e32f2c371b79aeb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/ActualFullPicardBasePointCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 405,
+      "sha256": "8a7d52cbffad8d139388028feb3c9e1e59cd83e21ec86bde8f3c1822c1e2dc7a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/FullPicardBasePointFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 6402,
+      "sha256": "8d3d461bf5f0280c6cf25d8e476d2ea64bce6c4ff58d3219e9166f9e490b1dcf"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/effective-source.lean",
+      "encoding": "utf-8",
+      "bytes": 8187,
+      "sha256": "e978466206274f2441e6a26a27489cfbe6378bcdddf5deb6a0ba53cff1bc1440"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/family-01.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "1ca61be38c0e0f49ef733e5f563fbe69aefbb20e3b31f4cc82166b2c677456ed"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/family-01.log",
+      "encoding": "utf-8",
+      "bytes": 541,
+      "sha256": "b311744b221d391fca5aaf71657409f118e707cd96b5d8c29c98aceb54611d67"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/make_family.py",
+      "encoding": "utf-8",
+      "bytes": 3939,
+      "sha256": "94ccc294494679e6efbf05fb5d2eb66cf1aa5b9379cfede92055ff2d0e761ad6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/picard-source.lean",
+      "encoding": "utf-8",
+      "bytes": 8088,
+      "sha256": "a0000a5b3ee6b87bd3393129f4d5f0240f261de25063826821f07cf1e16650b5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 878,
+      "sha256": "717348b42af571a05a903de6bc3c75d92bb970e090fe9fa86e61fabf284fafd9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FULL-PICARD-BASE-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 920,
+      "sha256": "f068cfbd614987e48a78da9be991e3674da68ddf289a2ef3b6b09fa3ce3c664e"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-FULL-PICARD-BASE-r1.md",
+      "encoding": "utf-8",
+      "bytes": 2898,
+      "sha256": "18ed79158aba34a32f20047e47383c967de791bf73a024fbd111acc3880c96df"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "d7822bff78034fa127f596ef37d18031ece6bd47",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "fullProjectiveBaseClass25Two",
+    "fullProjectiveBaseClass25Two_degree",
+    "fullProjectiveClassDegree25Two_surjective",
+    "fullProjectivePicDegreeEquivZero25Two"
+  ],
+  "production_additional_hypotheses": [],
+  "family": {
+    "name": "family-01",
+    "args": [
+      "/workspace/shared/flt-n25-full-picard-base/FullPicardBasePointFamilyCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 5.491024679002294,
+    "peak_child_rss_kib": 1793440,
+    "source_sha256": "8d3d461bf5f0280c6cf25d8e476d2ea64bce6c4ff58d3219e9166f9e490b1dcf"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "grading": "fullClosedPointGrading25Two",
+  "chosen_atom": "fullBoundaryAtomOfTag .X"
+}

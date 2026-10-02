@@ -1,0 +1,12 @@
+'MazurProof.N25F_FullPicardBasePoint.fullProjectiveBaseClass25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardBasePoint.fullProjectiveBaseClass25Two_degree' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardBasePoint.fullProjectiveClassDegree25Two_surjective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardBasePoint.fullProjectivePicDegreeEquivZero25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,6 @@
+import FLT.Assumptions.MazurProof.N25F_FullPicardBasePoint
+
+#print axioms MazurProof.N25F_FullPicardBasePoint.fullProjectiveBaseClass25Two
+#print axioms MazurProof.N25F_FullPicardBasePoint.fullProjectiveBaseClass25Two_degree
+#print axioms MazurProof.N25F_FullPicardBasePoint.fullProjectiveClassDegree25Two_surjective
+#print axioms MazurProof.N25F_FullPicardBasePoint.fullProjectivePicDegreeEquivZero25Two
