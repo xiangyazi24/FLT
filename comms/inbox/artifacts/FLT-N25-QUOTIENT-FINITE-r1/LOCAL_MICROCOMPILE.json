@@ -1,0 +1,87 @@
+{
+  "verified_at_utc": "2026-10-02T06:25:12.597613+00:00",
+  "scope": "Bounded cloud Lean environment and Mathlib-only N25 generic quotient-finiteness verification",
+  "toolchain": "Lean (version 4.31.0-rc2, x86_64-unknown-linux-gnu, commit 5e44d5f905127c78a2da7a015fe7a47840c95eb1, Release)",
+  "flt_source_reference": "22f88d43187caf0e57affcc6ded92cdf9b49714a",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "mathlib_dependency_source_commits_verified": 8,
+  "selective_cached_modules": 2004,
+  "bounds": {
+    "cpu_affinity_count": 1,
+    "lean_threads": 1,
+    "lean_memory_mib": 3072,
+    "compile_timeout_seconds": 60
+  },
+  "archive_sha256": "acf05cbac59691c08194c4aaa0d619e3bd6dde7feebd7287884d12841d17847a",
+  "checks": [
+    {
+      "name": "MathlibSmoke",
+      "command": [
+        "/workspace/shared/lean-feedback/check-lean",
+        "-R",
+        "/workspace/shared/lean-feedback/checks",
+        "-o",
+        "/workspace/shared/lean-feedback/checks/MathlibSmoke.olean",
+        "/workspace/shared/lean-feedback/checks/MathlibSmoke.lean"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.459,
+      "source_sha256": "926a1169cb63a4202f0b63d8f5c78a461ed9867ebc3b491f80ec027c0d311b67",
+      "olean_exists": true,
+      "max_rss_kib": 2607428
+    },
+    {
+      "name": "GenericFiniteQuotient",
+      "command": [
+        "/workspace/shared/lean-feedback/check-lean",
+        "-R",
+        "/workspace/shared/lean-feedback/checks",
+        "-o",
+        "/workspace/shared/lean-feedback/checks/GenericFiniteQuotient.olean",
+        "/workspace/shared/lean-feedback/checks/GenericFiniteQuotient.lean"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.779,
+      "source_sha256": "0d2f30725331edc3649feb35597e567bd6e944e1cdbb6398798eefa965f82aca",
+      "olean_exists": true,
+      "max_rss_kib": 2615672
+    }
+  ],
+  "negative_test": {
+    "name": "expected_failure",
+    "command": [
+      "/workspace/shared/lean-feedback/lean-4.31.0-rc2-linux/bin/lean",
+      "-j",
+      "1",
+      "-M",
+      "3072",
+      "/workspace/shared/lean-feedback/checks/ExpectedFailure.lean"
+    ],
+    "exit_code": 1,
+    "elapsed_seconds": 0.732,
+    "feedback_working": true,
+    "max_rss_kib": 744352
+  },
+  "generic_original_source": {
+    "path": "/workspace/shared/flt-n25-quotient-finite/GenericFiniteQuotient.lean",
+    "sha256": "461235f570f0abec1b7cdf0795b3a91e530aa87c5c6152a79b49eb66028bf16f"
+  },
+  "generic_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "principal_corollary_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "not_verified": [
+    "Actual FLT W-chart specialization",
+    "Full FLT source closure",
+    "Full Mathlib build",
+    "checkdecls dependency",
+    "Downstream project acceptance"
+  ],
+  "runner": "/workspace/shared/lean-feedback/check-lean"
+}

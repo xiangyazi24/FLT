@@ -1,0 +1,2 @@
+'finite_quotient_of_ne_bot' depends on axioms: [propext, Classical.choice, Quot.sound]
+'finite_principal_quotient_checked' depends on axioms: [propext, Classical.choice, Quot.sound]

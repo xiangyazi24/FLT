@@ -1,0 +1,87 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "source_commit": "22f88d43187caf0e57affcc6ded92cdf9b49714a",
+  "dispatch_commit": "fd37948be1f5ac54edf68841b76a662c948d9c61",
+  "scope": "Actual W finite-quotient candidate; generic exact-pin local microcompile PASS; actual W specialization uncompiled",
+  "lean_toolchain": "leanprover/lean4:v4.31.0-rc2",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "files": [
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 4312,
+      "sha256": "2ad098f78abf51589366777ed07ceeaddc6692180a4c3840710ba2c4f4afdb8e",
+      "git_blob": "4869522b0da6ef85c3cc8c7a2b34cfe4e8dc3e05"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/GenericFiniteQuotient.lean",
+      "encoding": "utf-8",
+      "bytes": 1189,
+      "sha256": "0d2f30725331edc3649feb35597e567bd6e944e1cdbb6398798eefa965f82aca",
+      "git_blob": "7bbe00bba36160ac28476428ace88346fe695e34"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/GenericFiniteQuotient.log",
+      "encoding": "utf-8",
+      "bytes": 182,
+      "sha256": "9460ce6751b17956c749f0005756ef3c678a637be60990d5da0a1c2c5dbd3976",
+      "git_blob": "13f466fa2c035f450e2d6707546eb372eee3767a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/SOURCE_API_EVIDENCE.md",
+      "encoding": "utf-8",
+      "bytes": 5500,
+      "sha256": "885057ab5011b85a2cd3dce638a07fd36a99a373da2cc5d0978ae3e4ec6fbd06",
+      "git_blob": "f41ed57d041ec7e404b971af1308d07a64ccdaa0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/INDEPENDENT_REVIEW.md",
+      "encoding": "utf-8",
+      "bytes": 5466,
+      "sha256": "2e1572684ee943d8d1991bce3cd20d86f4b170f3c9772f2409c919e034582ba9",
+      "git_blob": "1a681eab4b19316c0cb6668cb29256c25ab37203"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/LEAD_VALIDATION.lean",
+      "encoding": "utf-8",
+      "bytes": 319,
+      "sha256": "42c01356a476b0860ff540d342e3c66fe7378361a439285ff1c866cea79cda4e",
+      "git_blob": "5d8a892ecdc08197c903798ef6e04dc9f9a4fa7b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/LOCAL_MICROCOMPILE.json",
+      "encoding": "utf-8",
+      "bytes": 2867,
+      "sha256": "1c21f6e5153a4720a148273b90a1ce5c963fe6ac69b76f1090f969da8d3d122c",
+      "git_blob": "6d3b08874300fa47a4ef795f923c3877bc239203"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-QUOTIENT-FINITE-r1/check-lean.sh",
+      "encoding": "utf-8",
+      "bytes": 470,
+      "sha256": "a5bcc83877352d1430a389a32e63acb8eec503beb905e94a3024ff2e97337ce5",
+      "git_blob": "e875e0800894ac036a8f2e9a13542a0d16270dd0"
+    },
+    {
+      "path": "comms/candidates/N25F_WChartQuotientFinite.lean",
+      "encoding": "utf-8",
+      "bytes": 851,
+      "sha256": "b93b4090ed99594fe85811c37aaec0f751dec5389fec9bd0cb4274d0c3dd6cd9",
+      "git_blob": "1ac81106e1f048fb669e8fddfc5b666b5a54bd11"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N13-ENDPOINT-r6-candidate.md",
+      "encoding": "utf-8",
+      "bytes": 2500,
+      "sha256": "1ab51f4fd67e74f8b41b38169b9f8c90246bf016e6c80c6371d3428a919a2421",
+      "git_blob": "1cc2ee2c4f28bb944d4c50bfd3cbcabfd8224f9d"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 11522,
+      "sha256": "9b46c65144f521c0ad52d732047bfb5ea03db8656565f6cd9ba0975338b8b97b",
+      "git_blob": "d8105e7749e51ee13e320c5f4cbca1132569d076"
+    }
+  ]
+}
