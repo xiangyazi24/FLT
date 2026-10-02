@@ -1,0 +1,10 @@
+/workspace/shared/flt-n25-yz-zunit/GenericYZUnitCheck.lean:11:26: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  (RingHom.ker f).IsPrime
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-yz-zunit/GenericYZUnitCheck.lean:13:5: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  (RingHom.ker f).IsPrime
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-yz-zunit/GenericYZUnitCheck.lean:14:2: error: No goals to be solved
+'N25YZUnitCheck.evaluation_one_germ_isUnit' depends on axioms: [propext, sorryAx, Quot.sound]

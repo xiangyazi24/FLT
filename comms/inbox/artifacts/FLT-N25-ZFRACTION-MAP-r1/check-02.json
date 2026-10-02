@@ -1,0 +1,10 @@
+{
+  "name": "check-02",
+  "args": [
+    "/workspace/shared/flt-n25-zfraction-map/ZChartFractionMapCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 13.977514534000875,
+  "peak_child_rss_kib": 2433636,
+  "source_sha256": "5ff97c11cb9890c52735b126b59e92481e749b0afe30919a8f9f2178e5dcfb2b"
+}

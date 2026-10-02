@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-yz-zunit/GenericYZUnitCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 2.3117142230003083,
+  "peak_child_rss_kib": 2127632,
+  "source_sha256": "692b907eeca55cd7312f6526d16a0dbf100dd1385159dba8b2c9342f71cef2f4"
+}

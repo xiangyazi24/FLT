@@ -1,0 +1,179 @@
+{
+  "source_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 18380,
+      "sha256": "f39cc776ed9d3e2b88fd2833c969f2064ab9d2839214a6dad505504e05861bdc"
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalZUnit.lean",
+      "encoding": "utf-8",
+      "bytes": 1018,
+      "sha256": "25aaa6a9a1e13f3798add495dc3256d87adf94e85ea4b07b2c6550b8ed61071f"
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartFractionMap.lean",
+      "encoding": "utf-8",
+      "bytes": 8242,
+      "sha256": "811973b2ecc662a70eebe337f445910be9707a8598a4503edefddda40be2d784"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/ActualYZLocalZUnitCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 206,
+      "sha256": "db2aa50d736ac71590c64df4150dfde1ffdd3c5e6889b5254365777a3208770d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/GenericYZUnitCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 726,
+      "sha256": "692b907eeca55cd7312f6526d16a0dbf100dd1385159dba8b2c9342f71cef2f4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 1439,
+      "sha256": "fc42a86ae7fe523e8238d0f7f481b2efe3f3a79c052b5399fdc172144c0f1967"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 280,
+      "sha256": "9cb0b7e87221d78a258438c0b377e7173ff322b46e88ab3bbaba6262efa9f8e0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 775,
+      "sha256": "d0dacf9b245a7196b56318ba4211f93696811e0c7cbc13c395550c00dd74d1e7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 280,
+      "sha256": "f628d740e10278321d897dcf237d65abd43b897b04306c9e94c5300fbfe03741"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 103,
+      "sha256": "6ec59c526d67c482a90ebbcf1f185446a300579ca3a76709b932f2cee6553d75"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 870,
+      "sha256": "f3d0f66a2b7f86bab22c095c755a0e684c3218be8a5c042e6586c2dea97e0ccf"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/source-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 648,
+      "sha256": "d2363de7892a9ea781d4fda94867c3d41e55eb85b464a71be7f01c7529f3f380"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-ZUNIT-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 811,
+      "sha256": "a34594124826802d30e12179790c6bad5b06088a2cc91ef241b437f4c2b58d40"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/ActualZChartFractionMapCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1132,
+      "sha256": "c964a7c274098ba54002b827e3db5b75dc80c3e9935a5fa97f9fc3cf8c13ffe9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 4895,
+      "sha256": "10b7ce3cc456c9e422fe62ff3090bf49af66f22403ced33e3d4a78b5387bdf34"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/ZChartFractionMapCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 32172,
+      "sha256": "6aecc9601b3be01dfdc253411a36b4c4b96ce7bf9766c1724ae758961a565dbe"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/check-01.json",
+      "encoding": "utf-8",
+      "bytes": 287,
+      "sha256": "9599a98bdf024009a2243381370f0536806dcb0c90a316fc2c0dc8bc2392e794"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/check-01.log",
+      "encoding": "utf-8",
+      "bytes": 6741,
+      "sha256": "ccf9c60b683a9554c067151ad778d18b5c6792fd10bd70f856c5a1faae2258d4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/check-02.json",
+      "encoding": "utf-8",
+      "bytes": 287,
+      "sha256": "13c53571d0f6f35afe8567da70fccca9bce20296b35e3799c0b8795afb55ec24"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/check-02.log",
+      "encoding": "utf-8",
+      "bytes": 6884,
+      "sha256": "7102e7f4c4091e8efe90cec60e564c0029d85e9619f2d9d6a1f52243704cef41"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/check-03.json",
+      "encoding": "utf-8",
+      "bytes": 287,
+      "sha256": "c8eb9cd085063e2bdb241da98850b69270ba3780f35addc5aedc0f25bf332c8e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/check-03.log",
+      "encoding": "utf-8",
+      "bytes": 6188,
+      "sha256": "b9a77722ef26d8a6a5f833c701d891515b4f2e22b828db490e49a12c1cf4676d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/copied-declarations.json",
+      "encoding": "utf-8",
+      "bytes": 19824,
+      "sha256": "beab9e444335514bc7b074e37eaa1ca68c47ebffa16c12f18115a3d35de5402a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 6013,
+      "sha256": "46d02cfda26845bbf052fd29f5f91c7d042320fa114b74d93bbd2446c90e9da5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 875,
+      "sha256": "cbddeb42c74149607df3f3e9cd9e31c622a8d98cf5f16d8245059cdbb6d4e065"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/source-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 7286,
+      "sha256": "74ca21ccda16d0b9468428799e066e995b6fd70af134a209f328982b4e72346a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2023,
+      "sha256": "5599193f1592e460978aa88a06625b50f7d8d54712b8cb24a5017e336df3c7e7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-ZFRACTION-MAP-r1/verify_sources.py",
+      "encoding": "utf-8",
+      "bytes": 1563,
+      "sha256": "28b0a8382ec808d253d24778a2e7c04a0bb245c68d509393dff918f539bc8383"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r9-zfraction-map.md",
+      "encoding": "utf-8",
+      "bytes": 3939,
+      "sha256": "58128455e35912e7ea3fe31608b42c6e8595f2f13d2f3c0c99700cf456250ef3"
+    }
+  ]
+}

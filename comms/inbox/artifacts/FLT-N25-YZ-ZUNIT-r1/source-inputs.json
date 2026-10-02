@@ -1,0 +1,16 @@
+[
+  {
+    "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryYZChartArtin.lean",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "bytes": 8903,
+    "sha256": "dd0ce14161f5aa81c05ce4c756d93301c5ff1fd2c447f2fead47acaa80d8ec0d",
+    "git_blob_sha": "46943556f244982b39059b117fb5d49883bb5a85"
+  },
+  {
+    "path": "FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryYZLocal.lean",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "bytes": 7849,
+    "sha256": "600ad7f7e4083be4f82031627e441487a760b3153f06d4a5cd20712efec0031c",
+    "git_blob_sha": "d1dfc2e8b07b252e908a5b32af444df70fa238e9"
+  }
+]

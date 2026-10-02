@@ -1,0 +1,583 @@
+[
+  {
+    "file": "RationalPointsN25QuotientF2.lean",
+    "declaration": "Coordinates4",
+    "start_line": 29,
+    "end_line": 34,
+    "sha256": "e29d334f1093ee2ee381601576d01fb3141d878734ae8abc2457316a55a68a30"
+  },
+  {
+    "file": "RationalPointsN25QuotientSmoothF2.lean",
+    "declaration": "canonicalQuadric25CharTwo",
+    "start_line": 26,
+    "end_line": 28,
+    "sha256": "d6ce90e27d41379ccac128f24b6314ca6918c8ef406b56bfabb07d3b6f36b570"
+  },
+  {
+    "file": "RationalPointsN25QuotientSmoothF2.lean",
+    "declaration": "canonicalCubic25CharTwo",
+    "start_line": 31,
+    "end_line": 35,
+    "sha256": "630647782f6254ff29317f5763bbc00b86e04a7df552b9ae194d8d4f3227e139"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoConormal.lean",
+    "declaration": "BinaryHomogeneousRing",
+    "start_line": 29,
+    "end_line": 29,
+    "sha256": "3d514c75556252db65a8e791b55df2f36356ceeeae3e92157887264d456631d1"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoConormal.lean",
+    "declaration": "canonicalQuadricPolynomial25Two",
+    "start_line": 32,
+    "end_line": 37,
+    "sha256": "0a11e75f0170cca2285dffcebc74569e1528f258ecd93d6bb158d88685a7f299"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoConormal.lean",
+    "declaration": "canonicalCubicPolynomial25Two",
+    "start_line": 40,
+    "end_line": 47,
+    "sha256": "98998c470291e7c274211739441516027daad62d1d79b01d64b2ace23cc1be70"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoConormal.lean",
+    "declaration": "coordinates4ToFun",
+    "start_line": 195,
+    "end_line": 196,
+    "sha256": "d1404e565a2d13f1d2764a6f16e3fb5071e9f76f5ae75135aa98eb32409fad33"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoGradedKoszul.lean",
+    "declaration": "k",
+    "start_line": 20,
+    "end_line": 20,
+    "sha256": "bf25a8b2d36799f4ee534f6dea6856c54f8e02d89de7e88dcefb2fa5cfa20b4a"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoGradedKoszul.lean",
+    "declaration": "S",
+    "start_line": 23,
+    "end_line": 23,
+    "sha256": "7c78c8ae663a20eb446b152b3f257f013799996d17f22a4930a1748a07717528"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "OtherCoordinate",
+    "start_line": 26,
+    "end_line": 26,
+    "sha256": "c22a9f366b9f23b036e80da5b10ac3017bdbbed9f848cb4b10e9aac22fcff607"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "AffineChart",
+    "start_line": 35,
+    "end_line": 35,
+    "sha256": "0471ebe08d49c5f7a1c28123126ddbe85e27ee24fcfcc04e9d524e8ff3ba6bf0"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "dehomogenizedVariable",
+    "start_line": 192,
+    "end_line": 193,
+    "sha256": "d7d2916437c02f9cd91203386bb3d570d3376fe0d1182bcdb246d975fa23a3b6"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "ambientDehomogenize",
+    "start_line": 197,
+    "end_line": 198,
+    "sha256": "729b92314e82bfccf5a6d992b90711fdcab73acfc3e1b41be3333bcf3c08f927"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "ambientDehomogenize_X_self",
+    "start_line": 200,
+    "end_line": 203,
+    "sha256": "47044a4208d362297ff6cfd7067556f8632cc440c4686b56103232517092d2b1"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "chartAffineQuadric",
+    "start_line": 335,
+    "end_line": 336,
+    "sha256": "a151d458e44fcfa6cf2ca0225c38a0c75489eae9d69fe2a802d42afe23b8ed0c"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "chartAffineCubic",
+    "start_line": 340,
+    "end_line": 341,
+    "sha256": "33eb171ea9da2b56aef4bc85c411b9ba9c2f97a3ca05941b96605b354ddf106e"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "chartAffineRelation",
+    "start_line": 375,
+    "end_line": 376,
+    "sha256": "3b7a2657e4b50737f5cd3666403cc40b7d11fa26fd357b975fe1cd7a1499e0b6"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "chartAffineRelation_zero",
+    "start_line": 378,
+    "end_line": 380,
+    "sha256": "a5b3e0cb00327e5cf0e7477c4d113317938209aa3c4f63ca5485d58eec324c73"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "chartAffineRelation_one",
+    "start_line": 382,
+    "end_line": 384,
+    "sha256": "d05c6889e609233af28c998d86ceb4981533a446d898ddeb0d94b424d86fb42e"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "chartAffineRelation_range",
+    "start_line": 387,
+    "end_line": 397,
+    "sha256": "59ff2b3f6a61ae14de5d4973b6988ab7d77486ef2087e850ce0adc23809941c1"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "declaration": "chartAffineEquationIdeal",
+    "start_line": 400,
+    "end_line": 401,
+    "sha256": "dd8a3678b60be9c1ff6c098e2b39b2e467abcd82321826cb3f7adebdec2c3410"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "declaration": "mappedAmbientPoint",
+    "start_line": 115,
+    "end_line": 118,
+    "sha256": "d9f7f1d19ad0ce9bf69a50658c65b864a98935edb5a5c8742206a530a9c97d26"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "declaration": "coordinates4ToFun_mappedAmbientPoint",
+    "start_line": 122,
+    "end_line": 126,
+    "sha256": "7c653ddf5b35b4ff13d60ebd811dc0ec9e9f21b4d6675bcec55faa4382d4ff6f"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "declaration": "mapCoordinates4",
+    "start_line": 129,
+    "end_line": 131,
+    "sha256": "c3525b9fe8ce088a922da6a49cd658759d4db650276c66eb958add27ce720aa1"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "declaration": "map_canonicalQuadric_coordinates",
+    "start_line": 134,
+    "end_line": 140,
+    "sha256": "1a61016141bce8a2c0eaeeb1b19c6b937005858c387e387e2fdbabe97167849b"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "declaration": "map_canonicalCubic_coordinates",
+    "start_line": 143,
+    "end_line": 149,
+    "sha256": "ac5020caf75f8b311e01761558c6cf4ba27a1ea489b9871dcecf9ae8e9e34406"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "declaration": "map_canonicalQuadric",
+    "start_line": 252,
+    "end_line": 257,
+    "sha256": "75776c8d48b67e23877b7c3f14862f3adfcee73c0f8250ace9f78b0ac5586674"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "declaration": "map_canonicalCubic",
+    "start_line": 261,
+    "end_line": 266,
+    "sha256": "f9764f6470b4415c48bf53b86de279cde9d9d3f4052f2084c96f8ddc24851ca9"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "ChartQuotient",
+    "start_line": 35,
+    "end_line": 36,
+    "sha256": "0027697668fa7727d6982cdad4eda9da650e1cc4675252c6142e5add3c6f2cf1"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartMap",
+    "start_line": 40,
+    "end_line": 42,
+    "sha256": "2ae2d35803d939ea4f415cb90e1d56cd3eb6e1bb7434dcbd024cfeb8f814a18a"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartQuotient_relation_zero",
+    "start_line": 169,
+    "end_line": 176,
+    "sha256": "c4458908e326678a1edf4f1992be3919148f73bbcf1ba6fe253e770c1528f860"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartMap_quadric_zero",
+    "start_line": 180,
+    "end_line": 184,
+    "sha256": "024e469053b67ce80f2f857bbb1f612fadbca066cc3ec414e0468340d10ec908"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartMap_cubic_zero",
+    "start_line": 188,
+    "end_line": 192,
+    "sha256": "410844225c6938ba0900ebb3e9723154138d490665979e493771d7d2f7dee08f"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartQuotientPoint",
+    "start_line": 196,
+    "end_line": 197,
+    "sha256": "0c0c28cb918d271597a35135e4d3735e53c0c99269536d4422b1fdb92eb6d7d2"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartMap_X_pivot",
+    "start_line": 201,
+    "end_line": 206,
+    "sha256": "83797d0012f8de287637ba783a14a96e82657f496e7ce9644dbe9376543f6897"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartQuotientPoint_pivot",
+    "start_line": 209,
+    "end_line": 215,
+    "sha256": "ebce59d798c519be683895f82473a87d1a12d8ca5957957de0c8667ef1db5e93"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartQuotientPoint_quadric",
+    "start_line": 218,
+    "end_line": 223,
+    "sha256": "d4baf701b787aaae848ed8cf9e92c5183a95f7825f25e17f92a42dad71d2294a"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "declaration": "chartQuotientPoint_cubic",
+    "start_line": 226,
+    "end_line": 231,
+    "sha256": "88bea285069dc54eaceff029afa1846114e271f2b82f04a16ac859e6505399e5"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenEvaluation.lean",
+    "declaration": "WChartQuotient",
+    "start_line": 51,
+    "end_line": 51,
+    "sha256": "6ba3e45867944a3da0c8211967c7a7c57cde01e12607856548fcf36f7f6c4747"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenEvaluation.lean",
+    "declaration": "scaleCoordinates4",
+    "start_line": 54,
+    "end_line": 56,
+    "sha256": "41da6836504139110971e8779d170e92535290e1e578b2c42fc3cf05f6d55cb5"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenEvaluation.lean",
+    "declaration": "canonicalQuadric25CharTwo_scale",
+    "start_line": 90,
+    "end_line": 95,
+    "sha256": "e4494bf05401f613f262567e7c96469000638cd7274fa1d0083c589c0706362a"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenEvaluation.lean",
+    "declaration": "canonicalCubic25CharTwo_scale",
+    "start_line": 98,
+    "end_line": 103,
+    "sha256": "dd7cc0bd934c9a61364a93d8a4ddfb20ec7525c4f62ba2b169997b1f5d295063"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenPrimeSurjective.lean",
+    "declaration": "W",
+    "start_line": 42,
+    "end_line": 43,
+    "sha256": "4037481a86f2d5268cd8f28a917c3dcf15225f50194568e1999ecb77816526d8"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenPrimeSurjective.lean",
+    "declaration": "qx",
+    "start_line": 46,
+    "end_line": 48,
+    "sha256": "5c9f434e0a6ce7cb1dba3c6b432d96b9b62411d59f2931f8e0c339044fc4f9cc"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenPrimeSurjective.lean",
+    "declaration": "qy",
+    "start_line": 51,
+    "end_line": 53,
+    "sha256": "f68990e5391d819d8696c8d250f71610527ea5773460fe16ce3cdbe94079cf62"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenPrimeSurjective.lean",
+    "declaration": "qz",
+    "start_line": 56,
+    "end_line": 58,
+    "sha256": "c7958d41fa6991fd40c34b8454be9cfd3caed9919801608ac3901b715801b97c"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWBoundaryZLocal.lean",
+    "declaration": "ZChartRing",
+    "start_line": 36,
+    "end_line": 36,
+    "sha256": "c5ca7756b19973ffe6fabb1ddbe8949111ec1766f154af2ac74554453ce4e9df"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWBoundaryZLocal.lean",
+    "declaration": "zW",
+    "start_line": 41,
+    "end_line": 41,
+    "sha256": "e3bbee7ce46ec99c8efda574d410b024225940cb7c23fc3f2bfedafe7919fdc2"
+  },
+  {
+    "file": "N25F_NonBoundaryPrincipalDivisor.lean",
+    "declaration": "W",
+    "start_line": 19,
+    "end_line": 19,
+    "sha256": "ae6ef6ac1b12188012a41c8ef695548f1b50cab94ed106351ddc5da0715e053d"
+  },
+  {
+    "file": "N25F_ZChartWChartEquiv.lean",
+    "declaration": "zX",
+    "start_line": 35,
+    "end_line": 35,
+    "sha256": "356ac727c0b13985952b246cfb86547cb36cccd09422df4654cb96ebd17c4613"
+  },
+  {
+    "file": "N25F_ZChartWChartEquiv.lean",
+    "declaration": "zY",
+    "start_line": 38,
+    "end_line": 38,
+    "sha256": "8083c988affce57a285cf6cc0e771da6cf9442c8a9aa4360600d26e4b2204e7d"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "k",
+    "start_line": 21,
+    "end_line": 22,
+    "sha256": "ac56de5fdb02fdc9460dd9dd993cc99d9163979c5a77280720db23a17028f5cf"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "zRing",
+    "start_line": 22,
+    "end_line": 22,
+    "sha256": "98004417d03a367362a087bccc8462a91dc1cc7d8108022e4ea4680872119bcb"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "planeSexticPolynomial",
+    "start_line": 26,
+    "end_line": 28,
+    "sha256": "e6e8507067b0038e6c61af4fa4bae038c2b7c2fc175bf85beb6466db6352d1ed"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "PlaneCoordinateRing",
+    "start_line": 117,
+    "end_line": 117,
+    "sha256": "f4a1f6b52435b0e503a6b97d83788d49827f61ff0ce19db5dff694c53469e721"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "planeZ",
+    "start_line": 129,
+    "end_line": 130,
+    "sha256": "d8aba62789b828f1d0ff1f85ebd56aec31d3cbb5edfb26fc175d4be2c3833379"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "wChartPoint",
+    "start_line": 136,
+    "end_line": 137,
+    "sha256": "db71b5fbe8e8a6dd4df130467428e129e5b74fdec93ab35c456c96c991f94117"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "projectionDenominator",
+    "start_line": 139,
+    "end_line": 140,
+    "sha256": "ddbba2284beddc42dd3acbe96c522e0811e63a16f258c2f475c71ca3ff4ad485"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "projectionNumerator",
+    "start_line": 142,
+    "end_line": 143,
+    "sha256": "fd8bd3308ece82e8e938c97124be2613e6186705849a358dea84362b27521565"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "planeSexticValue",
+    "start_line": 145,
+    "end_line": 147,
+    "sha256": "ea0cf1b5bb955975a74135c332bef77f33db6bd5eee4672bf1730e5b61eae72f"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "planeSexticPolynomial_eval",
+    "start_line": 151,
+    "end_line": 159,
+    "sha256": "3878f647a0ce6249591423172b69eed86f27880d5347427783c2f847aaac90c4"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "planeSextic_elimination_identity",
+    "start_line": 273,
+    "end_line": 295,
+    "sha256": "7d99af8f68c30f2f7984dd1611549cdc788772b9ccee28f92c29d22e1a6301aa"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "declaration": "planeSexticPolynomial_eval_eq_zero_of_canonical",
+    "start_line": 299,
+    "end_line": 311,
+    "sha256": "91f768663e5107a2a9d80847620f23579562ca16de55e316299259ac1b95bcdc"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "k",
+    "start_line": 25,
+    "end_line": 25,
+    "sha256": "47a87324edd48856bcd4ab1407a3bca8784213183dd93100703340c9ef0728ec"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "wChartOriginEvaluation",
+    "start_line": 28,
+    "end_line": 29,
+    "sha256": "652adaf06f706ddcd1a2f0c8f9ae766abbbbef7ed8a5d3c9ef9e39577819205d"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "wChartOriginEvaluation_relation",
+    "start_line": 31,
+    "end_line": 41,
+    "sha256": "cd556b0d51c2c2bf8f6d049dd24c8c1b8e7bb38e2354172f24547532e4ec83f9"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "wChartAffineEquationIdeal_le_originKernel",
+    "start_line": 43,
+    "end_line": 47,
+    "sha256": "27917ca9e8198a9ada9cd345770ce8c0f6f359bf757cfc2a33555b6d7d785026"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "wChartAffineEquationIdeal_ne_top",
+    "start_line": 49,
+    "end_line": 54,
+    "sha256": "78121df7db84726f858bcf2b0d8e41f0a4101c28d4eeff98b632c655029195ca"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "canonicalWChart_nontrivial",
+    "start_line": 56,
+    "end_line": 57,
+    "sha256": "883f29479ea7dbaf8eb9c0531593962b7258519a9d4b4eafd356949ab7c67f2b"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "canonicalWChart_charP",
+    "start_line": 59,
+    "end_line": 60,
+    "sha256": "aa4a43986c4a11ad609955f4015c68a2d18caf81a36821df296f1403ed33ba78"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "canonicalWChartPoint",
+    "start_line": 63,
+    "end_line": 64,
+    "sha256": "9557016a83e57a0582761aaeb03131377b472dfd7df513e458f4067937f62795"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "canonicalWChartX",
+    "start_line": 66,
+    "end_line": 67,
+    "sha256": "9f2bb135e392c51d59363204f9c502f575b6a0e41fea2640f7d62a3a25d58c6a"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "canonicalWChartY",
+    "start_line": 67,
+    "end_line": 68,
+    "sha256": "c0566de995b47467d7be77835bc0f9e1a3201880eaabb33269b22eb3d28ad00d"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "canonicalWChartZ",
+    "start_line": 68,
+    "end_line": 68,
+    "sha256": "b31758be961c81ca4a39f93ac0e0419cb3ab8cbb148d0c25ef2c3422250e2eda"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "canonicalWChartPoint_w",
+    "start_line": 70,
+    "end_line": 72,
+    "sha256": "55fa3254993466849b09a3f05d69d74c2a43575fa1cb86ceb058e662ad4df174"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "coordinates4_ext",
+    "start_line": 74,
+    "end_line": 79,
+    "sha256": "5883ea3f0fe5ba360d1ac51770ead8fdbffa670af89a2aff44202052aecfbad7"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "wChartPoint_eq_canonicalWChartPoint",
+    "start_line": 81,
+    "end_line": 86,
+    "sha256": "f944d422702d948d2ce881410b0652b753176cbb7bbf962c6ba7962e655515ac"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "zPolynomialToCanonicalWChart",
+    "start_line": 89,
+    "end_line": 90,
+    "sha256": "2e1e20b2526a2c4720ee5d2a60348148532e4d0f6ab4578f3b5c80771e50f4ff"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "planeSexticPolynomial_eval_canonicalWChart",
+    "start_line": 92,
+    "end_line": 102,
+    "sha256": "698d2f541aad549b8079bf2b4515b4bfc2bd2ea841d7141c54dadf927c873bc3"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "planeCoordinateRingToCanonicalWChart",
+    "start_line": 106,
+    "end_line": 109,
+    "sha256": "0a7d601e8e699e30910811438899860138359594c8c002bc7ffb810399b8f3d2"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "declaration": "planeCoordinateRingToCanonicalWChart_planeZ",
+    "start_line": 122,
+    "end_line": 126,
+    "sha256": "d8ea4c1bfef10308166f7a0b2bdc04c59154d099ae764cc9f01d698f289bb577"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWChartNormalization.lean",
+    "declaration": "planeAlgebraW",
+    "start_line": 47,
+    "end_line": 48,
+    "sha256": "c173d01fdcb29ff77b2576a87240617875d5a545fc7f72566902f9c86d2ec18e"
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWChartNormalization.lean",
+    "declaration": "rzAlgebraW",
+    "start_line": 184,
+    "end_line": 185,
+    "sha256": "d4e200bbf368120cc205ffe58e7b1dfb23857cbec11b51a00e92667a79065f3e"
+  }
+]

@@ -1,0 +1,135 @@
+[
+  {
+    "file": "N25F_NonBoundaryPrincipalDivisor.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "4cb645a429c94c736267ff2ec7f7e77463eb493d",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/N25F_NonBoundaryPrincipalDivisor.lean",
+    "sha256": "403a7ad9b3052120c27d234819bda578bc92560e9f0555de6c90a2cba47ecf40",
+    "bytes": 4215
+  },
+  {
+    "file": "N25F_ZChartWChartEquiv.lean",
+    "source": "Passed local predecessor /workspace/shared/flt-n25-zchart-equiv/N25F_ZChartWChartEquiv.lean",
+    "sha256": "6058bc2512b100dafc39a4c25356ed66c2491ede1ab8e73e45810979f6adbd23",
+    "bytes": 12764,
+    "scope": "Only zX and zY coordinate definitions copied, verbatim"
+  },
+  {
+    "file": "RationalPointsN25QuotientF2.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "76e6473b7dac0e5b37ca34968349da3087441fa9",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean",
+    "sha256": "a7b7deae82af17a52e1fff8e36bd3898c256950c694c595e7ddc54b304a2e053",
+    "bytes": 10793
+  },
+  {
+    "file": "RationalPointsN25QuotientSmoothF2.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "b282d31c676297fcb4a2fd55464236615242abbc",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean",
+    "sha256": "997ee2b3f5e86fa34d1f74da3e8cc6dc7dead1208600af989efdf49b57433bbf",
+    "bytes": 10636
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineCharts.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "01d535accd5441b43f3a0135ee1404b3d66ab87a",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineCharts.lean",
+    "sha256": "ea00e95ef655b8980e3b67461d07ba885b37ac539b57335b34b4aa6ceafb8a91",
+    "bytes": 18651
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "5848a044ec5838a89774c164292c99d9b10eec2c",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineChartsSmooth.lean",
+    "sha256": "14939203766477a38743d6674714e237a05c983d3ac54ce4a0da224ec298b322",
+    "bytes": 30675
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoConormal.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "e63496bc9dcb90f6868d20c5ffd5d8748f7b2eaf",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean",
+    "sha256": "4e20cbfba31d3ab463315be17ca50430ec4291e8191a2d81eb476c320a2c45c8",
+    "bytes": 11110
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoGradedKoszul.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "ca479a075e32e2e5f5d1f11a5a0a6e5ea37887cf",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedKoszul.lean",
+    "sha256": "0d4a8e68148f701767994f264b40ddb9df18abb6ce407dd488afb45608a4dd73",
+    "bytes": 13207
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "e79757d85fd643f64ddca5e15db79579edd03b20",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean",
+    "sha256": "60a737f69e767f10e28ebd45052659d4127133c5b409c83a74c5535cc7cd3f28",
+    "bytes": 6282
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "0d711ee0eb8a62d6300f81a3b4dd05a76b0fa0ee",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean",
+    "sha256": "ac0761f9f3fa8aa2dca06b46f33e73be954b37135b2bd05258db628e3d4e9f47",
+    "bytes": 13317
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "ce969d4a1675f7be62b194abe36d26c4f6542a53",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean",
+    "sha256": "e974b0f277effad5704e36767ac1bb2618ad2753fe44b85b83379238077f81a8",
+    "bytes": 16729
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWBoundaryZLocal.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "bd4ca9299d029906af1c8b6c6f758733be2528d9",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWBoundaryZLocal.lean",
+    "sha256": "abdd687a245c42daebb2a724f5c46334446dbb48c70e6bce4384bcd09c900026",
+    "bytes": 23789
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWChartNormalization.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "13312dbe3c5cec7fdef9576da6ead94843ae5c3e",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWChartNormalization.lean",
+    "sha256": "df8aec7145f2c4b5acf097da8c238effe7778157e60436ceec46d11693bb71c7",
+    "bytes": 25231
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenEvaluation.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "8523290a73ebcd6ec25550578ca8b41c991d01c8",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenEvaluation.lean",
+    "sha256": "8116863cb10bf3b60125223544c91beb1d75dac977f9518517ceafe84761e631",
+    "bytes": 13704
+  },
+  {
+    "file": "RationalPointsN25QuotientTwoWOpenPrimeSurjective.lean",
+    "repository": "xiangyazi24/FLT",
+    "ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+    "git_blob_sha": "70858f686df492af1b198b2c1a505698efccb472",
+    "url": "https://github.com/xiangyazi24/FLT/blob/f0eb8381677bc483bddd93826871845030dd5c0e/FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoWOpenPrimeSurjective.lean",
+    "sha256": "646186aa02c353fb2e61ae1b1406858beee82335eeed11ace94078d9c2b7b712",
+    "bytes": 19233
+  }
+]

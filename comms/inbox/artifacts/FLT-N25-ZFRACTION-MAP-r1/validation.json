@@ -1,0 +1,50 @@
+{
+  "verified_at_utc": "2026-10-02T08:39:15.745991+00:00",
+  "accepted_flt_source_pin": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "mathlib_pin": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "lean_version": "4.31.0-rc2",
+  "production_candidate": "N25F_ZChartFractionMap.lean",
+  "production_sha256": "811973b2ecc662a70eebe337f445910be9707a8598a4503edefddda40be2d784",
+  "harness": "ZChartFractionMapCheck.lean",
+  "harness_sha256": "6aecc9601b3be01dfdc253411a36b4c4b96ce7bf9766c1724ae758961a565dbe",
+  "source_files": 15,
+  "accepted_source_files": 14,
+  "passed_local_predecessor_files": 1,
+  "copied_verbatim_declarations": 83,
+  "all_source_git_blob_hashes_verified": true,
+  "harness_changes": [
+    "Insert [Module.IsTorsionFree (Polynomial (ZMod 2)) W] before qz_ne_zero, representing accepted canonicalWChart_isTorsionFree",
+    "Insert [IsDomain W] before zFractionPoint, representing the accepted W-domain instance"
+  ],
+  "coefficient_algebra_identity_check": "Unconditional exact-source proof including actual coefficient algebra definitions and plane bridge proofs",
+  "check": {
+    "name": "check-03",
+    "args": [
+      "/workspace/shared/flt-n25-zfraction-map/ZChartFractionMapCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 19.449692169999253,
+    "peak_child_rss_kib": 2435488,
+    "source_sha256": "6aecc9601b3be01dfdc253411a36b4c4b96ce7bf9766c1724ae758961a565dbe"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "axiom_scope": "Exact-source harness; accepted W torsion-freeness and domain proofs are explicit ordinary parameters, not rebuilt",
+  "warnings": [
+    "Three unused harness section-variable warnings",
+    "One unnecessary simpa style suggestion"
+  ],
+  "bounds": {
+    "compiler_threads": 1,
+    "cpu_affinity_count": 1,
+    "memory_mib": 3072,
+    "timeout_seconds": 60,
+    "shared_flock_wait_seconds": 180
+  },
+  "production_full_import_compile": "not_run",
+  "remote_writes": "none",
+  "new_production_nonzero_or_algebra_premises": false
+}

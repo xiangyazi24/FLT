@@ -1,0 +1,23 @@
+{
+  "accepted_ref": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "production_sha256": "25aaa6a9a1e13f3798add495dc3256d87adf94e85ea4b07b2c6550b8ed61071f",
+  "source_review": "PASS against actual YChartRing, yZ, yzPointEval_yZ, yzPrime, yzPrime_isMaximal and YZLocalRing definitions",
+  "generic_check": {
+    "name": "generic-02",
+    "args": [
+      "/workspace/shared/flt-n25-yz-zunit/GenericYZUnitCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 2.3117142230003083,
+    "peak_child_rss_kib": 2127632,
+    "source_sha256": "692b907eeca55cd7312f6526d16a0dbf100dd1385159dba8b2c9342f71cef2f4"
+  },
+  "actual_specialization_compiled": false,
+  "full_FLT_imports_compiled": false,
+  "axioms_generic_check": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "production_added_premises": false
+}
