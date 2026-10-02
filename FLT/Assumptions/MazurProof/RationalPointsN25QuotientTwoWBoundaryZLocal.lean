@@ -374,6 +374,7 @@ private theorem zY_add_one_not_mem_zPrime : zY + 1 ∉ zPrime := by
   rw [zPrime, RingHom.mem_ker]
   simp
 
+set_option synthInstance.maxHeartbeats 200000 in
 private theorem qY_add_one_isUnit : IsUnit (qY + 1) := by
   let s : zPrime.primeCompl :=
     ⟨zY + 1, zY_add_one_not_mem_zPrime⟩
@@ -432,6 +433,7 @@ private theorem zLocalBoundaryToDouble_qW :
     IsLocalization.lift_eq]
   exact zChartToDouble_zW
 
+set_option synthInstance.maxHeartbeats 200000 in
 private noncomputable def doubleArtinToZLocalBoundary :
     DoubleArtin →ₐ[k₂] (ZLocalRing ⧸ zWGermIdeal) :=
   AdjoinRoot.liftAlgHom ((Polynomial.X : k₂[X]) ^ 2)
@@ -569,6 +571,7 @@ private theorem zResidueExtension_algebraMap_surjective :
     (IsLocalRing.ResidueField k₂)
     (IsLocalRing.ResidueField ZLocalRing) c
 
+set_option synthInstance.maxHeartbeats 200000 in
 private theorem zResidueExtension_length_one :
     Module.length (IsLocalRing.ResidueField k₂)
       (IsLocalRing.ResidueField ZLocalRing) = 1 := by

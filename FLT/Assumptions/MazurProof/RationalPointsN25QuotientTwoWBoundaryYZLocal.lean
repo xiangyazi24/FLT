@@ -173,6 +173,7 @@ private theorem yzResidueExtension_algebraMap_surjective :
     (IsLocalRing.ResidueField k₂)
     (IsLocalRing.ResidueField YZLocalRing) c
 
+set_option synthInstance.maxHeartbeats 200000 in
 private theorem yzResidueExtension_length_one :
     Module.length (IsLocalRing.ResidueField k₂)
       (IsLocalRing.ResidueField YZLocalRing) = 1 := by
