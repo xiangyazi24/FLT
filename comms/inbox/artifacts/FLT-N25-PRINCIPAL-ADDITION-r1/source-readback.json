@@ -1,0 +1,21 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "files": [
+    {
+      "file": "N25F_ProjectiveDivisorSplit.lean",
+      "sha": "c3ab045b8c87ebf90b5af37e3ebc6369cbb00c34",
+      "equal": false,
+      "equal_after_trailing_whitespace_normalization": true
+    },
+    {
+      "file": "CurveDedekindDivisor.lean",
+      "sha": "20c6208962f3163e4eabda838efc5c73afdc0b6c",
+      "equal": true
+    },
+    {
+      "file": "N25F_PrincipalDivisorCoefficient.lean",
+      "sha": "33feb1f895174c7e3e1e5e9b3318db8a61b76165",
+      "equal": true
+    }
+  ]
+}

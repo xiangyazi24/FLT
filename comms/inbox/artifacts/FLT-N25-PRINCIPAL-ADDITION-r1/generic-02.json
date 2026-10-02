@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-principal-add-order/PrincipalOrderAdditionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 19.72907600599865,
+  "peak_child_rss_kib": 2928708,
+  "source_sha256": "ec153e8d4b508c3d583b951581ba7b029152f4a62609fb302e9e8768a8004bfa"
+}

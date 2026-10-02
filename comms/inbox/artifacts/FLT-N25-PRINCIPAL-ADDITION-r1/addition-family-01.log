@@ -1,0 +1,10 @@
+'MazurProof.N25F_PrincipalOrderAddition.log_ordFrac_add_ge_min' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_PrincipalOrderAddition.count_spanSingleton_eq_log_ordFrac' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_PrincipalOrderAddition.count_spanSingleton_add_ge_min' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ProjectiveAdditionFamily.projective_add_ge_min' depends on axioms: [propext, Classical.choice, Quot.sound]

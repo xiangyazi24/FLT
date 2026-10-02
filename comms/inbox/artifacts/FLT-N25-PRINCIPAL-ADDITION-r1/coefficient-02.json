@@ -1,0 +1,10 @@
+{
+  "name": "coefficient-02",
+  "args": [
+    "/workspace/shared/flt-n25-principal-add-order/ProjectiveCoefficientFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 18.931854581998778,
+  "peak_child_rss_kib": 1722712,
+  "source_sha256": "624b842caa846c02160406ed156c0b444b28fb351acda923ba143cf5d9995d3f"
+}

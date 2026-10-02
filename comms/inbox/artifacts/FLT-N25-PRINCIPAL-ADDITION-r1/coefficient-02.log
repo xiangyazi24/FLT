@@ -1,0 +1,4 @@
+'CoefficientCheck.coefficient_X' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CoefficientCheck.coefficient_YZ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CoefficientCheck.coefficient_Z' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CoefficientCheck.coefficient_nonBoundary' depends on axioms: [propext, Classical.choice, Quot.sound]

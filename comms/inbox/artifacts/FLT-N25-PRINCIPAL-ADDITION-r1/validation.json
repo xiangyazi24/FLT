@@ -1,0 +1,76 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "06f02da731842a497c13bf2d4a5b4189b8bea3e9",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_PrincipalOrderAddition.log_ordFrac_add_ge_min",
+    "MazurProof.N25F_PrincipalOrderAddition.count_spanSingleton_eq_log_ordFrac",
+    "MazurProof.N25F_PrincipalOrderAddition.count_spanSingleton_add_ge_min",
+    "MazurProof.N25F_ProjectivePrincipalCoefficients.projectivePrincipalDivisor_apply_X",
+    "MazurProof.N25F_ProjectivePrincipalCoefficients.projectivePrincipalDivisor_apply_YZ",
+    "MazurProof.N25F_ProjectivePrincipalCoefficients.projectivePrincipalDivisor_apply_Z",
+    "MazurProof.N25F_ProjectivePrincipalCoefficients.projectivePrincipalDivisor_apply_nonBoundary",
+    "MazurProof.N25F_ProjectivePrincipalAddition.projectivePrincipalDivisor_add_ge_min"
+  ],
+  "production_additional_hypotheses": [],
+  "passed": [
+    {
+      "name": "generic-02",
+      "args": [
+        "/workspace/shared/flt-n25-principal-add-order/PrincipalOrderAdditionCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 19.72907600599865,
+      "peak_child_rss_kib": 2928708,
+      "source_sha256": "ec153e8d4b508c3d583b951581ba7b029152f4a62609fb302e9e8768a8004bfa"
+    },
+    {
+      "name": "coefficient-02",
+      "args": [
+        "/workspace/shared/flt-n25-principal-add-order/ProjectiveCoefficientFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 18.931854581998778,
+      "peak_child_rss_kib": 1722712,
+      "source_sha256": "624b842caa846c02160406ed156c0b444b28fb351acda923ba143cf5d9995d3f"
+    },
+    {
+      "name": "addition-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-principal-add-order/ProjectiveAdditionFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 54.858645517000696,
+      "peak_child_rss_kib": 2922116,
+      "source_sha256": "f8c676976a77cd4aec32b1eff9fcbca5a6b0bbcec7a6a8048687584583dede4b"
+    }
+  ],
+  "failed": [
+    {
+      "name": "generic-01",
+      "args": [
+        "/workspace/shared/flt-n25-principal-add-order/PrincipalOrderAdditionCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 70.20010323899623,
+      "peak_child_rss_kib": 2901928,
+      "source_sha256": "839377a39a10f4c355e9f6eec750ae423b811f2e53535051b97e1145fe2ac70f"
+    },
+    {
+      "name": "coefficient-01",
+      "args": [
+        "/workspace/shared/flt-n25-principal-add-order/ProjectiveCoefficientFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 10.673371802993643,
+      "peak_child_rss_kib": 1739200,
+      "source_sha256": "d4eb0246e87eb1431b7fd954ccb184513c5ca8f140847eba10ceb613fd0cfb4f"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "current_passing_hashes_verified": true
+}

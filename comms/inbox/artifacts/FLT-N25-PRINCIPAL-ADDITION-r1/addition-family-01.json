@@ -1,0 +1,10 @@
+{
+  "name": "addition-family-01",
+  "args": [
+    "/workspace/shared/flt-n25-principal-add-order/ProjectiveAdditionFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 54.858645517000696,
+  "peak_child_rss_kib": 2922116,
+  "source_sha256": "f8c676976a77cd4aec32b1eff9fcbca5a6b0bbcec7a6a8048687584583dede4b"
+}

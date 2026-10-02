@@ -1,0 +1,29 @@
+/workspace/shared/flt-n25-principal-add-order/PrincipalOrderAdditionCheck.lean:180:7: error(lean.unknownIdentifier): Unknown constant `inv_ne_zero.mpr`
+/workspace/shared/flt-n25-principal-add-order/PrincipalOrderAdditionCheck.lean:165:72: error: unsolved goals
+R : Type u_1
+inst✝¹ : CommRing R
+inst✝ : IsDedekindDomain R
+v : IsDedekindDomain.HeightOneSpectrum R
+a b : R
+hb : b ∈ R⁰
+hz : (algebraMap R (FractionRing R)) a / (algebraMap R (FractionRing R)) b ≠ 0
+ha : a ≠ 0
+hb' : b ≠ 0
+hna : (algebraMap R (FractionRing R)) a ≠ 0
+hnb : (algebraMap R (FractionRing R)) b ≠ 0
+⊢ FractionalIdeal.count (FractionRing R) v
+      (FractionalIdeal.spanSingleton R⁰ ((algebraMap R (FractionRing R)) a) *
+        (FractionalIdeal.spanSingleton R⁰ ((algebraMap R (FractionRing R)) b))⁻¹) =
+    ((Ring.ordFrac (Localization.AtPrime v.asIdeal))
+        ((algebraMap R (FractionRing R)) a * ((algebraMap R (FractionRing R)) b)⁻¹)).log
+'MazurProof.N25F_PrincipalOrderAddition.log_ordFrac_add_ge_min' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_PrincipalOrderAddition.count_spanSingleton_eq_log_ordFrac' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_PrincipalOrderAddition.count_spanSingleton_add_ge_min' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

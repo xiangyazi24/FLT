@@ -1,0 +1,16 @@
+/workspace/shared/flt-n25-principal-add-order/ProjectiveCoefficientFamilyCheck.lean:49:4: error(lean.unknownIdentifier): Unknown constant `AddEquiv.prodCongr_apply`
+/workspace/shared/flt-n25-principal-add-order/ProjectiveCoefficientFamilyCheck.lean:48:2: error: Type mismatch: After simplification, term
+  h
+ has type
+  DFunLike.coe.{u_2 + 1, u_2 + 1, 1}
+      ((chartEquiv q).symm
+        ((boundaryTriple.prodCongr (AddEquiv.refl (C →₀ ℤ)))
+            (((AddEquiv.refl (Boundary →₀ ℤ)).prodCongr (chartEquiv q)) ((splitAtoms e) D))).2)
+      a =
+    n a
+but is expected to have type
+  DFunLike.coe.{u_1 + 1, u_1 + 1, 1} D (e.symm (Sum.inr a)) = n a
+'CoefficientCheck.coefficient_X' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CoefficientCheck.coefficient_YZ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CoefficientCheck.coefficient_Z' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CoefficientCheck.coefficient_nonBoundary' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
