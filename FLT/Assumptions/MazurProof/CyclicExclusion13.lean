@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.TorsionDefs
 import FLT.Assumptions.MazurProof.TateOrder13
 import FLT.Assumptions.MazurProof.N13CurveModel
+import FLT.Assumptions.MazurProof.N13ConstructedRationalPointTheorem
 
 /-!
 # Cyclic order 13 exclusion
@@ -32,9 +33,10 @@ namespace CyclicExclusion13
 
 /-- The arithmetic core: every rational point on the optimized model of
 `X₁(13)` is a cusp.  The Tate and birational reductions are proved separately
-in `N13TateBridge`. -/
-axiom C13Sextic_affine_x_is_cuspidal :
-    ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y → X = 0 ∨ X = -1
+in `N13TateBridge`. Proved by the constructed N13 rational-point theorem. -/
+theorem C13Sextic_affine_x_is_cuspidal :
+    ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y → X = 0 ∨ X = -1 :=
+  N13ConstructedRationalPointTheorem.affine_x_is_cuspidal
 
 /-- The sextic rational-point theorem rules out the noncuspidal open of the
 optimized model. -/
