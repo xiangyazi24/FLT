@@ -1,0 +1,10 @@
+{
+  "name": "sections-01",
+  "args": [
+    "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 10.619756940002844,
+  "peak_child_rss_kib": 2771136,
+  "source_sha256": "675ea998071459b97c1ada8f1e7eddaab1b2c12163ab69260dd200c7655f6f2b"
+}

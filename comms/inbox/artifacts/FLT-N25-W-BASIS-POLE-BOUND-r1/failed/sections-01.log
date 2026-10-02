@@ -1,0 +1,68 @@
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:326:20: error: Application type mismatch: The argument
+  basePoleDivisor25Two
+has type
+  (C : ClosedPointGrading) → (Boundary → C.Atom) → C.Divisor
+but is expected to have type
+  C.Divisor
+in the application
+  C.divisorDegree basePoleDivisor25Two
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:326:63: error: unsolved goals
+C : ClosedPointGrading
+boundaryAtom : Boundary → C.Atom
+hdegree : ∀ (t : Boundary), C.atomDegree (boundaryAtom t) = 1
+⊢ sorry () = 4
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:327:8: warning: This simp argument is unused:
+  basePoleDivisor25Two
+
+Hint: Omit it from the simp argument list.
+  simp [b̵a̵s̵e̵P̵o̵l̵e̵D̵i̵v̵i̵s̵o̵r̵2̵5̵T̵w̵o̵,̵ ̵ClosedPointGrading.divisorDegree, hdegree]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:327:30: warning: This simp argument is unused:
+  ClosedPointGrading.divisorDegree
+
+Hint: Omit it from the simp argument list.
+  simp [basePoleDivisor25Two, C̵l̵o̵s̵e̵d̵P̵o̵i̵n̵t̵G̵r̵a̵d̵i̵n̵g̵.̵d̵i̵v̵i̵s̵o̵r̵D̵e̵g̵r̵e̵e̵,̵ ̵hdegree]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:327:64: warning: This simp argument is unused:
+  hdegree
+
+Hint: Omit it from the simp argument list.
+  simp [basePoleDivisor25Two, ClosedPointGrading.divisorDegree,̵ ̵h̵d̵e̵g̵r̵e̵e̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:340:30: warning: This simp argument is unused:
+  hn
+
+Hint: Omit it from the simp argument list.
+  simp [basePoleDivisor25Two, h̵n̵,̵ ̵Ne.symm (hn .X), Ne.symm (hn .YZ), Ne.symm (hn .Z)]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:364:25: error: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  e + g ≤ -1
+  c ≥ 0
+  c + d ≥ 0
+  2*c + e ≥ 0
+  b + c ≥ 0
+where
+ b := xOrder f
+ c := ↑n
+ d := yzOrder f
+ e := zOrder f
+ g := ↑n *
+  match Boundary.Z with
+  | Boundary.X => 1
+  | Boundary.YZ => 1
+  | Boundary.Z => 2
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_degree' depends on axioms: [sorryAx]
+'MazurProof.N25F_WBasisPoleSections.regular_function_mem_basePole_space' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.wPolynomialBasis_mem_uniform_section_space' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,11 @@
+import FLT.Assumptions.MazurProof.N25F_WBasisPoleSections
+
+#print axioms MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two
+#print axioms MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two_ne_zero
+#print axioms MazurProof.N25F_WBasisPoleBound.wPolynomialBasisFunction25Two
+#print axioms MazurProof.N25F_WBasisPoleBound.wPolynomialBasisPoleBound25Two
+#print axioms MazurProof.N25F_WBasisPoleBound.wPolynomialBasis_boundary_orders_bounded
+#print axioms MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two
+#print axioms MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_degree
+#print axioms MazurProof.N25F_WBasisPoleSections.regular_function_mem_basePole_space
+#print axioms MazurProof.N25F_WBasisPoleSections.wPolynomialBasis_mem_uniform_section_space

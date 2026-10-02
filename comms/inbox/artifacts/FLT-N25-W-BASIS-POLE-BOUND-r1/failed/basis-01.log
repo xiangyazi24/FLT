@@ -1,0 +1,130 @@
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:19:28: error(lean.unknownIdentifier): Unknown identifier `Basis`
+
+Note: It is not possible to treat `Basis` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:20:48: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  IsPrincipalIdealRing (Polynomial (ZMod 2))
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:24:25: error(lean.unknownIdentifier): Unknown identifier `A`
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:27:57: error(lean.unknownIdentifier): Unknown identifier `K`
+
+Note: It is not possible to treat `K` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:29:106: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasis25Two_ne_zero A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:35:44: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:36:45: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:37:44: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:41:39: error: Application type mismatch: The argument
+  hrank
+has type
+  Module.finrank (Polynomial (ZMod 2)) A = 4
+of sort `Prop` but is expected to have type
+  Additive (FractionRing A)ˣ →+ ℤ
+of sort `Type u_1` in the application
+  wPolynomialBasisPoleBound25Two A hrank
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:41:112: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:42:39: error: Application type mismatch: The argument
+  hrank
+has type
+  Module.finrank (Polynomial (ZMod 2)) A = 4
+of sort `Prop` but is expected to have type
+  Additive (FractionRing A)ˣ →+ ℤ
+of sort `Type u_1` in the application
+  wPolynomialBasisPoleBound25Two A hrank
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:42:113: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:43:44: error: Application type mismatch: The argument
+  hrank
+has type
+  Module.finrank (Polynomial (ZMod 2)) A = 4
+of sort `Prop` but is expected to have type
+  Additive (FractionRing A)ˣ →+ ℤ
+of sort `Type u_1` in the application
+  wPolynomialBasisPoleBound25Two A hrank
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:43:118: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:45:46: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:46:47: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:47:46: error: Application type mismatch: The argument
+  A
+has type
+  Type u_1
+of sort `Type (u_1 + 1)` but is expected to have type
+  Fin 4
+of sort `Type` in the application
+  wPolynomialBasisFunction25Two A
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:47:99: error(lean.unknownIdentifier): Unknown identifier `hrank`
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two_ne_zero' depends on axioms: [sorryAx]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasisFunction25Two' depends on axioms: [sorryAx, Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasisPoleBound25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis_boundary_orders_bounded' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

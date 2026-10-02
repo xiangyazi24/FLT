@@ -1,0 +1,101 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "77ceeb2555eb82aef5c5e889f0e6493012980752",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two",
+    "MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two_ne_zero",
+    "MazurProof.N25F_WBasisPoleBound.wPolynomialBasisFunction25Two",
+    "MazurProof.N25F_WBasisPoleBound.wPolynomialBasisPoleBound25Two",
+    "MazurProof.N25F_WBasisPoleBound.wPolynomialBasis_boundary_orders_bounded",
+    "MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two",
+    "MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_degree",
+    "MazurProof.N25F_WBasisPoleSections.regular_function_mem_basePole_space",
+    "MazurProof.N25F_WBasisPoleSections.wPolynomialBasis_mem_uniform_section_space"
+  ],
+  "passed": [
+    {
+      "name": "basis-04",
+      "args": [
+        "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 4.1957571000020835,
+      "peak_child_rss_kib": 2228284,
+      "source_sha256": "00317521a9d1c28fd27056da6aaea23cb9e3e570a6c8023865fbab790a60bbc1"
+    },
+    {
+      "name": "sections-03",
+      "args": [
+        "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 8.953604416994494,
+      "peak_child_rss_kib": 2775144,
+      "source_sha256": "f7289745a75b3e4173ed73e33e73f4ddc4b5190d480e32bb4a807e229c76ef15"
+    }
+  ],
+  "failed": [
+    {
+      "name": "basis-01",
+      "args": [
+        "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 5.840242427999328,
+      "peak_child_rss_kib": 2212296,
+      "source_sha256": "f8f8ed52152cec290454ecc3dd17a3569b8c7b4a8066c74b8d9eda67ad856cfe"
+    },
+    {
+      "name": "basis-02",
+      "args": [
+        "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 3.6959209969936637,
+      "peak_child_rss_kib": 2220336,
+      "source_sha256": "863f12b9d77754a7dbd5811f66857096a58755503e803a772dfec0b4be1d2e80"
+    },
+    {
+      "name": "basis-03",
+      "args": [
+        "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 3.9145073749969015,
+      "peak_child_rss_kib": 2219656,
+      "source_sha256": "850107658991f7bc730b3cae1c001162c673b3422c5af0f015cbb26d4320fab7"
+    },
+    {
+      "name": "sections-01",
+      "args": [
+        "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 10.619756940002844,
+      "peak_child_rss_kib": 2771136,
+      "source_sha256": "675ea998071459b97c1ada8f1e7eddaab1b2c12163ab69260dd200c7655f6f2b"
+    },
+    {
+      "name": "sections-02",
+      "args": [
+        "/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 12.083100572999683,
+      "peak_child_rss_kib": 2773816,
+      "source_sha256": "a4c777aa34ae8988bd6e33c006d4f01e00458fdfc73ca5748cf77c79ba6e2026"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "uniform_constant_depends_on_divisor": false,
+  "actual_fixed_basis_section_space": "PROVED IN CANDIDATE CHAIN",
+  "coarse_rr_lower_bound": "OPEN",
+  "picard_finiteness": "OPEN",
+  "sharp_rr_identity": "OPEN"
+}

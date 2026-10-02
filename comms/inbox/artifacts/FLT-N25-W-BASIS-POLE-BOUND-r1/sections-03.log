@@ -1,0 +1,10 @@
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_degree' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.regular_function_mem_basePole_space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.wPolynomialBasis_mem_uniform_section_space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,23 @@
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleBoundFamilyCheck.lean:50:4: error: Type mismatch
+  Finset.single_le_sum (fun j x => Nat.zero_le (?m.137 j)) (Finset.mem_univ i)
+has type
+  ?m.137 i ≤ ∑ x, ?m.137 x
+but is expected to have type
+  (-xOrder (wPolynomialBasisFunction25Two A hrank i)).toNat +
+        (-yzOrder (wPolynomialBasisFunction25Two A hrank i)).toNat +
+      (-zOrder (wPolynomialBasisFunction25Two A hrank i)).toNat ≤
+    wPolynomialBasisPoleBound25Two A hrank xOrder yzOrder zOrder
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two_ne_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasisFunction25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasisPoleBound25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis_boundary_orders_bounded' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

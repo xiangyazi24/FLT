@@ -1,0 +1,216 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "77ceeb2555eb82aef5c5e889f0e6493012980752",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 37981,
+      "sha256": "cfa5b5e88de2366db22be868fc0a04502c8a2003b48abc1eaddf399d3ac9f4ac"
+    },
+    {
+      "path": "comms/candidates/N25F_WBasisPoleBound.lean",
+      "encoding": "utf-8",
+      "bytes": 2908,
+      "sha256": "47375ee8f56b447b5dc721720f6e8fdddb0ee45f3a2113000497a2b0ed9617c0"
+    },
+    {
+      "path": "comms/candidates/N25F_WBasisPoleSections.lean",
+      "encoding": "utf-8",
+      "bytes": 4474,
+      "sha256": "2b42344182b1047071e72cba97d7222a23ff3e404eef715d7a886b2b9db722d1"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/ActualWBasisPoleBoundCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 767,
+      "sha256": "14e6ff6718437444a7642e93ceba5bf3a29c58c9fa33c73e32980cd15b0e5e73"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/CurveDedekindDivisorInput.lean",
+      "encoding": "utf-8",
+      "bytes": 4199,
+      "sha256": "37aac2b75aca0d95e3f367a5e3e1e524c3bae2bc55e16e96c04b6f05bc9b6580"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/PrincipalDivisorCoefficientInput.lean",
+      "encoding": "utf-8",
+      "bytes": 1065,
+      "sha256": "ffab496854fae1b92c28c844f0ed99cc585a219741a6dac26535580285db3f50"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/PrincipalDivisorRegularInput.lean",
+      "encoding": "utf-8",
+      "bytes": 902,
+      "sha256": "268728bf4a2ba9ca38c22dd3f3b1e872be0a4d1d64ab398d83e17c368d093bb9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/RiemannRochSpaceFamilyInput.lean",
+      "encoding": "utf-8",
+      "bytes": 5016,
+      "sha256": "30c1b5264b9f0865a0fb90b630b8666df3d78bac371f2e44477d722a623e8a44"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/WBasisPoleBoundFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 3492,
+      "sha256": "00317521a9d1c28fd27056da6aaea23cb9e3e570a6c8023865fbab790a60bbc1"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/WBasisPoleSectionsFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 16819,
+      "sha256": "f7289745a75b3e4173ed73e33e73f4ddc4b5190d480e32bb4a807e229c76ef15"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/accepted-N25F_WChartBaseNorm.lean",
+      "encoding": "utf-8",
+      "bytes": 2385,
+      "sha256": "ac3d934e61be2dd60880f208d1e0411bf3343de6c34d5670206e81f133141e85"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/basis-04.json",
+      "encoding": "utf-8",
+      "bytes": 296,
+      "sha256": "3b10fb3f7c2fb59f8489d742cdc528ca61d85ec73827036b9f93ba41d11d29f9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/basis-04.log",
+      "encoding": "utf-8",
+      "bytes": 627,
+      "sha256": "11b1143e817ad1b1a3dc7e6d584fae5d7ddadc6f74781b8aad6feaacc7fa2492"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/WBasisPoleBoundFamilyCheck-failed-01.lean",
+      "encoding": "utf-8",
+      "bytes": 3158,
+      "sha256": "f8f8ed52152cec290454ecc3dd17a3569b8c7b4a8066c74b8d9eda67ad856cfe"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/WBasisPoleBoundFamilyCheck-failed-02.lean",
+      "encoding": "utf-8",
+      "bytes": 3230,
+      "sha256": "863f12b9d77754a7dbd5811f66857096a58755503e803a772dfec0b4be1d2e80"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/WBasisPoleBoundFamilyCheck-failed-03.lean",
+      "encoding": "utf-8",
+      "bytes": 3253,
+      "sha256": "850107658991f7bc730b3cae1c001162c673b3422c5af0f015cbb26d4320fab7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/WBasisPoleSectionsFamilyCheck-failed-01.lean",
+      "encoding": "utf-8",
+      "bytes": 16686,
+      "sha256": "675ea998071459b97c1ada8f1e7eddaab1b2c12163ab69260dd200c7655f6f2b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/WBasisPoleSectionsFamilyCheck-failed-02.lean",
+      "encoding": "utf-8",
+      "bytes": 16745,
+      "sha256": "a4c777aa34ae8988bd6e33c006d4f01e00458fdfc73ca5748cf77c79ba6e2026"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/basis-01.json",
+      "encoding": "utf-8",
+      "bytes": 295,
+      "sha256": "4bcdda972c723d260b53361a721375cf230b860fd7dd323bf5fc1cd5e01ecc9c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/basis-01.log",
+      "encoding": "utf-8",
+      "bytes": 5679,
+      "sha256": "f2a6794259259ddb88edfe65dc726c50cb7d1f7adb994dac86db91e1f4687909"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/basis-02.json",
+      "encoding": "utf-8",
+      "bytes": 296,
+      "sha256": "033bc2069cfc10f29409fccfa97ff3f6e1f8f220551ad6fd690f6253c0865c92"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/basis-02.log",
+      "encoding": "utf-8",
+      "bytes": 1907,
+      "sha256": "a5637f4b7e450743de4cc5f1bd270aeda0f453e4a149fa0be575a95174017ead"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/basis-03.json",
+      "encoding": "utf-8",
+      "bytes": 296,
+      "sha256": "cb9b3ea7f5f1e4757baa64913eda33bc7992c2314583135e7b47c667bdb021fb"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/basis-03.log",
+      "encoding": "utf-8",
+      "bytes": 1153,
+      "sha256": "ec2528136046da846b8a7b5089ee254592c73483bb75399336c0feebf684490e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/sections-01.json",
+      "encoding": "utf-8",
+      "bytes": 302,
+      "sha256": "14384e9569136243585d5fc3ae48ac81fdaa61a1537f300b7b876261cc354805"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/sections-01.log",
+      "encoding": "utf-8",
+      "bytes": 3022,
+      "sha256": "4ee4a871a63bf1bbe993dac344abdd1c1a3edd92ef09cd2894a665e835960c74"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/sections-02.json",
+      "encoding": "utf-8",
+      "bytes": 302,
+      "sha256": "602e5ce9058c6fbc44a3399cb6bba21236919ac5476672017fc5c11968505284"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/failed/sections-02.log",
+      "encoding": "utf-8",
+      "bytes": 1853,
+      "sha256": "47dab8f4bbe731e252c39468ec7a3d0d72e0d43b5756390cb98a60278245f8fe"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/make_family.py",
+      "encoding": "utf-8",
+      "bytes": 2212,
+      "sha256": "72b1c99b01d4010ac5efbea273c8ef3133b43cd8c7daf93885784a9d4964ae24"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/make_sections_family.py",
+      "encoding": "utf-8",
+      "bytes": 6421,
+      "sha256": "50684fbf74778298665b42f4de9c830ec55865b9f6e5da7208c30b7755421658"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 880,
+      "sha256": "90649832907fae319579de754a840f38e95391ab5f889800f66ddaf8f8ff2d4c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/sections-03.json",
+      "encoding": "utf-8",
+      "bytes": 301,
+      "sha256": "9e53487b9318cacaf2dd2dac7bf0a39b24d36c986775341539e0830c209b4ec4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/sections-03.log",
+      "encoding": "utf-8",
+      "bytes": 518,
+      "sha256": "41d25e60cd998916b672c0b16bb94fd20d8c25493d76f4d767202d1b50abcede"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-W-BASIS-POLE-BOUND-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 3604,
+      "sha256": "3e30ff363cd912d9806d3110ae3311f7c088629ff59d3f705a56c70ce632887c"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-W-BASIS-POLE-BOUND-r1.md",
+      "encoding": "utf-8",
+      "bytes": 4152,
+      "sha256": "4469f80fd79a8fc1dd814209692bd9f431330bf662b7ae4e6db8e56edc89a82c"
+    }
+  ]
+}

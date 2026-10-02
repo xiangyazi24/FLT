@@ -1,0 +1,33 @@
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:326:65: error: unsolved goals
+C : ClosedPointGrading
+boundaryAtom : Boundary → C.Atom
+hdegree : ∀ (t : Boundary), C.atomDegree (boundaryAtom t) = 1
+⊢ (Finsupp.sum
+      (Finsupp.single (boundaryAtom Boundary.X) 1 + Finsupp.single (boundaryAtom Boundary.YZ) 1 +
+        Finsupp.single (boundaryAtom Boundary.Z) 2)
+      fun x m => m * ↑(C.atomDegree x)) =
+    4
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:327:64: warning: This simp argument is unused:
+  hdegree
+
+Hint: Omit it from the simp argument list.
+  simp [basePoleDivisor25Two, ClosedPointGrading.divisorDegree,̵ ̵h̵d̵e̵g̵r̵e̵e̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-w-basis-pole-bound/WBasisPoleSectionsFamilyCheck.lean:345:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_WBasisPoleSections.regular_function_mem_basePole_space`:
+  [Algebra (Polynomial (ZMod 2)) A]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (Polynomial (ZMod 2)) A] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.basePoleDivisor25Two_degree' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.regular_function_mem_basePole_space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleSections.wPolynomialBasis_mem_uniform_section_space' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,13 @@
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis25Two_ne_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasisFunction25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasisPoleBound25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_WBasisPoleBound.wPolynomialBasis_boundary_orders_bounded' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
