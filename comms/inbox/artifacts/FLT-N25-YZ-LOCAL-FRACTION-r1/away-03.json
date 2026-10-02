@@ -1,0 +1,13 @@
+{
+  "name": "away-03",
+  "args": [
+    "--root=/workspace/shared/flt-n25-yz-fraction-embedding",
+    "-o",
+    "/workspace/shared/flt-n25-yz-fraction-embedding/AwayFractionCheck.olean",
+    "/workspace/shared/flt-n25-yz-fraction-embedding/AwayFractionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 11.130520833001356,
+  "peak_child_rss_kib": 2511836,
+  "source_sha256": "37a56c3a89b7c086de907a69dd442881e15694edff58e575227efd026f09d8ad"
+}

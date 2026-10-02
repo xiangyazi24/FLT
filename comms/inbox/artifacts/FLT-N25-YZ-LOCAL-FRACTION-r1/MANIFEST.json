@@ -1,0 +1,102 @@
+{
+  "production_source": "N25F_YZLocalFractionEmbedding.lean",
+  "production_compilation_status": "Not run against full FLT import closure; actual yzPointEval binding remains for lead validation.",
+  "checked": [
+    {
+      "receipt": "generic-01.json",
+      "scope": "Generic extension from an away-open fraction field to the canonical prime localization",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "receipt": "away-03.json",
+      "scope": "Actual Z and Y away-open fraction embeddings, with explicit proof zY != 0; actual curve equations and proved overlap equivalence imported",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "receipt": "point-04.json",
+      "scope": "Actual curve and overlap equivalence, arbitrary F2 point f with f(yZ)=1; map, injectivity, fraction field, nonvanishing, 3 coordinates, uniqueness",
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "fixture_assumptions": [
+    "IsDedekindDomain W",
+    "Module.IsTorsionFree (Polynomial (ZMod 2)) W",
+    "point f : YChartRing -> AlgHom(F2) F2",
+    "hf : f yZ = 1"
+  ],
+  "production_additional_assumptions": [],
+  "compiler": "Lean 4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "limits": {
+    "gates_per_invocation": 1,
+    "gate_wait_seconds": 180,
+    "cpu": 1,
+    "lean_memory_mib": 3072,
+    "compiler_seconds": 60,
+    "synthInstance_maxHeartbeats": 200000
+  },
+  "files": {
+    "N25F_YZLocalFractionEmbedding.lean": {
+      "sha256": "9ba78aebc9f91f3afec1dc121c5881fa7600836d2ea9332b0a3443b5b175633c",
+      "bytes": 11674
+    },
+    "GenericFractionExtension.lean": {
+      "sha256": "b7b55cadc2d2db58dfd45ee2858b89f537961577650974318bcda9df7290ba0c",
+      "bytes": 2479
+    },
+    "AwayFractionCheck.lean": {
+      "sha256": "37a56c3a89b7c086de907a69dd442881e15694edff58e575227efd026f09d8ad",
+      "bytes": 3709
+    },
+    "CurvePointFractionCheck.lean": {
+      "sha256": "cfc2e7b02424445667be505ade97b520c50e322bd4079938e225fc53cda2f239",
+      "bytes": 9322
+    },
+    "ActualYZLocalFractionEmbeddingCheck.lean": {
+      "sha256": "c37b583f7b6ced7d8bfa856e8c962ef96a5ad4419ff824a82e3a4542b428c580",
+      "bytes": 1503
+    },
+    "make_production.py": {
+      "sha256": "eb818573a3e7191d5b6a3c67c9cbdbd3c9b0c0d8f5d79aae5145243522667608",
+      "bytes": 3598
+    },
+    "run_check.py": {
+      "sha256": "8902861b17eb5c4714d4b54bad24dec669144f4f190052936a36a717e0d80099",
+      "bytes": 883
+    }
+  },
+  "public_declarations": [
+    "zYOpenToFraction",
+    "zYOpenToFraction_algebraMap",
+    "zYOpenToFraction_isFractionRing",
+    "zYOpenToFraction_injective",
+    "zYOpenToFraction_invSelf",
+    "yZOpenToFraction",
+    "yZOpenToFraction_injective",
+    "yZOpenToFraction_isFractionRing",
+    "yzLocalToFraction",
+    "yzLocalToFraction_algebraMap",
+    "yzLocalToFraction_injective",
+    "yzLocalToFraction_isFractionRing",
+    "fraction_qy_ne_zero",
+    "yzLocalToFraction_yZ",
+    "yzLocalToFraction_yzW",
+    "yzLocalToFraction_yX",
+    "yzLocalToFraction_unique",
+    "yzLocalToFraction_yzZGerm",
+    "yzLocalToFraction_yzWGerm"
+  ],
+  "full_import_audit_count": 19
+}

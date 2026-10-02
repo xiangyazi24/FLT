@@ -1,0 +1,15 @@
+/workspace/shared/flt-n25-yz-fraction-embedding/AwayFractionCheck.lean:16:8: warning: automatically included section variable(s) unused in theorem `_private.AwayFractionCheck.0.MazurProof.N25F_YZLocalFractionEmbedding.zY_powers_nonZeroDivisors`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'MazurProof.N25F_YZLocalFractionEmbedding.zYOpenToFraction_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_YZLocalFractionEmbedding.yZOpenToFraction_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_YZLocalFractionEmbedding.yZOpenToFraction_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

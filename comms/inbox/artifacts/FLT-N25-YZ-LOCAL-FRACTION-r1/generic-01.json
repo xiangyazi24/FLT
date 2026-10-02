@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-yz-fraction-embedding/GenericFractionExtension.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 4.357980715001759,
+  "peak_child_rss_kib": 2190648,
+  "source_sha256": "b7b55cadc2d2db58dfd45ee2858b89f537961577650974318bcda9df7290ba0c"
+}

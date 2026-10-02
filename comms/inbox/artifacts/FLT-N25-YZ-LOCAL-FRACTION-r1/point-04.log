@@ -1,0 +1,16 @@
+'N25FractionExtensionCheck.exists_atPrime_fraction_map' depends on axioms: [propext, Classical.choice, Quot.sound]
+/workspace/shared/flt-n25-yz-fraction-embedding/CurvePointFractionCheck.lean:73:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.N25CurvePointFractionCheck.yZ_not_mem`:
+  [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  [IsDedekindDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Module.IsTorsionFree (Polynomial (ZMod 2)) W] [IsDedekindDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'N25CurvePointFractionCheck.yzLocalToFraction_yX' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointFractionCheck.yzLocalToFraction_unique' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointFractionCheck.yzLocalToFraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointFractionCheck.yzLocalToFraction_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointFractionCheck.yzLocalToFraction_isFractionRing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointFractionCheck.fraction_qy_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointFractionCheck.yzLocalToFraction_yZ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointFractionCheck.yzLocalToFraction_yzW' depends on axioms: [propext, Classical.choice, Quot.sound]

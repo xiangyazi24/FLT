@@ -1,0 +1,10 @@
+{
+  "name": "point-04",
+  "args": [
+    "/workspace/shared/flt-n25-yz-fraction-embedding/CurvePointFractionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 17.525229033999494,
+  "peak_child_rss_kib": 2509512,
+  "source_sha256": "cfc2e7b02424445667be505ade97b520c50e322bd4079938e225fc53cda2f239"
+}

@@ -1,0 +1,41 @@
+import FLT.Assumptions.MazurProof.N25F_YZLocalFractionEmbedding
+set_option synthInstance.maxHeartbeats 200000
+open MazurProof.N25F_YZLocalFractionEmbedding
+#check zYOpenToFraction
+#print axioms zYOpenToFraction
+#check zYOpenToFraction_algebraMap
+#print axioms zYOpenToFraction_algebraMap
+#check zYOpenToFraction_isFractionRing
+#print axioms zYOpenToFraction_isFractionRing
+#check zYOpenToFraction_injective
+#print axioms zYOpenToFraction_injective
+#check zYOpenToFraction_invSelf
+#print axioms zYOpenToFraction_invSelf
+#check yZOpenToFraction
+#print axioms yZOpenToFraction
+#check yZOpenToFraction_injective
+#print axioms yZOpenToFraction_injective
+#check yZOpenToFraction_isFractionRing
+#print axioms yZOpenToFraction_isFractionRing
+#check yzLocalToFraction
+#print axioms yzLocalToFraction
+#check yzLocalToFraction_algebraMap
+#print axioms yzLocalToFraction_algebraMap
+#check yzLocalToFraction_injective
+#print axioms yzLocalToFraction_injective
+#check yzLocalToFraction_isFractionRing
+#print axioms yzLocalToFraction_isFractionRing
+#check fraction_qy_ne_zero
+#print axioms fraction_qy_ne_zero
+#check yzLocalToFraction_yZ
+#print axioms yzLocalToFraction_yZ
+#check yzLocalToFraction_yzW
+#print axioms yzLocalToFraction_yzW
+#check yzLocalToFraction_yX
+#print axioms yzLocalToFraction_yX
+#check yzLocalToFraction_unique
+#print axioms yzLocalToFraction_unique
+#check yzLocalToFraction_yzZGerm
+#print axioms yzLocalToFraction_yzZGerm
+#check yzLocalToFraction_yzWGerm
+#print axioms yzLocalToFraction_yzWGerm

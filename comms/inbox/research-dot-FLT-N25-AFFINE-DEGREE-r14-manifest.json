@@ -1,0 +1,120 @@
+{
+  "accepted_source_commit": "11c72e9feb3d47fb022469a40198ec85fdec3097",
+  "dispatch_commit": "c429fb036a24ff9059775c742fb745abdcd36951",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 22187,
+      "sha256": "57a1f32db4dace7100a96b51510d6a0ac0aeb56d178d1f7cfb8d44e377cdaa0b"
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalFractionEmbedding.lean",
+      "encoding": "utf-8",
+      "bytes": 11674,
+      "sha256": "9ba78aebc9f91f3afec1dc121c5881fa7600836d2ea9332b0a3443b5b175633c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/ActualYZLocalFractionEmbeddingCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1503,
+      "sha256": "c37b583f7b6ced7d8bfa856e8c962ef96a5ad4419ff824a82e3a4542b428c580"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/AwayFractionCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 3709,
+      "sha256": "37a56c3a89b7c086de907a69dd442881e15694edff58e575227efd026f09d8ad"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/CurvePointFractionCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 9322,
+      "sha256": "cfc2e7b02424445667be505ade97b520c50e322bd4079938e225fc53cda2f239"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/GenericFractionExtension.lean",
+      "encoding": "utf-8",
+      "bytes": 2479,
+      "sha256": "b7b55cadc2d2db58dfd45ee2858b89f537961577650974318bcda9df7290ba0c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/MANIFEST.json",
+      "encoding": "utf-8",
+      "bytes": 3287,
+      "sha256": "375c251f3338a6cb8c3b2709f14b1ccd90e2e4420fa6146ced60c102cc33ce27"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/RESULT.md",
+      "encoding": "utf-8",
+      "bytes": 3977,
+      "sha256": "6277e7ab637d96a802366f2517b2c6d7bc7f53fd96d98b4fb6a3c72d87502473"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/accepted-dvr-byte-check.json",
+      "encoding": "utf-8",
+      "bytes": 204,
+      "sha256": "76663fd35e0de27f0896df3cfe960decf3e52a209e130f33b29b041ae8323018"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/away-03.json",
+      "encoding": "utf-8",
+      "bytes": 440,
+      "sha256": "e3d6a68f8c0f360d84fcfc6888dccbed0977e2c1179d804d0f0b0470c702e4d3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/away-03.log",
+      "encoding": "utf-8",
+      "bytes": 967,
+      "sha256": "f7b2362222718812bd37a0118ff4ab33e63759a5180375df253157e295ba692e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 298,
+      "sha256": "7b33ded3b7d0fbe5d89ee019315d3fccef2ff4ff47c49f1dacd6df98235324a3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 115,
+      "sha256": "cd6afc964036979436346139f9648c4c32b4b445d0cb6efd9bd4825583fd76f3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/lead-receipt-r14.md",
+      "encoding": "utf-8",
+      "bytes": 523,
+      "sha256": "632f5229a0acbd9cfad5a66f5b1f7b903695e516a26a0732fba9185d8ed6a880"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/make_production.py",
+      "encoding": "utf-8",
+      "bytes": 3598,
+      "sha256": "eb818573a3e7191d5b6a3c67c9cbdbd3c9b0c0d8f5d79aae5145243522667608"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/point-04.json",
+      "encoding": "utf-8",
+      "bytes": 296,
+      "sha256": "4c2bb4e082577e5926532b17f84631ef773a9b3e396ce9ca02219bc8cb7d2931"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/point-04.log",
+      "encoding": "utf-8",
+      "bytes": 1581,
+      "sha256": "8d22a832e3b028b840dc1cda54db804a245cc6185c30775fa1671c4a6b61435f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-FRACTION-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 883,
+      "sha256": "8902861b17eb5c4714d4b54bad24dec669144f4f190052936a36a717e0d80099"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r14.md",
+      "encoding": "utf-8",
+      "bytes": 3541,
+      "sha256": "61020756c9af48944f1dddd725ccbc6f4a45f5e3ec5f756571d4fa183f8ba746"
+    }
+  ]
+}
