@@ -1,0 +1,10 @@
+{
+  "name": "audit-01",
+  "args": [
+    "/workspace/shared/flt-n25-ord-ring-equiv/OrderRingEquivCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 54.25475060000099,
+  "peak_child_rss_kib": 2522924,
+  "source_sha256": "4bb05681f0d9862e15abddc8de82147a8f30cff032fc361e82704630484bd580"
+}

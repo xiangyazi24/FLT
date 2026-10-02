@@ -1,0 +1,10 @@
+{
+  "name": "production-01",
+  "args": [
+    "/workspace/shared/flt-n25-ord-ring-equiv/N25F_OrderRingEquiv.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 75.57547118599905,
+  "peak_child_rss_kib": 2249572,
+  "source_sha256": "24b7e7fef45c44a938686de24fc25147c4d6a5eb7d2c83aacb6cc9ee3af7d42a"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "family-02",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-localizations/InfinityLocalizationsCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 60.53113618600037,
+  "peak_child_rss_kib": 2828188,
+  "source_sha256": "20933cfe81f582943803729a5b1bd371823b701a6b0f3a56494fbd79568a984d"
+}

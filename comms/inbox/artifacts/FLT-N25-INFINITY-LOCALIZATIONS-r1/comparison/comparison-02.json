@@ -1,0 +1,14 @@
+{
+  "name": "comparison-02",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-center-localization",
+    "-o",
+    "/workspace/shared/flt-n25-center-localization/CenterLocalizationCheck.olean",
+    "/workspace/shared/flt-n25-center-localization/CenterLocalizationCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 14.709625650997623,
+  "peak_child_rss_kib": 2538512,
+  "source_sha256": "125e6f44ee89d4b972a69c224d1f2e10bbfc372ba6fa859e1e7891f30e70673f"
+}

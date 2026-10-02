@@ -18,6 +18,12 @@ attribute [local instance] infinityPolynomialAlgebra
 local instance : Module BasePolynomial CurveField :=
   @Algebra.toModule BasePolynomial CurveField _ _ infinityPolynomialAlgebra
 local instance : SMul BasePolynomial CurveField := infinityPolynomialAlgebra.toSMul
+local instance : Algebra BasePolynomial XLocalRing :=
+  infinityBaseToX.toRingHom.toAlgebra
+local instance : Algebra BasePolynomial YZLocalRing :=
+  infinityBaseToYZ.toRingHom.toAlgebra
+local instance : Algebra BasePolynomial ZLocalRing :=
+  infinityBaseToZ.toRingHom.toAlgebra
 
 /-- The reciprocal base coordinate as an actual element of the normalization. -/
 def infinityParameter : InfinityNormalization :=

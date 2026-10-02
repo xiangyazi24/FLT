@@ -1,0 +1,61 @@
+{
+  "source_commit": "eb3f5d1c241368c4393d55a83e5c075963a499f0",
+  "accepted_center_delta": {
+    "source": "eb3f5d1c241368c4393d55a83e5c075963a499f0",
+    "blob": "54d051db598c150de32cad8a00a268f8aa968eb0",
+    "exact_six_line_fix": true
+  },
+  "actual_full_imports": "NOT RUN",
+  "actual_production_additional_hypotheses": [],
+  "generic_comparison": {
+    "name": "comparison-02",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-center-localization",
+      "-o",
+      "/workspace/shared/flt-n25-center-localization/CenterLocalizationCheck.olean",
+      "/workspace/shared/flt-n25-center-localization/CenterLocalizationCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 14.709625650997623,
+    "peak_child_rss_kib": 2538512,
+    "source_sha256": "125e6f44ee89d4b972a69c224d1f2e10bbfc372ba6fa859e1e7891f30e70673f"
+  },
+  "actual_carrier_family": {
+    "name": "family-02",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-localizations/InfinityLocalizationsCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 60.53113618600037,
+    "peak_child_rss_kib": 2828188,
+    "source_sha256": "20933cfe81f582943803729a5b1bd371823b701a6b0f3a56494fbd79568a984d"
+  },
+  "order_production": {
+    "name": "production-01",
+    "args": [
+      "/workspace/shared/flt-n25-ord-ring-equiv/N25F_OrderRingEquiv.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 75.57547118599905,
+    "peak_child_rss_kib": 2249572,
+    "source_sha256": "24b7e7fef45c44a938686de24fc25147c4d6a5eb7d2c83aacb6cc9ee3af7d42a"
+  },
+  "order_audit": {
+    "name": "audit-01",
+    "args": [
+      "/workspace/shared/flt-n25-ord-ring-equiv/OrderRingEquivCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 54.25475060000099,
+    "peak_child_rss_kib": 2522924,
+    "source_sha256": "4bb05681f0d9862e15abddc8de82147a8f30cff032fc361e82704630484bd580"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "generic_source_difference": "Only accepted rigidity import path renamed to exact emitted local module; audit commands appended",
+  "new_public_declarations": 15
+}

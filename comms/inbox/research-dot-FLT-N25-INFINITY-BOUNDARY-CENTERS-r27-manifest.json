@@ -1,0 +1,143 @@
+{
+  "source_commit": "eb3f5d1c241368c4393d55a83e5c075963a499f0",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 28195,
+      "sha256": "24bdd924b8875e7e23a9fce10c0b2045d94b05e5e07e7366c49d69d8b4848a4c"
+    },
+    {
+      "path": "comms/candidates/N25F_CenterLocalization.lean",
+      "encoding": "utf-8",
+      "bytes": 3913,
+      "sha256": "8abd958ed025356bebfb6b4b8561529816e9e59bf35b068c3a84dbd43e4575cb"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityBoundaryCenters.lean",
+      "encoding": "utf-8",
+      "bytes": 5834,
+      "sha256": "46e691413e5167dc67719503f44c576aac9996d41428d7350ee67a4a189ad26e"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityLocalizations.lean",
+      "encoding": "utf-8",
+      "bytes": 4972,
+      "sha256": "bd23fc7c496b09f51acc12875fb6d34513fff47f23e5ada84eecb2d6fa4fc012"
+    },
+    {
+      "path": "comms/candidates/N25F_OrderRingEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 1154,
+      "sha256": "24b7e7fef45c44a938686de24fc25147c4d6a5eb7d2c83aacb6cc9ee3af7d42a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/ActualInfinityLocalizationsCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1357,
+      "sha256": "5151c0ffcd5600e0dcf3c1983dbd870d1f6f82dbdf64a7ab6fb012f4f0017d00"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/InfinityLocalizationsCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 2121,
+      "sha256": "20933cfe81f582943803729a5b1bd371823b701a6b0f3a56494fbd79568a984d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/comparison/CenterLocalizationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 4276,
+      "sha256": "125e6f44ee89d4b972a69c224d1f2e10bbfc372ba6fa859e1e7891f30e70673f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/comparison/comparison-02.json",
+      "encoding": "utf-8",
+      "bytes": 455,
+      "sha256": "540f8d0ad06aab962e11781f77bc22347e88b0c22a964f227170bff04e63a90f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/comparison/comparison-02.log",
+      "encoding": "utf-8",
+      "bytes": 630,
+      "sha256": "5e10d6ae267f7afc5073d08b83769752b85e539d14e51d01d40957e78d2d3def"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/comparison/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 881,
+      "sha256": "0b4d3d0efd3cd56cacc89e5c5ce9fcc9a151c6192bf53c343804940d8b0f86b0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/family-02.json",
+      "encoding": "utf-8",
+      "bytes": 300,
+      "sha256": "24768458eeec8aad8d92840714254c2af7065ffae81f7b7b52dfc8a7a6d217c0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/family-02.log",
+      "encoding": "utf-8",
+      "bytes": 418,
+      "sha256": "41a523ee186f8a512324c6f83a8d968d8656294c323a36f8f74d6e34f7d19341"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/lead-FLT-N25-receipt-r27.md",
+      "encoding": "utf-8",
+      "bytes": 1459,
+      "sha256": "7c6541460f8901933fd73d60e5cf063f86f263dfa91a50de01b4d9463b80294a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/order/OrderRingEquivCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 1218,
+      "sha256": "4bb05681f0d9862e15abddc8de82147a8f30cff032fc361e82704630484bd580"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/order/audit-01.json",
+      "encoding": "utf-8",
+      "bytes": 284,
+      "sha256": "e4ca6312a95eaf323319fdd83a4b890c94c093b8de890ea7366a00134affc103"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/order/audit-01.log",
+      "encoding": "utf-8",
+      "bytes": 110,
+      "sha256": "db9001539cd29f646df9aabb776446a5083d33e65b84b13230b87fccaf42cf62"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/order/production-01.json",
+      "encoding": "utf-8",
+      "bytes": 289,
+      "sha256": "4ad4219a3d5df79440ccda84c2b873804d842bd00bdb27f480b3ad0f6dc308bd"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/order/production-01.log",
+      "encoding": "utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/order/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 876,
+      "sha256": "7a74044afffc77a7402fafa3ddc975043c9820b989b317b2c82e0bc618d4bc10"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 884,
+      "sha256": "99f7fe6500a05e959a67f18fb97f20bfa9ddda8ddb4b5dddf49a10edbc9bdc80"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-INFINITY-LOCALIZATIONS-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2072,
+      "sha256": "369da13a8fe5af20bca5eb8dc52bd4d6a775a08d0ced8fe5781bc1514c89989b"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-INFINITY-BOUNDARY-CENTERS-r27.md",
+      "encoding": "utf-8",
+      "bytes": 6018,
+      "sha256": "fc8912501525a6d56e4099eba4fd3d2e85d2d3143fa5b65c953a805406531f49"
+    }
+  ]
+}
