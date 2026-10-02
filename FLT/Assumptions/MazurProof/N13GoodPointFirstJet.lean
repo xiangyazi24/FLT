@@ -19,10 +19,10 @@ open Polynomial MulOpposite
 universe u
 variable {K : Type u} [Field K]
 
-abbrev Dual := TrivSqZeroExt K K
-abbrev Good := N13GeneralizedMumfordIntegral.CoordinateRing (R := K)
+abbrev Dual (K : Type u) [Field K] := TrivSqZeroExt K K
+abbrev Good (K : Type u) [Field K] := N13GeneralizedMumfordIntegral.CoordinateRing (R := K)
 
-def polynomialJet (x : K) : K[X] →+* Dual where
+def polynomialJet (x : K) : K[X] →+* Dual K where
   toFun p := (p.eval x, p.derivative.eval x)
   map_zero' := by apply TrivSqZeroExt.ext <;> simp
   map_one' := by apply TrivSqZeroExt.ext <;> simp
@@ -33,6 +33,9 @@ def polynomialJet (x : K) : K[X] →+* Dual where
     · simp [derivative_mul, smul_eq_mul, op_smul_eq_smul]
       ring
 
+private theorem polynomialJet_apply (x : K) (p : K[X]) :
+    polynomialJet x p = (p.eval x, p.derivative.eval x) := rfl
+
 private theorem root_jet
     (x y s : K)
     (hc : y ^ 2 + (x ^ 3 + x + 1) * y - (x ^ 5 + x ^ 4) = 0)
@@ -41,19 +44,25 @@ private theorem root_jet
     (N13GeneralizedMumfordIntegral.curvePoly (R := K)).eval₂
       (polynomialJet x) (y, s) = 0 := by
   apply TrivSqZeroExt.ext
-  · simpa [N13GeneralizedMumfordIntegral.curvePoly,
+  · simp only [N13GeneralizedMumfordIntegral.curvePoly,
       N13GeneralizedMumfordIntegral.hPoly, N13GeneralizedMumfordIntegral.rhsPoly,
-      polynomialJet] using hc
-  · convert hd using 1 <;>
-      simp [N13GeneralizedMumfordIntegral.curvePoly,
-        N13GeneralizedMumfordIntegral.hPoly, N13GeneralizedMumfordIntegral.rhsPoly,
-        polynomialJet, derivative_mul, derivative_pow, smul_eq_mul,
-        op_smul_eq_smul, nsmul_eq_mul] <;> ring
+      eval₂_add, eval₂_sub, eval₂_mul, eval₂_pow, eval₂_C, eval₂_X, eval₂_one,
+      polynomialJet_apply, TrivSqZeroExt.fst_add, TrivSqZeroExt.fst_sub, TrivSqZeroExt.fst_mul,
+      TrivSqZeroExt.fst_pow, TrivSqZeroExt.fst_one, TrivSqZeroExt.fst_zero,
+      eval_X, eval_add, eval_pow, eval_one, eval_C, TrivSqZeroExt.fst_mk]
+    linear_combination hc
+  · simp only [N13GeneralizedMumfordIntegral.curvePoly,
+      N13GeneralizedMumfordIntegral.hPoly, N13GeneralizedMumfordIntegral.rhsPoly,
+      eval₂_add, eval₂_sub, eval₂_mul, eval₂_pow, eval₂_C, eval₂_X, eval₂_one,
+      polynomialJet_apply]
+    simp [derivative_mul, derivative_pow, smul_eq_mul, op_smul_eq_smul, nsmul_eq_mul,
+      TrivSqZeroExt.snd_pow]
+    linear_combination hd
 
 def pointJet (x y s : K)
     (hc : y ^ 2 + (x ^ 3 + x + 1) * y - (x ^ 5 + x ^ 4) = 0)
     (hd : (2 * y + (x ^ 3 + x + 1)) * s +
-      (3 * x ^ 2 + 1) * y - (5 * x ^ 4 + 4 * x ^ 3) = 0) : Good →+* Dual :=
+      (3 * x ^ 2 + 1) * y - (5 * x ^ 4 + 4 * x ^ 3) = 0) : Good K →+* Dual K :=
   AdjoinRoot.lift (polynomialJet x) (y, s) (root_jet x y s hc hd)
 
 section
@@ -72,9 +81,9 @@ variable (hd : (2 * y + (x ^ 3 + x + 1)) * s +
 
 theorem square_graph_maps_to_zero (u v : K[X])
     (hu : u.eval x = 0) (hv : v.eval x = y)
-    (n : Good) (hn : n ∈ N13GeneralizedMumfordIntegral.mumfordIdeal u v ^ 2) :
+    (n : Good K) (hn : n ∈ N13GeneralizedMumfordIntegral.mumfordIdeal u v ^ 2) :
     pointJet x y s hc hd n = 0 := by
-  let f : Good →+* K :=
+  let f : Good K →+* K :=
     (TrivSqZeroExt.fstHom K K K).toRingHom.comp (pointJet x y s hc hd)
   have hI : N13GeneralizedMumfordIntegral.mumfordIdeal u v ≤ RingHom.ker f := by
     rw [N13GeneralizedMumfordIntegral.mumfordIdeal, Ideal.span_le]
@@ -98,6 +107,7 @@ theorem square_graph_maps_to_zero (u v : K[X])
       simp [hfa, hfb, smul_eq_mul, op_smul_eq_smul]
   exact hsquare hn
 
+include hc hd in
 theorem value_derivative_of_square_graph
     (u v p q : K[X]) (hu : u.eval x = 0) (hv : v.eval x = y)
     (hn : N13GeneralizedMumfordIntegral.xClass p +

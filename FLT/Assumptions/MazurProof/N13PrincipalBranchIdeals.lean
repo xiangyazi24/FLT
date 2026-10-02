@@ -25,10 +25,17 @@ abbrev F := N13IntegralFractionalHull.FunctionField
 
 local instance : Algebra A R := N13IntegralFractionalHull.integralToRational.toAlgebra
 
+private theorem includePower_injective : Function.Injective includePower :=
+  HahnSeries.ofPowerSeries_injective
+
+private theorem includePower_ne_zero {f : QP} (hf : f ≠ 0) : includePower f ≠ 0 :=
+  (map_ne_zero_iff includePower includePower_injective).mpr hf
+
+private theorem two_eq_C : (2 : L) = HahnSeries.C (2 : Q₂) := (map_ofNat _ 2).symm
+
 theorem includePower_order (f : QP) (hf : f ≠ 0) :
     (includePower f).order = (f.order.toNat : ℤ) := by
-  have hinc : includePower f ≠ 0 := by
-    simpa only [map_zero] using (HahnSeries.ofPowerSeries_injective.ne hf)
+  have hinc : includePower f ≠ 0 := includePower_ne_zero hf
   apply le_antisymm
   · apply HahnSeries.order_le_of_coeff_ne_zero
     change (HahnSeries.ofPowerSeries ℤ Q₂ f).coeff (f.order.toNat : ℤ) ≠ 0
@@ -63,10 +70,7 @@ theorem principal_power_ideal_eq_of_orders (f g : QP) (hf : f ≠ 0) (hg : g ≠
     Ideal.span_singleton_mul_span_singleton, ← pow_add, ← pow_add, hn]
 
 private theorem scalar_order (n : ℕ) : ((2 : L) ^ n).order = 0 := by
-  have h : (algebraMap Q₂ L ((2 : Q₂) ^ n)).order = 0 := by
-    rw [HahnSeries.algebraMap_apply', HahnSeries.order_single
-      (pow_ne_zero n (by norm_num : (2 : Q₂) ≠ 0))]
-  simpa only [map_pow, map_ofNat] using h
+  rw [two_eq_C, ← map_pow, HahnSeries.order_C]
 
 private theorem clear_cross
     (χ : F →+* L) (f a b : F) (c d : L) (n m : ℕ)
@@ -89,12 +93,10 @@ private theorem order_of_scaled_cross
     (n m : ℕ)
     (h : (2 : L) ^ m * χ (f : F) * includePower d = (2 : L) ^ n * includePower c) :
     (includePower c).order = (χ (f : F)).order + (includePower d).order := by
-  have h2 : (2 : L) ≠ 0 := by norm_num
+  have h2 : (2 : L) ≠ 0 := by rw [two_eq_C]; exact HahnSeries.C_ne_zero (by norm_num)
   have hf : χ (f : F) ≠ 0 := by simpa only [map_zero] using χ.injective.ne f.ne_zero
-  have hc' : includePower c ≠ 0 := by
-    simpa only [map_zero] using (HahnSeries.ofPowerSeries_injective.ne hc)
-  have hd' : includePower d ≠ 0 := by
-    simpa only [map_zero] using (HahnSeries.ofPowerSeries_injective.ne hd)
+  have hc' : includePower c ≠ 0 := includePower_ne_zero hc
+  have hd' : includePower d ≠ 0 := includePower_ne_zero hd
   have ho := congrArg HahnSeries.order h
   rw [HahnSeries.order_mul (mul_ne_zero (pow_ne_zero m h2) hf) hd',
     HahnSeries.order_mul (pow_ne_zero m h2) hf,
@@ -150,7 +152,8 @@ theorem branch_orders_of_primitive_presentation
       (by simpa only [map_zero] using negativeExpansion_injective.ne hd) n m
       (clear_cross _ _ _ _ _ _ n m hbF hf hm')
 
-open N13InfinityChartMarking N13EffectiveInfinityRepair
+open N13InfinityChartMarking hiding B QP
+open N13EffectiveInfinityRepair
 
 /-- The affine principal relation and its positive orientation force BOTH
 actual branch ideal equations for the transported common numerator and

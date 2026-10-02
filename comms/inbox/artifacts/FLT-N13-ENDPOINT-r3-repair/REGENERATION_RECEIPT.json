@@ -1,0 +1,11 @@
+{
+  "status": "BYTE_IDENTICAL_REGENERATION_AND_SOURCE_LITERAL_AUDIT_PASS",
+  "candidate_sha256": "5ca2de32cec1df09a869dfbc5f3bcc216ece07af20d44d6796ae0f384404de26",
+  "regenerated_bytes": 255643,
+  "commands": [
+    "python generate_candidate.py",
+    "python independent_source_literal_audit.py"
+  ],
+  "lean_build": "NOT RUN",
+  "axiom_checks": "NOT RUN"
+}

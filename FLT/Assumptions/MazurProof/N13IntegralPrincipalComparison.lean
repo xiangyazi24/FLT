@@ -14,8 +14,10 @@ namespace MazurProof.N13IntegralPrincipalComparison
 
 noncomputable section
 open N13OverlapBranchCompatibility N13PrincipalBranchIdeals
-open N13TwoChartPicardRealization N13GenericInfinityComparison
-open N13InfinityChartMarking N13EffectiveInfinityRepair
+open N13TwoChartPicardRealization hiding Q₂
+open N13GenericInfinityComparison
+open N13InfinityChartMarking hiding Line B QP
+open N13EffectiveInfinityRepair
 open scoped nonZeroDivisors
 local instance : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
 
@@ -94,9 +96,8 @@ private theorem principal_mul_infinity_isUnit (c : B) (hc : c ≠ 0) (L : Line) 
   rw [FractionalIdeal.coeIdeal_mul]
   have hprincipal : IsUnit ((Ideal.span ({c} : Set B) : Ideal B) :
       N13IntegralInfinityPointSpread.InfinityFractionalIdeal) := by
-    refine ⟨Units.mkOfMulEqOne _ _ ?_, rfl⟩
-    exact FractionalIdeal.coe_ideal_span_singleton_mul_inv
-      N13IntegralInfinityPointSpread.FunctionField hc
+    exact IsUnit.of_mul_eq_one _ (FractionalIdeal.coe_ideal_span_singleton_mul_inv
+      N13IntegralInfinityPointSpread.FunctionField hc)
   exact hprincipal.mul L.infinity_isUnit
 
 private theorem principal_mul_reduction_ne_bot
@@ -107,7 +108,7 @@ private theorem principal_mul_reduction_ne_bot
   intro h
   rcases Ideal.mul_eq_bot.mp h with hp | hI0
   · apply hc
-    have hm := Ideal.subset_span (Set.mem_singleton (N13IntegralInfinityReduction.reduceCoordinate c))
+    have hm := Ideal.mem_span_singleton_self (N13IntegralInfinityReduction.reduceCoordinate c)
     rwa [hp, Ideal.mem_bot] at hm
   · exact hI hI0
 

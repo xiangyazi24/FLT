@@ -71,6 +71,10 @@ def overlapBranch (negative : Bool) : O →+* L :=
   rw [overlapBranch_infinity, branch_base]
   simp
 
+private theorem base_X' : base X = t⁻¹ := by
+  simp only [base, N13BranchNorm.evalPoly, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_X]
+  rfl
+
 theorem overlapBranch_affine_hom (negative : Bool) :
     (overlapBranch negative).comp N13SpecialCurveOverlap.affineToInfinityOverlap =
       affineBranch negative := by
@@ -78,24 +82,32 @@ theorem overlapBranch_affine_hom (negative : Bool) :
   · apply Polynomial.ringHom_ext
     · intro a
       change overlapBranch negative
-        (N13SpecialCurveOverlap.affineToInfinityOverlap (N13GoodCoordinateRingTwo.xClass (C a))) = _
+        (N13SpecialCurveOverlap.affineToInfinityOverlap
+          (AdjoinRoot.of N13GoodCoordinateRingTwo.curvePoly (C a))) =
+        affineBranch negative (N13GoodCoordinateRingTwo.xClass (C a))
       rw [N13SpecialCurveOverlap.affineToInfinityOverlap_of]
-      simp only [N13SpecialCurveOverlap.affineCoeffMap, Polynomial.eval₂RingHom_apply, Polynomial.eval₂_C]
+      simp only [N13SpecialCurveOverlap.affineCoeffMap, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_C]
       rw [overlapBranch_coefficient]
       cases negative <;> simp [affineBranch, base, N13BranchNorm.evalPoly]
     · change overlapBranch negative
-        (N13SpecialCurveOverlap.affineToInfinityOverlap N13SpecialCurveOverlap.xClass) = _
+        (N13SpecialCurveOverlap.affineToInfinityOverlap N13SpecialCurveOverlap.xClass) =
+        affineBranch negative (N13GoodCoordinateRingTwo.xClass X)
       rw [N13SpecialCurveOverlap.affineToInfinityOverlap_xClass, overlapBranch_x]
-      cases negative <;> simp [affineBranch, base, N13BranchNorm.evalPoly,
-        N13SpecialCurveOverlap.xClass, N13Infinity.parameter, t,
-        N13LaurentPolynomialOrder.parameter]
+      cases negative
+      · simp only [affineBranch, Bool.false_eq_true, if_false, plus_xClass, base_X']
+      · simp only [affineBranch, if_true, minus_xClass, base_X']
   · change overlapBranch negative
-      (N13SpecialCurveOverlap.affineToInfinityOverlap N13SpecialCurveOverlap.yClass) = _
+      (N13SpecialCurveOverlap.affineToInfinityOverlap N13SpecialCurveOverlap.yClass) =
+      affineBranch negative N13GoodCoordinateRingTwo.yClass
     rw [N13SpecialCurveOverlap.affineToInfinityOverlap_yClass]
     change overlapBranch negative (N13SpecialCurveOverlap.xOverlap ^ 3 *
       algebraMap B O N13SpecialInfinityChart.vClass) = _
     rw [map_mul, map_pow, overlapBranch_x, overlapBranch_infinity]
-    cases negative <;> simp [affineBranch, infinityBranch]
+    cases negative
+    · simp only [affineBranch, infinityBranch, Bool.false_eq_true, if_false, plus_yClass,
+        N13SpecialInfinityBranchJets.plus_v]
+    · simp only [affineBranch, infinityBranch, if_true, minus_yClass,
+        N13SpecialInfinityBranchJets.minus_v]
 
 @[simp] theorem overlapBranch_affine (negative : Bool) (a : R) :
     overlapBranch negative (N13SpecialCurveOverlap.affineToInfinityOverlap a) =

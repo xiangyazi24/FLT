@@ -14,7 +14,8 @@ for the principal-comparison target.
 namespace MazurProof.N13SpecialSmallNumerator
 
 noncomputable section
-open Polynomial N13SpecialDivisorCharts N13SpecialLaurentBranches N13SpecialOverlapBranches
+open Polynomial N13SpecialDivisorCharts N13SpecialOverlapBranches
+open N13SpecialLaurentBranches hiding K R
 open N13SpecialComparisonFactorPair N13SpecialDivisorBranchOrders N13SpecialBranchFaithfulness
 
 private theorem include_X : includeSeries (PowerSeries.X : N13SpecialLaurentBranches.P) = t :=
@@ -43,8 +44,10 @@ theorem order_balance_of_principal_power_eq
   obtain ⟨u, hu⟩ := Ideal.span_singleton_eq_span_singleton.mp h
   have he := congrArg includeSeries hu
   simp only [map_mul, map_pow, include_X] at he
-  have hf' : includeSeries f ≠ 0 := by simpa only [map_zero] using HahnSeries.ofPowerSeries_injective.ne hf
-  have hg' : includeSeries g ≠ 0 := by simpa only [map_zero] using HahnSeries.ofPowerSeries_injective.ne hg
+  have hf' : includeSeries f ≠ 0 :=
+    (map_ne_zero_iff includeSeries HahnSeries.ofPowerSeries_injective).mpr hf
+  have hg' : includeSeries g ≠ 0 :=
+    (map_ne_zero_iff includeSeries HahnSeries.ofPowerSeries_injective).mpr hg
   have ho := congrArg HahnSeries.order he
   rw [HahnSeries.order_mul (mul_ne_zero hf' (pow_ne_zero n t_ne_zero)) (u.isUnit.map includeSeries).ne_zero,
     HahnSeries.order_mul hf' (pow_ne_zero n t_ne_zero),
@@ -81,11 +84,11 @@ theorem cleared_numerator_pole_bound
     (-4 : ℤ) ≤ (affineBranch negative z).order := by
   have ha := affineBranch_ne_zero negative _ h.aNum_ne
   have hb := affineBranch_ne_zero negative _ h.aDen_ne
-  have hc : includeSeries (infinityBranch negative h.iNum) ≠ 0 := by
-    simpa only [map_zero] using HahnSeries.ofPowerSeries_injective.ne
+  have hc : includeSeries (infinityBranch negative h.iNum) ≠ 0 :=
+    (map_ne_zero_iff includeSeries HahnSeries.ofPowerSeries_injective).mpr
       (infinityBranch_ne_zero negative _ h.iNum_ne)
-  have hd : includeSeries (infinityBranch negative h.iDen) ≠ 0 := by
-    simpa only [map_zero] using HahnSeries.ofPowerSeries_injective.ne
+  have hd : includeSeries (infinityBranch negative h.iDen) ≠ 0 :=
+    (map_ne_zero_iff includeSeries HahnSeries.ofPowerSeries_injective).mpr
       (infinityBranch_ne_zero negative _ h.iDen_ne)
   have he := congrArg HahnSeries.order (cross_relation negative _ _ _ _ h.overlap_eq)
   rw [HahnSeries.order_mul ha hd, HahnSeries.order_mul hb hc] at he
@@ -127,10 +130,10 @@ theorem exists_small_supported_numerator
   change (-4 : ℤ) ≤ (minus z).order at hm
   have hbounds := degree_four_polynomial_bounds
     (N13GoodCoordinateRingTwo.coeff0 z) (N13GoodCoordinateRingTwo.coeffY z)
-    (by rwa [hrepr]) (by rwa [hrepr])
+    (by rw [hrepr]; exact hp) (by rw [hrepr]; exact hm)
   refine ⟨_, _, i, j, hbounds.1, hbounds.2, hij, ?_, ?_, ?_, hnorm⟩
-  · rwa [hrepr]
-  · rwa [hrepr]
+  · rw [hrepr]; exact hz
+  · rw [hrepr]; exact hcross
   · exact N13SpecialAffineNorm.norm_ne_zero z hz
 
 end

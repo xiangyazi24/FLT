@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13EffectiveDataCompatibility
+import FLT.Assumptions.MazurProof.N13RationalCurvePointPicardRealization
 
 /-!
 Source pin: 887d29cd9eb9b60a6e5ec438ff919a74ccda41e5.
@@ -14,7 +15,8 @@ namespace MazurProof.N13PointDataCertificates
 
 noncomputable section
 open Polynomial N13EffectiveDataCompatibility N13EffectiveInfinityRepair
-open N13InfinityChartMarking N13TwoChartPicardRealization
+open N13InfinityChartMarking hiding Line B QP
+open N13TwoChartPicardRealization
 local instance : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
 
 theorem infinityPlus_certified : Certified N13InfinityPointPicardRealization.infinityPlusData := by
@@ -23,8 +25,9 @@ theorem infinityPlus_certified : Certified N13InfinityPointPicardRealization.inf
   · norm_num [EffectiveChamber, SexticMumford.zero]
   · exact genericRaw_eq_mumfordRaw_of_map_affineIdeal_eq _ _
       N13InfinityPointPicardRealization.map_infinityPlusLine_affineIdeal
-  · simpa [positiveMultiplicity, negativeMultiplicity, SexticMumford.zero] using
-      hasInfinityMultiplicities_tensor _ _ 1 0 1 0 infinityPlusLine_marked infinityPlusLine_marked
+  · have h := hasInfinityMultiplicities_tensor _ _ 1 0 1 0 infinityPlusLine_marked infinityPlusLine_marked
+    convert h using 2 <;>
+      first | rfl | simp [positiveMultiplicity, negativeMultiplicity, SexticMumford.zero]
 
 theorem infinityMinus_certified : Certified N13InfinityPointPicardRealization.infinityMinusData := by
   refine ⟨(SexticMumford.infinityMinusMumford Model).toSemi, ?_, ?_,
@@ -32,8 +35,9 @@ theorem infinityMinus_certified : Certified N13InfinityPointPicardRealization.in
   · norm_num [EffectiveChamber, SexticMumford.infinityMinusMumford]
   · exact genericRaw_eq_mumfordRaw_of_map_affineIdeal_eq _ _
       N13InfinityPointPicardRealization.map_infinityMinusLine_affineIdeal
-  · simpa [positiveMultiplicity, negativeMultiplicity, SexticMumford.infinityMinusMumford] using
-      hasInfinityMultiplicities_tensor _ _ 0 1 1 0 infinityMinusLine_marked infinityPlusLine_marked
+  · have h := hasInfinityMultiplicities_tensor _ _ 0 1 1 0 infinityMinusLine_marked infinityPlusLine_marked
+    convert h using 2 <;>
+      first | rfl | simp [positiveMultiplicity, negativeMultiplicity, SexticMumford.infinityMinusMumford]
 
 private theorem with_positive_anchor_marked (L : Line) (hL : HasInfinityMultiplicities L 0 0) :
     HasInfinityMultiplicities (N13TwoChartLineTensor.withPositiveInfinityMultiplicity L 1) 1 0 := by
@@ -73,7 +77,7 @@ theorem escapingPoint_certified (x y : Q₂) (hx : x.valuation < 0)
   · have hm : HasInfinityMultiplicities
         (N13IntegralInfinityPointSpread.nonintegralPointLine x y hx hxy) 0 0 := by
       apply infinityChartPointLine_marked
-      exact N13LocalDlogRegimes.inverseIntegralPart_ne_zero x _
+      exact N13LocalDlogRegimes.inverseIntegralPart_ne_zero x hx
     change HasInfinityMultiplicities
       (N13TwoChartLineTensor.withPositiveInfinityMultiplicity
         (N13IntegralInfinityPointSpread.nonintegralPointLine x y hx hxy) 1)
@@ -94,11 +98,11 @@ theorem rationalPoint_certified (P : N13RationalPointEndgame.RationalCurvePoint)
     have hgood : N13GoodModelTwo.AffineEquation x₂ y₂ :=
       N13ProperCurveReduction.map_good_equation hC13
     by_cases hx : ‖N13ProperCurveReduction.ratToQ₂ X‖ ≤ 1
-    · rw [N13RationalCurvePointPicardRealization.data, dif_pos hx]
+    · simp only [N13RationalCurvePointPicardRealization.data, dif_pos hx]
       change Certified (N13IntegralPointPicardRealization.data
         (N13ProperCurveReduction.integralAffineLift x₂ y₂ hx hgood))
       exact integralPoint_certified _
-    · rw [N13RationalCurvePointPicardRealization.data, dif_neg hx]
+    · simp only [N13RationalCurvePointPicardRealization.data, dif_neg hx]
       have hxval : x₂.valuation < 0 :=
         lt_of_not_ge ((Padic.norm_le_one_iff_val_nonneg x₂).not.mp hx)
       change Certified (N13EscapingPointPicardRealization.data x₂ y₂ hxval hgood)

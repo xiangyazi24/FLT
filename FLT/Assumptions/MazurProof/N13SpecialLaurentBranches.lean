@@ -27,6 +27,10 @@ def includeSeries : P →+* L := HahnSeries.ofPowerSeries ℤ K
 
 theorem t_ne_zero : t ≠ 0 := N13LaurentPolynomialOrder.parameter_ne_zero K
 
+private theorem base_X : base X = t⁻¹ := by
+  simp only [base, N13BranchNorm.evalPoly, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_X]
+  rfl
+
 private theorem root_relation (r : P)
     (hr : r ^ 2 + N13SpecialInfinityBranchJets.h * r - N13SpecialInfinityBranchJets.rhs = 0) :
     N13GoodCoordinateRingTwo.curvePoly.eval₂ base (t⁻¹ ^ 3 * includeSeries r) = 0 := by
@@ -45,11 +49,12 @@ private theorem root_relation (r : P)
           (t⁻¹ ^ 3 + t⁻¹ + 1) * (t⁻¹ ^ 3 * includeSeries r) - (t⁻¹ ^ 5 + t⁻¹ ^ 4)) =
         (includeSeries r) ^ 2 + (1 + t ^ 2 + t ^ 3) * includeSeries r - (t + t ^ 2) := by
           field_simp [t_ne_zero]
-          ring
+          try ring
       _ = t ^ 6 * 0 := by rw [hl, mul_zero]
-  simpa [N13GoodCoordinateRingTwo.curvePoly, N13GoodCoordinateRingTwo.hPoly,
-    N13GoodCoordinateRingTwo.rhsPoly, base, N13BranchNorm.evalPoly,
-    N13Infinity.parameter, t, N13LaurentPolynomialOrder.parameter] using he
+  simp only [N13GoodCoordinateRingTwo.curvePoly, N13GoodCoordinateRingTwo.hPoly,
+    N13GoodCoordinateRingTwo.rhsPoly, eval₂_sub, eval₂_add, eval₂_mul, eval₂_pow, eval₂_X,
+    eval₂_C, eval₂_one, map_add, map_pow, map_one, base_X]
+  linear_combination he
 
 def plus : R →+* L := AdjoinRoot.lift base
   (t⁻¹ ^ 3 * includeSeries N13SpecialInfinityBranchJets.r₀)
@@ -81,7 +86,7 @@ theorem y_branch_sum : plus N13GoodCoordinateRingTwo.yClass + minus N13GoodCoord
   have hh : includeSeries N13SpecialInfinityBranchJets.h = 1 + t ^ 2 + t ^ 3 := by
     simp [N13SpecialInfinityBranchJets.h, includeSeries, N13LaurentPolynomialOrder.parameter]
   rw [hh]
-  simp only [N13GoodCoordinateRingTwo.hPoly, map_add, map_pow, map_one]
+  simp only [N13GoodCoordinateRingTwo.hPoly, map_add, map_pow, map_one, base_X]
   change t⁻¹ ^ 3 * includeSeries N13SpecialInfinityBranchJets.r₀ +
       t⁻¹ ^ 3 * (-(1 + t ^ 2 + t ^ 3) - includeSeries N13SpecialInfinityBranchJets.r₀) =
     -(t⁻¹ ^ 3 + t⁻¹ + 1)
@@ -166,8 +171,8 @@ theorem ordinate_degree_bound (p q : K[X]) (hq : q ≠ 0) (d : ℕ)
 theorem include_order_nonnegative (r : P) : 0 ≤ (includeSeries r).order := by
   by_cases hr : r = 0
   · simp [hr]
-  · have hinc : includeSeries r ≠ 0 := by
-      simpa only [map_zero] using (HahnSeries.ofPowerSeries_injective.ne hr)
+  · have hinc : includeSeries r ≠ 0 :=
+      (map_ne_zero_iff includeSeries HahnSeries.ofPowerSeries_injective).mpr hr
     rw [HahnSeries.le_order_iff_forall hinc]
     intro j hj
     change ((r : LaurentSeries K).coeff j) = 0

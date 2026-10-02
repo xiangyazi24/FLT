@@ -57,7 +57,7 @@ theorem exists_scalar_norm_ratio
         dsimp only [αbar]
         rw [hbar]
         ac_rfl
-  have hfrac := congrArg (fun U : InvFrac M => (U : FractionalIdeal R⁰ F)) hnorm
+  have hfrac := congrArg (fun U : InvFrac M => U.val) hnorm
   simp only [Units.val_mul, coe_toPrincipalIdeal, coe_mumfordIdealUnit,
     conjugateSemiMumford_u, conjugateSemiMumford_v] at hfrac
   rw [mumfordIdeal_mul_conj_fractional M D₀,
@@ -67,44 +67,44 @@ theorem exists_scalar_norm_ratio
   simp only [FractionalIdeal.coeIdeal_span_singleton,
     FractionalIdeal.spanSingleton_mul_spanSingleton] at hfrac
   change FractionalIdeal.spanSingleton R⁰
-      (algebraMap R F (xClass M D₀.u) * algebraMap R F (xClass M D₁.u) *
-        ((α : F) * (αbar : F))) =
+      (algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M D₀.u) * algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M D₁.u) *
+        ((α : N13Mumford.FunctionField K) * (αbar : N13Mumford.FunctionField K))) =
     FractionalIdeal.spanSingleton R⁰
-      (algebraMap R F (xClass M D₂.u) * algebraMap R F (xClass M D₃.u)) at hfrac
+      (algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M D₂.u) * algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M D₃.u)) at hfrac
   obtain ⟨ε, he⟩ := FractionalIdeal.spanSingleton_eq_spanSingleton.mp hfrac
   rw [Units.smul_def, Algebra.smul_def] at he
-  have heq : algebraMap R F (ε : R) *
-      ((α : F) * (αbar : F) * algebraMap R F (xClass M (D₀.u * D₁.u))) =
-      algebraMap R F (xClass M (D₂.u * D₃.u)) := by
+  have heq : algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (ε : N13Mumford.CoordinateRing K) *
+      ((α : N13Mumford.FunctionField K) * (αbar : N13Mumford.FunctionField K) * algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M (D₀.u * D₁.u))) =
+      algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M (D₂.u * D₃.u)) := by
     simp only [xClass_mul, map_mul]
     rw [← he]
     ring
   have hfixed : functionConjugateEquiv M
-      ((α : F) * (αbar : F) * algebraMap R F (xClass M (D₀.u * D₁.u))) =
-      (α : F) * (αbar : F) * algebraMap R F (xClass M (D₀.u * D₁.u)) := by
+      ((α : N13Mumford.FunctionField K) * (αbar : N13Mumford.FunctionField K) * algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M (D₀.u * D₁.u))) =
+      (α : N13Mumford.FunctionField K) * (αbar : N13Mumford.FunctionField K) * algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M (D₀.u * D₁.u)) := by
     simp only [map_mul, functionConjugateEquiv_algebraMap,
       conjugate_xClass, αbar, conjugateFunctionUnit_val]
     rw [functionConjugate_involutive]
     ring
   have hconj := congrArg (functionConjugateEquiv M) heq
   simp only [map_mul, functionConjugateEquiv_algebraMap, conjugate_xClass, hfixed] at hconj
-  have hne : (α : F) * (αbar : F) *
-      algebraMap R F (xClass M (D₀.u * D₁.u)) ≠ 0 := by
+  have hne : (α : N13Mumford.FunctionField K) * (αbar : N13Mumford.FunctionField K) *
+      algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M (D₀.u * D₁.u)) ≠ 0 := by
     apply mul_ne_zero (mul_ne_zero α.ne_zero αbar.ne_zero)
-    simpa only [map_zero] using (IsFractionRing.injective R F).ne
+    simpa only [map_zero] using (IsFractionRing.injective (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K)).ne
       (xClass_ne_zero M (mul_ne_zero D₀.u_monic.ne_zero D₁.u_monic.ne_zero))
-  have hε : conjugate M (ε : R) = ε := by
-    apply IsFractionRing.injective R F
+  have hε : conjugate M (ε : N13Mumford.CoordinateRing K) = ε := by
+    apply IsFractionRing.injective (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K)
     apply mul_right_cancel₀ hne
     exact hconj.trans heq.symm
   obtain ⟨q, hq⟩ := fixed_coordinate_unit_is_scalar M ε hε
   refine ⟨q, ?_⟩
   apply Units.ext
-  change algebraMap R F
-      (Units.map (algebraMap K R).toMonoidHom q : R) *
-        ((α : F) * (conjugateFunctionUnit M α : F)) *
-        algebraMap R F (xClass M (D₀.u * D₁.u)) =
-      algebraMap R F (xClass M (D₂.u * D₃.u))
+  change algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K)
+      (Units.map (algebraMap K (N13Mumford.CoordinateRing K)).toMonoidHom q : N13Mumford.CoordinateRing K) *
+        ((α : N13Mumford.FunctionField K) * (conjugateFunctionUnit M α : N13Mumford.FunctionField K)) *
+        algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M (D₀.u * D₁.u)) =
+      algebraMap (N13Mumford.CoordinateRing K) (N13Mumford.FunctionField K) (xClass M (D₂.u * D₃.u))
   rw [← hq]
   simpa only [mul_assoc, αbar] using heq
 
@@ -120,8 +120,8 @@ theorem principal_branch_orders_sum
   obtain ⟨q, hq⟩ := exists_scalar_norm_ratio D₀ D₁ D₂ D₃ α h
   have ho := congrArg
     (fun z : Fˣ => Multiplicative.toAdd ((N13Infinity.positiveInfinityOrder K).ordPlus z)) hq
-  simp only [map_mul, Multiplicative.toAdd_mul, N13Infinity.ordPlus_functionConstUnit,
-    Multiplicative.toAdd_one, zero_add,
+  simp only [map_mul, toAdd_mul, N13Infinity.ordPlus_functionConstUnit,
+    toAdd_one, zero_add,
     N13FunctionConjugation.positive_order_conjugate_eq_negative,
     N13MumfordInfinityBalance.ordPlus_xClassFunctionUnit] at ho
   rw [Polynomial.natDegree_mul D₀.u_monic.ne_zero D₁.u_monic.ne_zero,

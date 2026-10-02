@@ -61,8 +61,7 @@ theorem ideal_le_of_localization_le_of_approximations
     simpa [q, Algebra.smul_def] using hh
   have hsmall : q x ∈ ⨅ n : ℕ,
       Ideal.span ({t} : Set R) ^ n • (⊤ : Submodule R (R ⧸ J)) := by
-    apply Submodule.mem_iInf.mpr
-    intro n
+    refine (Submodule.mem_iInf _).mpr fun n => ?_
     obtain ⟨y, hy⟩ := hApprox x hx n
     have hh : q (x - t ^ n * y) = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hy
     have hq : q x = t ^ n • q y := by

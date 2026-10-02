@@ -30,7 +30,6 @@ theorem differenceUnit_coe : (differenceUnit : QP) = r₀q - r₁q := by
   change N13TwoAdicInfinityCompatibility.powerMap
       (N13FormalInfinitySplit.branchDifferenceUnit : P) = _
   rw [N13FormalInfinitySplit.branchDifferenceUnit_coe, map_sub]
-  rfl
 
 theorem inverse_difference_mul : (↑(differenceUnit⁻¹) : QP) * (r₀q - r₁q) = 1 := by
   rw [← differenceUnit_coe]
@@ -69,9 +68,9 @@ theorem clear_two_polynomials (p q : Q₂[X]) :
   rw [Polynomial.algebraMap_def] at hp hq
   refine ⟨c, mem_nonZeroDivisors_iff_ne_zero.mp hc, a, b, ?_, ?_⟩
   · change p * C (algebraMap R₂ Q₂ c) = a.map (algebraMap R₂ Q₂)
-    simpa only [Polynomial.map_C] using hp
+    simpa only [Polynomial.coe_mapRingHom, Polynomial.map_C] using hp
   · change q * C (algebraMap R₂ Q₂ c) = b.map (algebraMap R₂ Q₂)
-    simpa only [Polynomial.map_C] using hq
+    simpa only [Polynomial.coe_mapRingHom, Polynomial.map_C] using hq
 
 theorem generic_plus_base (p : R₂[X]) :
     N13InfinityChartMarking.positiveExpansion (base p) = (p.map cMap : QP) := by
@@ -91,13 +90,11 @@ theorem generic_plus_v :
     N13InfinityChartMarking.positiveExpansion N13IntegralInfinityChart.vClass = r₀q := by
   change N13TwoAdicInfinityCompatibility.powerMap (plus N13IntegralInfinityChart.vClass) = _
   rw [plus_v]
-  rfl
 
 theorem generic_minus_v :
     N13InfinityChartMarking.negativeExpansion N13IntegralInfinityChart.vClass = r₁q := by
   change N13TwoAdicInfinityCompatibility.powerMap (minus N13IntegralInfinityChart.vClass) = _
   rw [minus_v]
-  rfl
 
 theorem trunc_error_dvd (f : QP) (n : ℕ) :
     (PowerSeries.X : QP) ^ n ∣ ((PowerSeries.trunc n f : Q₂[X]) : QP) - f := by

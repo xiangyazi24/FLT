@@ -1,0 +1,252 @@
+{
+  "source_pin": "b07243d72093bec5686e15b1208cb50d000f3e8d",
+  "status": "30_LEAD_ACCEPTED_MODULES_SYNCED_ONE_UNCOMPILED_REPAIR",
+  "certificate_sha256": "5ca2de32cec1df09a869dfbc5f3bcc216ece07af20d44d6796ae0f384404de26",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N13CalibratedChooser.lean",
+      "bytes": 8250,
+      "sha256": "35b0b50d43d0a2e4f6baf4ce5e707b4b67a738123526cc21de827f5a603350e1"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveDataCompatibility.lean",
+      "bytes": 6398,
+      "sha256": "0f0acf81083de4047ea8228510617a3940b204150fe8de0b14c1ce84adc99fc9"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveGraphData.lean",
+      "bytes": 11645,
+      "sha256": "41ba8315cba21d46d7785cc4c5eeddef4ef061043e9a1139f4546455edf7a6a1"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13EffectiveInfinityRepair.lean",
+      "bytes": 8138,
+      "sha256": "38edd0c2622b2afdb5c38c37025e3267306de6d1ed7d97c8ab93c3a0c80c10cb"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13GenericInfinityComparison.lean",
+      "bytes": 6672,
+      "sha256": "c9ea24c377870434d182d7a8a28fb244a842a6427f3955eb6a844c55f108d26f"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13GoodPointFirstJet.lean",
+      "bytes": 5400,
+      "sha256": "2895706526258f03447bd706803f93a685fc4aa9065b977abfe330eb0995d6ab"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityBranchJetLift.lean",
+      "bytes": 6580,
+      "sha256": "9bc56a6ffa147af04f122a879ae14a055aac608d634510506faa2a1ea20b130c"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityBranchJets.lean",
+      "bytes": 7300,
+      "sha256": "fdb96901fc9a7073925e5e243efaf377f50c41dc7425e86224fec7f18f44f7c8"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityChartMarking.lean",
+      "bytes": 21303,
+      "sha256": "de65ce3df40a779725f72c22c9c6dd07842cffcf8d3e59e577ff2ad7454f8679"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13InfinityIdealApproximation.lean",
+      "bytes": 7216,
+      "sha256": "1910ec2ebf184998a262a104bf0800a248df889d03439d661adc796977d32e61"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13IntegralPrincipalComparison.lean",
+      "bytes": 7523,
+      "sha256": "96689357cf05e122f57f9ed6f064ab34dc42fe8159354d475ede90d91516c600"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13LocalizationAdicPatch.lean",
+      "bytes": 3853,
+      "sha256": "640c28d92e482b3525d3060c6cd76a7ccfd1e7cd135cbd6f5514372494079531"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedEffectiveData.lean",
+      "bytes": 6892,
+      "sha256": "88a99a4ee0591a9c763ee46e7201a66ccbfe2f9237626efe7aade4d5ba09b307"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedQuadraticExistence.lean",
+      "bytes": 22589,
+      "sha256": "fb2182b062c55533286723202513600e80d14f3ff37e88305c940032a6d73d0e"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13MarkedTensorComparison.lean",
+      "bytes": 8405,
+      "sha256": "3680d8e45663359d25a3cc2f5135a7ea9b81f7f0bad9af08141a1b8cfb070d87"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13NormalizedHermiteResidual.lean",
+      "bytes": 5726,
+      "sha256": "ac6a7c74349704cbfd3453ad3560e2659e91a96d232638c1cf341810b8767d49"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13OverlapBranchCompatibility.lean",
+      "bytes": 9589,
+      "sha256": "edede2091df126f090d15d699d0606f7772578200de2431576075be3d92992fa"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PointDataCertificates.lean",
+      "bytes": 6926,
+      "sha256": "3b17739789245530621a201025b641104e24ae49824ae6362d6cdc13b7b058d1"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveAffineComparison.lean",
+      "bytes": 7001,
+      "sha256": "9d6702663dc343aed071eadf2084071f6f978052b8cee9591eb8c36411b05b07"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrimitiveVerticalPresentation.lean",
+      "bytes": 6460,
+      "sha256": "303654d59e49ab829a5ade02c5dcc32da4b01a5401b84b0c6f13344d255fdea1"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrincipalBranchBalance.lean",
+      "bytes": 7641,
+      "sha256": "21872a4234fe3ccb505c8f627032f0d91003aeaf1f67aa7696a14e82cb3eed46"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13PrincipalBranchIdeals.lean",
+      "bytes": 12194,
+      "sha256": "2d9cf987e5c55ba7c80d6d7918408dc1be382442021bd53754c7d8fd0546f9fd"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialAffineNorm.lean",
+      "bytes": 5656,
+      "sha256": "7a8de225654a475338df70119c9b7d75f7f462a920429a421d943bd3d2891429"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialBranchFaithfulness.lean",
+      "bytes": 4141,
+      "sha256": "12e3f136303c03b41a28bec1f1a28b3ba50c0892eafd559148f4fedc680c81e1"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialComparisonFactorPair.lean",
+      "bytes": 7546,
+      "sha256": "57dd1fec876b033ce00bad2375e99de3a2662100bc86033ec6c031b9e9185357"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialDivisorBranchOrders.lean",
+      "bytes": 6268,
+      "sha256": "7ec1cfeb06007660dbd2ddcd5135349b6c3f9a1132174732738d77be6b33c6df"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialInfinityBranchJets.lean",
+      "bytes": 9946,
+      "sha256": "bab336e049afdf09303fe294841d5426c550c9d245fda8b051a6cc98543666bb"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialLaurentBranches.lean",
+      "bytes": 11558,
+      "sha256": "9734409e32ed69f482f36e363a0a9fdb0858403cc26cd84f2ddca433a5c40451"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialOverlapBranches.lean",
+      "bytes": 6178,
+      "sha256": "0eb53af13e9714e329b5c2eb2b8351f4be79c38dcd66639c7f28bce041d209f5"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSmallFunctionCertificate.lean",
+      "bytes": 255643,
+      "sha256": "5ca2de32cec1df09a869dfbc5f3bcc216ece07af20d44d6796ae0f384404de26"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N13SpecialSmallNumerator.lean",
+      "bytes": 7691,
+      "sha256": "949b4478265624e55e100d48f4f4d5ef9737d3f45bee583f0c4a60c7ec0ced34"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "bytes": 9901,
+      "sha256": "f3782b25db0d1447fed4bf616d448881917c8b7fca01d0d57ebf4c24f0df1246"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/ACCEPTED_BASELINE_MANIFEST.json",
+      "bytes": 9734,
+      "sha256": "865fae14491a8fa9fbc932e7ab62a17a0ab9e80b2be5d9976746dbbc7c9a5082"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/INDEPENDENT_CERTIFICATE_REVIEW.md",
+      "bytes": 7694,
+      "sha256": "d26b40628983eee80ae63e65b09628e68a219b70e2484b3b1e1937f305a3dec4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/INPUT_N13SpecialSmallFunctionCertificate.lean",
+      "bytes": 4179,
+      "sha256": "05ae0db26a4a15ddb632249406038b4bf0e1e0fd44dbd6e58a645b64059c50e6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/Mathlib_Coprime_Basic.lean",
+      "bytes": 24210,
+      "sha256": "5d207043b00d986c283a51a105ff3aebe4b6c81156dee7b297d0a58ecd49d0c4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/Mathlib_Coprime_Basic.receipt.json",
+      "bytes": 25063,
+      "sha256": "fabdc8c080cd4b829e67a42acc0ff41039f889319b3561bc04f942ededf1423a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/REGENERATION_RECEIPT.json",
+      "bytes": 359,
+      "sha256": "af5972c5633ca999897030dae8e666fbc21f02c05384017ea44a21af7fb290e5"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/REPAIR_NOTES.md",
+      "bytes": 5136,
+      "sha256": "55855cebf76ee301affa55f3123089e6769a7f0144f9825b85feed6bf4ee9859"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/STATIC_AUDIT.json",
+      "bytes": 798,
+      "sha256": "ceec83eb4d612ec69a57cea273de4525154155308aabb01fac5ccb12a3fa2018"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/VALIDATION.lean",
+      "bytes": 487,
+      "sha256": "8b96f95576c0ab697c8295504063f684429adae712fae1007ee5bbad7340a491"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/certificate_math.json",
+      "bytes": 43284,
+      "sha256": "8a88fde082d372924131aeccf16a089f103ca2edb776b5ecd9d8124d658077a1"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/certificate_math.py",
+      "bytes": 2500,
+      "sha256": "019658c48bd9f2a4bbaec3d493cdf87933ea27ff5ceb5e5fcc7c30bb912bd03e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/generate_candidate.py",
+      "bytes": 10862,
+      "sha256": "b4dcbfc7c53d8eebe8e45a75d412e10abc0631950eab3a3afd661dc5dd20655b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/independent_certificate_audit.py",
+      "bytes": 3540,
+      "sha256": "e333dd01bcb9dde3b3ab61981e0e7cfc2210a0e33a01e1788041f510b2df1271"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/independent_certificate_math.json",
+      "bytes": 46431,
+      "sha256": "1cc6456b3df75a8df120b1a093c923e0c9255fdab4348f7f44153f41a4168913"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/independent_source_literal_audit.json",
+      "bytes": 643,
+      "sha256": "ee0c51edb721f4f3c775b62d0b98bc690a0a982d8e73a24b5dca9b20f9d16f2f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N13-ENDPOINT-r3-repair/independent_source_literal_audit.py",
+      "bytes": 6074,
+      "sha256": "a6409160aa63eaed225076d86a798d99054eacf5955709396a560f846ed68f6a"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N13-ENDPOINT-r3-certificate-repair.md",
+      "bytes": 4691,
+      "sha256": "76cf4afef282f2e6422a2b17619a2520335d61b1c960b9a4174ee926e7152b5e"
+    }
+  ]
+}

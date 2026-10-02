@@ -34,7 +34,8 @@ theorem reduce_rhs : powerReduce N13FormalInfinityChart.rhsPower = rhs := by
 
 theorem r₀_relation : r₀ ^ 2 + h * r₀ - rhs = 0 := by
   have he := congrArg powerReduce N13FormalInfinityBranches.branchZero_relation
-  simpa only [map_sub, map_add, map_pow, map_mul, map_zero, reduce_h, reduce_rhs] using he
+  simp only [map_sub, map_add, map_pow, map_mul, map_zero, reduce_h, reduce_rhs] at he
+  exact he
 
 theorem r₁_eq : r₁ = -h - r₀ := by
   simp [r₁, N13FormalInfinityBranches.branchOne, reduce_h, r₀]
@@ -46,15 +47,18 @@ theorem r₁_relation : r₁ ^ 2 + h * r₁ - rhs = 0 := by
 theorem r₀_constant : PowerSeries.constantCoeff r₀ = 0 := by
   change PowerSeries.constantCoeff (PowerSeries.map PadicInt.toZMod
     N13FormalInfinityBranches.branchZero) = 0
-  simpa using congrArg PadicInt.toZMod N13FormalInfinityBranches.branchZero_constantCoeff
+  rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map,
+    PowerSeries.coeff_zero_eq_constantCoeff_apply,
+    N13FormalInfinityBranches.branchZero_constantCoeff, map_zero]
 
 theorem r₁_constant : PowerSeries.constantCoeff r₁ = 1 := by
   rw [r₁_eq]
   norm_num [h, r₀_constant]
 
 theorem root_difference_unit : IsUnit (r₀ - r₁) := by
-  simpa only [map_sub] using
-    N13FormalInfinityBranches.branch_difference_isUnit.map powerReduce
+  have hu := N13FormalInfinityBranches.branch_difference_isUnit.map powerReduce
+  simp only [map_sub] at hu
+  exact hu
 
 def beta : K[X] →+* P := Polynomial.eval₂RingHom PowerSeries.C PowerSeries.X
 
@@ -64,7 +68,8 @@ theorem beta_eq_coe (p : K[X]) : beta p = (p : P) := by
 private theorem root_eval (r : P) (hr : r ^ 2 + h * r - rhs = 0) :
     N13SpecialInfinityChart.curvePoly.eval₂ beta r = 0 := by
   simpa [N13SpecialInfinityChart.curvePoly, N13SpecialInfinityChart.hPoly,
-    N13SpecialInfinityChart.rhsPoly, beta, h, rhs] using hr
+    N13SpecialInfinityChart.rhsPoly, beta, h, rhs, Polynomial.eval₂_pow, Polynomial.eval₂_C,
+    Polynomial.coe_eval₂RingHom, Polynomial.eval₂_X] using hr
 
 def plus : B →+* P := AdjoinRoot.lift beta r₀ (root_eval r₀ r₀_relation)
 def minus : B →+* P := AdjoinRoot.lift beta r₁ (root_eval r₁ r₁_relation)

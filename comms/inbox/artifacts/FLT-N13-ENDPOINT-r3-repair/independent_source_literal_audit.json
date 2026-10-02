@@ -1,0 +1,13 @@
+{
+  "candidate_sha256": "5ca2de32cec1df09a869dfbc5f3bcc216ece07af20d44d6796ae0f384404de26",
+  "public_signatures_count": 18,
+  "public_signatures_equal": true,
+  "public_definition_lines_equal": true,
+  "source_supported_rows_verified": 69,
+  "source_excluded_rows_verified": 58,
+  "source_zero_norm_rows_verified": 1,
+  "source_obstruction_factor_certificates_verified": 17,
+  "source_integer_linear_combination_certificates_verified": 512,
+  "source_case_dispatch_order_verified": true,
+  "method": "Independent parser of Lean polynomial literal expressions and coefficient-list arithmetic over integers; no Lean or project code executed"
+}

@@ -18,8 +18,10 @@ namespace MazurProof.N13EffectiveDataCompatibility
 
 noncomputable section
 open N13OverlapBranchCompatibility N13PrincipalBranchIdeals
-open N13TwoChartPicardRealization N13InfinityChartMarking
-open N13EffectiveInfinityRepair N13MarkedTensorComparison
+open N13TwoChartPicardRealization hiding Q₂
+open N13InfinityChartMarking hiding Line B QP
+open N13EffectiveInfinityRepair hiding Model
+open N13MarkedTensorComparison
 open scoped nonZeroDivisors
 local instance : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
 
@@ -90,9 +92,11 @@ abbrev G := N13RationalPointEndgame.G
 theorem exists_certified_realization (P : G) :
     ∃ D : Data, Certified D ∧ D.toGenericPic = N13InfinityBaseChange.picMapRatToQ₂ P := by
   obtain ⟨D, hD⟩ := N13MumfordInfinityBalance.classOf_surjective P
-  let M := D.mapCoeffs N13InfinityBaseChange.ratToQ₂
+  let M := D.mapCoeffs (M' := N13Mumford.model N13InfinityBaseChange.Q₂)
+    N13InfinityBaseChange.ratToQ₂
     N13InfinityBaseChange.ratToQ₂_injective
-    (N13InfinityBaseChange.map_n13_f N13InfinityBaseChange.ratToQ₂)
+    (by simpa only [N13Mumford.model_f] using
+      N13InfinityBaseChange.map_n13_f N13InfinityBaseChange.ratToQ₂)
   obtain ⟨W, hraw, hgeneric, hs, hm⟩ := N13MarkedEffectiveData.exists_marked_repaired_data M
   refine ⟨W, ⟨repair M, repair_effective M, hraw, hs, hm⟩, ?_⟩
   rw [hgeneric]

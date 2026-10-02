@@ -33,15 +33,14 @@ theorem exists_primitive_factor
     intro htop
     have hmem : (1 : A) ∈ RingHom.ker red := by
       rw [hker, htop]
-      exact Ideal.mem_top
+      exact Submodule.mem_top
     have hzero := RingHom.mem_ker.mp hmem
     simpa using hzero
   have hex : ∃ n : ℕ, ¬p ^ n ∣ z := by
     by_contra h
     push_neg at h
     have hm : z ∈ ⨅ n : ℕ, Ideal.span ({p} : Set A) ^ n := by
-      apply Submodule.mem_iInf.mpr
-      intro n
+      refine (Submodule.mem_iInf _).mpr fun n => ?_
       rw [Ideal.span_singleton_pow, Ideal.mem_span_singleton]
       exact h n
     rw [Ideal.iInf_pow_eq_bot_of_isDomain _ hproper, Ideal.mem_bot] at hm
@@ -65,7 +64,14 @@ theorem exists_primitive_factor
   apply hnondvd
   refine ⟨b, ?_⟩
   have hn : Nat.find hex - 1 + 1 = Nat.find hex := by omega
-  rw [ha, hb, ← mul_assoc, ← pow_succ, hn]
+  calc
+    z = p ^ (Nat.find hex - 1) * a := ha
+    _ = p ^ (Nat.find hex - 1) * (p * b) := by rw [hb]
+    _ = (p ^ (Nat.find hex - 1) * p) * b := by rw [mul_assoc]
+    _ = p ^ (Nat.find hex - 1 + 1) * b := by
+      rw [← pow_succ]
+      <;> simp [Nat.succ_pred_eq_of_pos hnpos]
+    _ = p ^ Nat.find hex * b := by rw [hn]
 
 variable {K : Type*} [Field K] [Algebra A K] [IsFractionRing A K]
 
@@ -114,17 +120,17 @@ local instance : IsFractionRing Affine CommonField :=
 theorem exists_affine_primitive_factor (z : Affine) (hz : z ≠ 0) :
     ∃ n : ℕ, ∃ a : Affine,
       N13GeneralizedMumfordReduction.reduceCoordinate a ≠ 0 ∧ z = (2 : Affine) ^ n * a := by
-  apply exists_primitive_factor N13GeneralizedMumfordReduction.reduceCoordinate (2 : Affine)
-    _ z hz
-  simpa using N13GeneralizedMumfordReduction.ker_reduceCoordinate
+  apply exists_primitive_factor N13GeneralizedMumfordReduction.reduceCoordinate
+    (algebraMap N13GeneralizedMumfordReduction.R₂ Affine 2) _ z hz
+  simpa only [N13GeneralizedMumfordReduction.ker_reduceCoordinate]
 
 /-- Concrete primitive factorization on the ordinary infinity N13 chart. -/
 theorem exists_infinity_primitive_factor (z : Infinity) (hz : z ≠ 0) :
     ∃ n : ℕ, ∃ a : Infinity,
       N13IntegralInfinityReduction.reduceCoordinate a ≠ 0 ∧ z = (2 : Infinity) ^ n * a := by
-  apply exists_primitive_factor N13IntegralInfinityReduction.reduceCoordinate (2 : Infinity)
-    _ z hz
-  simpa using N13IntegralInfinityReduction.ker_reduceCoordinate
+  apply exists_primitive_factor N13IntegralInfinityReduction.reduceCoordinate
+    (algebraMap N13IntegralInfinityReduction.R₂ Infinity 2) _ z hz
+  simpa only [N13IntegralInfinityReduction.ker_reduceCoordinate]
 
 /-- Every nonzero N13 common-field function has primitive affine numerator
 and denominator, with the exact removed powers of two recorded. -/
@@ -132,11 +138,12 @@ theorem exists_affine_primitive_fraction_presentation (f : CommonField) (hf : f 
     ∃ n m : ℕ, ∃ a b : Affine,
       N13GeneralizedMumfordReduction.reduceCoordinate a ≠ 0 ∧
       N13GeneralizedMumfordReduction.reduceCoordinate b ≠ 0 ∧
-      (2 : CommonField) ^ m * f * algebraMap Affine CommonField b =
-        (2 : CommonField) ^ n * algebraMap Affine CommonField a := by
-  simpa using exists_primitive_fraction_presentation
-    N13GeneralizedMumfordReduction.reduceCoordinate (2 : Affine)
-    (by simpa using N13GeneralizedMumfordReduction.ker_reduceCoordinate) f hf
+      (algebraMap Affine CommonField 2) ^ m * f * algebraMap Affine CommonField b =
+        (algebraMap Affine CommonField 2) ^ n * algebraMap Affine CommonField a := by
+  simpa only [N13GeneralizedMumfordReduction.ker_reduceCoordinate] using
+    exists_primitive_fraction_presentation
+      N13GeneralizedMumfordReduction.reduceCoordinate 2
+      N13GeneralizedMumfordReduction.ker_reduceCoordinate f hf
 
 end N13Charts
 

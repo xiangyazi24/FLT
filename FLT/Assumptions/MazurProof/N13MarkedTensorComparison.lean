@@ -15,7 +15,8 @@ namespace MazurProof.N13MarkedTensorComparison
 
 noncomputable section
 open N13OverlapBranchCompatibility N13PrincipalBranchIdeals
-open N13TwoChartPicardRealization N13InfinityChartMarking
+open N13TwoChartPicardRealization hiding Q₂
+open N13InfinityChartMarking hiding Line B QP
 open N13EffectiveInfinityRepair N13IntegralPrincipalComparison
 open scoped nonZeroDivisors
 local instance : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
@@ -98,6 +99,8 @@ theorem exists_integral_tensor_comparison
   have hb0 : b ≠ 0 := fun h => hb (by simp [h])
   have hc0 : c ≠ 0 := fun h => hc (by simp [h])
   have hd0 : d ≠ 0 := fun h => hd (by simp [h])
+  have hf' : 2 ^ m * (f : F) * algebraMap A F b = 2 ^ n * algebraMap A F a := by
+    simpa only [map_ofNat] using hf
   have hgeneric : genericIdealUnit (tensor D₀.charts D₁.charts) * toPrincipalIdeal R F f =
       genericIdealUnit (tensor D₂.charts D₃.charts) := by
     rw [genericIdealUnit_tensor, genericIdealUnit_tensor]
@@ -115,10 +118,10 @@ theorem exists_integral_tensor_comparison
     (tensor D₀.charts D₁.charts) (tensor D₂.charts D₃.charts)
     (N13QuadraticTwoChartSpreadSaturation.affineVerticallySaturated_tensor _ _ hs₀ hs₁)
     (N13QuadraticTwoChartSpreadSaturation.affineVerticallySaturated_tensor _ _ hs₂ hs₃)
-    f n m a b ha hb hf hgeneric
+    f n m a b ha hb hf' hgeneric
   obtain ⟨hplus, hminus⟩ := tensor_branch_ideal_equations
     E₀ E₁ E₂ E₃ h₀ h₁ h₂ h₃ D₀.charts D₁.charts D₂.charts D₃.charts
-    hm₀ hm₁ hm₂ hm₃ f n m a b c d hb0 hc0 hd0 hf hcross hprincipal horientation
+    hm₀ hm₁ hm₂ hm₃ f n m a b c d hb0 hc0 hd0 hf' hcross hprincipal horientation
   have htensor (D E : Data) :
       Ideal.map N13IntegralInfinityReduction.reduceCoordinate (tensor D.charts E.charts).infinityIdeal ≠ ⊥ := by
     rw [N13TwoChartLineTensor.tensor_infinityIdeal, Ideal.map_mul]

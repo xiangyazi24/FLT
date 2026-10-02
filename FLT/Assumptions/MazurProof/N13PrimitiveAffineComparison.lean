@@ -16,7 +16,8 @@ namespace MazurProof.N13PrimitiveAffineComparison
 
 noncomputable section
 open N13OverlapBranchCompatibility N13PrincipalBranchIdeals
-open N13TwoChartPicardRealization N13InvertibleReductionSaturation
+open N13TwoChartPicardRealization hiding Q₂
+open N13InvertibleReductionSaturation
 open scoped nonZeroDivisors
 local instance : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
 
@@ -60,7 +61,7 @@ theorem generic_cleared_equation
   have hfrac := congrArg (fun U : Fracˣ => (U : Frac)) hprincipal
   simp only [Units.val_mul, coe_genericIdealUnit, coe_toPrincipalIdeal] at hfrac
   have hsp := congrArg (FractionalIdeal.spanSingleton R⁰) hf
-  simp only [FractionalIdeal.spanSingleton_mul_spanSingleton.symm] at hsp
+  simp only [← FractionalIdeal.spanSingleton_mul_spanSingleton] at hsp
   rw [scalar_span_eq_one, scalar_span_eq_one, one_mul, one_mul] at hsp
   apply FractionalIdeal.coeIdeal_injective (K := F)
   simp only [Ideal.map_mul, Ideal.map_span, Set.image_singleton,
@@ -85,13 +86,16 @@ theorem primitive_principal_saturated (a : A)
     (ha : N13GeneralizedMumfordReduction.reduceCoordinate a ≠ 0) :
     ∀ r : R₂, r ≠ 0 → ∀ x : A,
       algebraMap R₂ A r * x ∈ Ideal.span ({a} : Set A) → x ∈ Ideal.span ({a} : Set A) := by
-  have ha0 : a ≠ 0 := fun h => ha (by simp [h])
+  have ha0 : a ≠ 0 := fun h => ha (by rw [h, map_zero])
   have har : Ideal.map N13GeneralizedMumfordReduction.reduceCoordinate
       (Ideal.span ({a} : Set A)) ≠ ⊥ := by
     rw [Ideal.map_span, Set.image_singleton]
     intro h
     apply ha
-    have hm := Ideal.subset_span (Set.mem_singleton _)
+    have hm : N13GeneralizedMumfordReduction.reduceCoordinate a ∈
+        Ideal.span ({N13GeneralizedMumfordReduction.reduceCoordinate a} :
+          Set N13GeneralizedMumfordReduction.SpecialRing) :=
+      Ideal.subset_span (Set.mem_singleton _)
     rw [h, Ideal.mem_bot] at hm
     exact hm
   exact twoAdic_scalar_saturated_of_reduction_ne_bot (K := F)

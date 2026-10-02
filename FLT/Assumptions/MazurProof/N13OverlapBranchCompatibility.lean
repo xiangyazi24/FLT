@@ -47,7 +47,10 @@ theorem overlapBranches_affine (a : A) :
     (N13FormalOverlapSplit.formalBranchEval
       (N13OrdinaryCompletionCompatibility.ordinaryToFormalCurve
         (N13OrdinaryCurveOverlap.affineToInfinityOverlap a))) = _
-  rw [h]
+  have h' : N13OrdinaryCompletionCompatibility.ordinaryToFormalCurve
+      (N13OrdinaryCurveOverlap.affineToInfinityOverlap a) =
+      N13FormalCurveOverlap.affineToFormalCurve a := h
+  rw [h']
   exact N13TwoAdicAffineRestrictionCompatibility.affineRestriction_commutes a
 
 theorem overlapBranches_infinity (b : B) :
@@ -117,9 +120,10 @@ theorem positiveOverlap_injective : Function.Injective positiveOverlap := by
     apply hi
     change positiveOverlap (N13OrdinaryCurveOverlap.overlapEquiv (algebraMap A AO a)) =
       positiveOverlap (N13OrdinaryCurveOverlap.overlapEquiv (algebraMap A AO b)) at hab
-    simpa only [N13OrdinaryCurveOverlap.overlapEquiv_apply,
+    simp only [N13OrdinaryCurveOverlap.overlapEquiv_apply,
       N13OrdinaryCurveOverlap.affineOverlapToInfinityOverlap_algebraMap,
-      positiveOverlap_affine] using hab
+      positiveOverlap_affine] at hab
+    exact hab
   intro x y hxy
   apply N13OrdinaryCurveOverlap.overlapEquiv.symm.injective
   apply h
@@ -127,7 +131,8 @@ theorem positiveOverlap_injective : Function.Injective positiveOverlap := by
       (N13OrdinaryCurveOverlap.overlapEquiv.symm x)) =
     positiveOverlap (N13OrdinaryCurveOverlap.overlapEquiv
       (N13OrdinaryCurveOverlap.overlapEquiv.symm y))
-  simpa using hxy
+  rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+  exact hxy
 
 theorem negativeOverlap_injective : Function.Injective negativeOverlap := by
   have h : Function.Injective
@@ -139,9 +144,10 @@ theorem negativeOverlap_injective : Function.Injective negativeOverlap := by
     apply hi
     change negativeOverlap (N13OrdinaryCurveOverlap.overlapEquiv (algebraMap A AO a)) =
       negativeOverlap (N13OrdinaryCurveOverlap.overlapEquiv (algebraMap A AO b)) at hab
-    simpa only [N13OrdinaryCurveOverlap.overlapEquiv_apply,
+    simp only [N13OrdinaryCurveOverlap.overlapEquiv_apply,
       N13OrdinaryCurveOverlap.affineOverlapToInfinityOverlap_algebraMap,
-      negativeOverlap_affine] using hab
+      negativeOverlap_affine] at hab
+    exact hab
   intro x y hxy
   apply N13OrdinaryCurveOverlap.overlapEquiv.symm.injective
   apply h
@@ -149,7 +155,8 @@ theorem negativeOverlap_injective : Function.Injective negativeOverlap := by
       (N13OrdinaryCurveOverlap.overlapEquiv.symm x)) =
     negativeOverlap (N13OrdinaryCurveOverlap.overlapEquiv
       (N13OrdinaryCurveOverlap.overlapEquiv.symm y))
-  simpa using hxy
+  rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+  exact hxy
 
 theorem positiveExpansion_injective :
     Function.Injective N13InfinityChartMarking.positiveExpansion := by

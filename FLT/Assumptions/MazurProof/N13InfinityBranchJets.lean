@@ -118,6 +118,7 @@ theorem integral_branch_dvd_iff (z : B) (n : ℕ) :
         simp only [base, N13IntegralInfinityReduction.integralBaseClass, map_mul, map_pow]
         change N13IntegralInfinityChart.tClass ^ n * base a +
           (N13IntegralInfinityChart.tClass ^ n * base b) * N13IntegralInfinityChart.vClass = _
+        simp only [base, N13IntegralInfinityReduction.integralBaseClass]
         ring
 
 theorem powerMap_reflects_X_pow_dvd (f : P) (n : ℕ) :

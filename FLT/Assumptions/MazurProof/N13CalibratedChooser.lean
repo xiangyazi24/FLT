@@ -25,13 +25,20 @@ def caMumford : N13Mumford.Mumford Q₂ where
   nInf := 0
   u_monic := by monicity!
   deg_u := by compute_degree!
-  v_reduced := by apply Polynomial.mod_eq_of_lt; compute_degree!
+  v_reduced := by
+    have h2 : (X * (X + 1) : Q₂[X]).natDegree = 2 := by compute_degree!
+    have hne : (X * (X + 1) : Q₂[X]) ≠ 0 := by
+      intro h; rw [h, natDegree_zero] at h2; exact absurd h2 (by norm_num)
+    rw [Polynomial.mod_eq_self_iff hne, degree_one, degree_eq_natDegree hne, h2]
+    exact_mod_cast (by norm_num : (0 : ℕ) < 2)
   curve_dvd := by
     refine ⟨X ^ 4 + 3 * X ^ 3 + 3 * X ^ 2 - X + 2, ?_⟩
     change N13Mumford.f Q₂ - (1 : Q₂[X]) ^ 2 = _
     unfold N13Mumford.f
     ring
-  infinity_bound := by compute_degree!
+  infinity_bound := by
+    rw [add_zero]
+    compute_degree!
 
 def caSemi : N13Mumford.SemiMumford Q₂ := { caMumford.toSemi with nInf := -1 }
 
@@ -51,18 +58,26 @@ theorem caLine_map :
     N13TwoChartLineTensor.mumfordIdeal_eq_pointIdeal_mul_of_split
       caMumford ca_degree (0 : Q₂) (-1) (by simp [caMumford]) (by norm_num)
 
+set_option maxHeartbeats 800000 in
 theorem inverseInfinity_certified : Certified N13InverseInfinityWitness.inverseInfinityData := by
   have hd : caSemi.u.natDegree = 2 := ca_degree
   have hn : caSemi.nInf = -1 := rfl
   refine ⟨caSemi, ?_, ?_,
     N13InverseInfinityWitness.inverseInfinityData_affineVerticallySaturated, ?_⟩
   · simp [EffectiveChamber, hd, hn]
-  · apply N13EffectiveGraphData.raw_eq_of_map_and_mark caSemi _ caLine_map
-    rfl
-  · simpa [positiveMultiplicity, negativeMultiplicity, hd, hn] using
-      pairLine_marked (0 : Q₂) (N13TwoChartLineTensor.goodY 0 1)
+  · exact N13EffectiveGraphData.raw_eq_of_map_and_mark caSemi
+      N13InverseInfinityWitness.inverseInfinityData caLine_map
+      (by show (-2 : ℤ) = -1 - 1; norm_num)
+  · have hm := pairLine_marked (0 : Q₂) (N13TwoChartLineTensor.goodY 0 1)
         (-1) (N13TwoChartLineTensor.goodY (-1) 1)
         N13InverseInfinityData.curve_zero N13InverseInfinityData.curve_negOne
+    have hp : positiveMultiplicity caSemi = 0 := by
+      simp [positiveMultiplicity, hn]
+    have hq : negativeMultiplicity caSemi = 0 := by
+      simp [negativeMultiplicity, hd, hn]
+    rw [hp, hq]
+    change HasInfinityMultiplicities N13InverseInfinityWitness.caLine 0 0
+    exact hm
 
 abbrev tClass : G := N13Arithmetic.AJ13 N13Arithmetic.T
 

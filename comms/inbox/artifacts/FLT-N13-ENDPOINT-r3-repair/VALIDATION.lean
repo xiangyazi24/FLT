@@ -1,0 +1,7 @@
+import FLT.Assumptions.MazurProof.N13SpecialSmallFunctionCertificate
+
+-- Lead-only validation harness; NOT RUN by dot.
+#check MazurProof.N13SpecialSmallFunctionCertificate.jet_polynomials_satisfy_equations
+#check MazurProof.N13SpecialSmallFunctionCertificate.supported_small_function_certificate
+#print axioms MazurProof.N13SpecialSmallFunctionCertificate.jet_polynomials_satisfy_equations
+#print axioms MazurProof.N13SpecialSmallFunctionCertificate.supported_small_function_certificate

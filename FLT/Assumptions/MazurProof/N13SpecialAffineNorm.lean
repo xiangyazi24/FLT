@@ -14,7 +14,8 @@ polynomial supported only over x=0 and x=1.
 namespace MazurProof.N13SpecialAffineNorm
 
 noncomputable section
-open Polynomial N13GoodCoordinateRingTwo N13SpecialDivisorCharts
+open Polynomial N13GoodCoordinateRingTwo
+open N13SpecialDivisorCharts hiding K
 
 abbrev R := N13GoodCoordinateRingTwo.CoordinateRing
 
@@ -61,7 +62,9 @@ theorem linear_mul_conjugate (p q : K[X]) :
 
 theorem mul_conjugate (z : R) : z * conjugate z = xClass (norm z) := by
   have he := linear_mul_conjugate (coeff0 z) (coeffY z)
-  simpa only [linear, recompose] using he
+  have hz : linear (coeff0 z) (coeffY z) = z := recompose z
+  rw [hz] at he
+  exact he
 
 theorem norm_ne_zero (z : R) (hz : z ≠ 0) : norm z ≠ 0 := by
   intro hn
@@ -104,7 +107,7 @@ theorem normPolynomial_degree_le_eight (p q : K[X])
   unfold normPolynomial
   omega
 
-open N13SpecialComparisonFactorPair
+open N13SpecialComparisonFactorPair hiding xClass R
 
 /-- The arbitrary comparison already forces the cleared numerator norm to
 divide a polynomial with support only at the two finite rational fibres.

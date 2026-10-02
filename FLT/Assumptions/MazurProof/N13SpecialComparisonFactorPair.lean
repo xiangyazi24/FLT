@@ -35,11 +35,11 @@ theorem pointPolynomial_degree (P : CurvePoint) : (pointPolynomial P).natDegree 
 theorem pointPolynomial_mem (P : CurvePoint) : xClass (pointPolynomial P) ∈ (point P).affineIdeal := by
   cases P with
   | inl P =>
-    unfold point
-    split
-    · exact N13GoodCoordinateRingTwo.xClass_mem_mumfordIdeal _ _
-    · exact N13GoodCoordinateRingTwo.xClass_mem_mumfordIdeal _ _
-  | inr P => exact Ideal.mem_top
+    simp only [point]
+    split_ifs with hx
+    · exact N13GoodCoordinateRingTwo.xClass_mem_mumfordIdeal (X - C P.1.1) (C P.1.2)
+    · exact N13GoodCoordinateRingTwo.xClass_mem_mumfordIdeal (X - C P.1.1) (C P.1.2)
+  | inr P => exact Submodule.mem_top
 
 def divisorPolynomial : EffectiveDivisorTwo → K[X] :=
   Sym2.lift ⟨fun P Q => pointPolynomial P * pointPolynomial Q, fun P Q => mul_comm _ _⟩
@@ -67,7 +67,7 @@ theorem divisorPolynomial_mem (D : EffectiveDivisorTwo) :
   intro P Q
   change xClass (pointPolynomial P * pointPolynomial Q) ∈
     (point P).affineIdeal * (point Q).affineIdeal
-  rw [N13GoodCoordinateRingTwo.xClass_mul]
+  simp only [xClass, N13GoodCoordinateRingTwo.xClass_mul]
   exact Ideal.mul_mem_mul (pointPolynomial_mem P) (pointPolynomial_mem Q)
 
 def tensorPolynomial (D E : EffectiveDivisorTwo) : K[X] := divisorPolynomial D * divisorPolynomial E
@@ -86,7 +86,7 @@ theorem tensorPolynomial_mem (D E : EffectiveDivisorTwo) :
     xClass (tensorPolynomial D E) ∈ (tensor (ofDivisor D) (ofDivisor E)).affineIdeal := by
   change xClass (divisorPolynomial D * divisorPolynomial E) ∈
     (ofDivisor D).affineIdeal * (ofDivisor E).affineIdeal
-  rw [N13GoodCoordinateRingTwo.xClass_mul]
+  simp only [xClass, N13GoodCoordinateRingTwo.xClass_mul]
   exact Ideal.mul_mem_mul (divisorPolynomial_mem D) (divisorPolynomial_mem E)
 
 theorem pointPolynomial_fibres (P : CurvePoint) :
@@ -140,7 +140,7 @@ theorem exists_factor_pair_of_comparison
   obtain ⟨w, hwmem, hweq⟩ := Ideal.mem_span_singleton_mul.mp hw
   have hprod : z * w = xClass (tensorPolynomial D E * tensorPolynomial F H) := by
     apply mul_left_cancel₀ (mul_ne_zero h.aNum_ne h.aDen_ne)
-    rw [N13GoodCoordinateRingTwo.xClass_mul]
+    simp only [xClass, N13GoodCoordinateRingTwo.xClass_mul]
     calc
       (h.aNum * h.aDen) * (z * w) = (h.aDen * z) * (h.aNum * w) := by ring
       _ = (h.aNum * xClass (tensorPolynomial D E)) *

@@ -1,0 +1,32 @@
+{
+  "source_pin": "b07243d72093bec5686e15b1208cb50d000f3e8d",
+  "checks": {
+    "public_definition_source_values": "PASS",
+    "public_theorem_statements": "PASS",
+    "all_128_row_lemmas_and_dispatches": "PASS",
+    "forbidden_proof_terms": "PASS",
+    "standalone_gf2_arithmetic": "PASS",
+    "lean_compilation": "NOT RUN",
+    "axiom_audit": "NOT RUN"
+  },
+  "public_definitions": [
+    "K",
+    "numerator",
+    "ordinate",
+    "jetZeroZero",
+    "jetZeroOne",
+    "jetOneZero",
+    "jetOneOne",
+    "jetInfinityZero",
+    "jetInfinityOne",
+    "residual",
+    "jetOrder",
+    "infinityNumerator",
+    "infinityOrdinate",
+    "sixJetPolynomials",
+    "sixJetOrders",
+    "weightedJetCode"
+  ],
+  "bytes": 255643,
+  "sha256": "5ca2de32cec1df09a869dfbc5f3bcc216ece07af20d44d6796ae0f384404de26"
+}

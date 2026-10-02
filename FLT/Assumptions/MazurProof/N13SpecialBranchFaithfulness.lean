@@ -67,7 +67,8 @@ theorem overlapBranch_injective (negative : Bool) : Function.Injective (overlapB
       (N13SpecialCurveOverlap.overlapEquiv.symm a)) =
     overlapBranch negative (N13SpecialCurveOverlap.overlapEquiv
       (N13SpecialCurveOverlap.overlapEquiv.symm b))
-  simpa using hab
+  rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+  exact hab
 
 theorem infinity_t_ne_zero : N13SpecialInfinityChart.tClass ≠ 0 := by
   have hd : N13SpecialInfinityChart.curvePoly.degree ≠ 0 := by

@@ -15,6 +15,7 @@ noncomputable section
 
 universe u
 variable {K : Type u} [Field K] [CharZero K]
+local instance : DecidableEq K := Classical.decEq K
 
 open SexticMumford N13MumfordInfinityBalance
 open Polynomial

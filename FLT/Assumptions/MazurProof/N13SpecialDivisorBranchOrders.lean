@@ -13,7 +13,8 @@ Laurent-order balance, not a guessed sheet assignment.
 namespace MazurProof.N13SpecialDivisorBranchOrders
 
 noncomputable section
-open Polynomial N13SpecialDivisorCharts N13SpecialLaurentBranches
+open Polynomial N13SpecialDivisorCharts
+open N13SpecialLaurentBranches hiding K
 open N13SpecialOverlapBranches N13SpecialComparisonFactorPair
 open scoped Sym2
 
@@ -59,7 +60,7 @@ theorem point_branch_ideal (negative : Bool) (P : CurvePoint) :
     simp only [pointOrder, pow_zero, Ideal.span_singleton_one]
     unfold point
     split
-    · simp [affineZeroPoint]
+    · simp [affineZeroPoint, Ideal.map_top]
     · exact branch_finite_point negative P.1.2
   | inr P =>
     rcases N13GoodModelTwo.fixedTwo_eq_zero_or_one P.1 (ZMod.pow_card P.1) with hv | hv

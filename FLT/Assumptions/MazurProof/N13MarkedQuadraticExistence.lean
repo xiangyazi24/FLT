@@ -176,9 +176,8 @@ theorem ReciprocalGraphClosure.exists_saturated_data
       N13SplitQuadraticPicardRealization.dataOfSpecialRealization_affineVerticallySaturated
         D L Δ haffine hinfinity
         (N13ReciprocalGraphPicardRealization.ReciprocalGraphClosure.twoChartLine_affineVerticallySaturated E)
-  · apply infinityGraphLine_marked
-    rw [E.data_u]
-    exact reciprocal_constant_nonzero D a b h0 hm
+  · exact infinityGraphLine_marked E.data (by omega) E.v_degree E.w_degree huMonic.ne_zero
+      (by rw [E.data_u]; exact reciprocal_constant_nonzero D a b h0 hm)
 
 theorem verticalGraph_exists_saturated_data
     {D : SexticMumford.Mumford

@@ -188,13 +188,17 @@ theorem finiteClosure_marked
   have ht := N13FiniteAffineTwoChart.infinityClosure_tUnitMod_of_finite I hfinite
   constructor
   · apply generic_map_of_integral positiveIntegralExpansion _ 0
-    simpa only [pow_zero, Ideal.span_singleton_one] using
+    have h0 : Ideal.map positiveIntegralExpansion
+        (N13FiniteAffineTwoChart.twoChartLineOfInfinityClosure I hI hfinite).infinityIdeal = ⊤ :=
       map_top_of_t_unit_mod positiveIntegralExpansion positiveIntegralExpansion_t
         (N13FiniteAffineTwoChart.infinityClosure I) ht
+    simpa only [pow_zero, Ideal.span_singleton_one] using h0
   · apply generic_map_of_integral negativeIntegralExpansion _ 0
-    simpa only [pow_zero, Ideal.span_singleton_one] using
+    have h0 : Ideal.map negativeIntegralExpansion
+        (N13FiniteAffineTwoChart.twoChartLineOfInfinityClosure I hI hfinite).infinityIdeal = ⊤ :=
       map_top_of_t_unit_mod negativeIntegralExpansion negativeIntegralExpansion_t
         (N13FiniteAffineTwoChart.infinityClosure I) ht
+    simpa only [pow_zero, Ideal.span_singleton_one] using h0
 
 theorem integralPointLine_marked
     (p : N13IntegralAffinePointSpread.IntegralPoint) :
@@ -348,10 +352,14 @@ theorem infinityChartPointLine_marked
     (p : N13IntegralInfinityPointSpread.IntegralInfinityPoint) (hp : p.1.1 ≠ 0) :
     HasInfinityMultiplicities (N13IntegralInfinityPointSpread.pointLine p) 0 0 := by
   constructor
-  · simpa only [pow_zero, Ideal.span_singleton_one] using
+  · have h0 : Ideal.map positiveExpansion
+        (N13IntegralInfinityPointSpread.pointLine p).infinityIdeal = ⊤ :=
       point_map_top_of_nonzero_t positiveExpansion positiveExpansion_base p hp
-  · simpa only [pow_zero, Ideal.span_singleton_one] using
+    simpa only [pow_zero, Ideal.span_singleton_one] using h0
+  · have h0 : Ideal.map negativeExpansion
+        (N13IntegralInfinityPointSpread.pointLine p).infinityIdeal = ⊤ :=
       point_map_top_of_nonzero_t negativeExpansion negativeExpansion_base p hp
+    simpa only [pow_zero, Ideal.span_singleton_one] using h0
 
 theorem affinePointLine_marked
     (x y : N13TwoChartPicardRealization.Q₂)
@@ -361,7 +369,9 @@ theorem affinePointLine_marked
   split
   · exact integralPointLine_marked _
   · apply infinityChartPointLine_marked
-    exact N13LocalDlogRegimes.inverseIntegralPart_ne_zero x _
+    rename_i hnorm
+    exact N13LocalDlogRegimes.inverseIntegralPart_ne_zero x
+      (lt_of_not_ge fun h0 => hnorm ((Padic.norm_le_one_iff_val_nonneg x).mpr h0))
 
 theorem pairLine_marked
     (x y z w : N13TwoChartPicardRealization.Q₂)
@@ -377,9 +387,9 @@ theorem anchoredPointData_geometricMark_of_marked
     (hp : HasInfinityMultiplicities (N13QuadraticTwoChartSpread.pointLine x y h) 0 0) :
     HasGeometricMark (N13EffectiveGraphData.anchoredPointData x y h b) := by
   cases b
-  · refine ⟨0, 1, ?_, by decide⟩
+  · refine ⟨0, 1, ?_, by first | rfl | simp [N13EffectiveGraphData.anchoredPointData, N13EffectiveGraphData.pointPairData]⟩
     exact hasInfinityMultiplicities_tensor _ _ 0 0 0 1 hp infinityMinusLine_marked
-  · refine ⟨1, 0, ?_, by decide⟩
+  · refine ⟨1, 0, ?_, by first | rfl | simp [N13EffectiveGraphData.anchoredPointData, N13EffectiveGraphData.pointPairData]⟩
     exact hasInfinityMultiplicities_tensor _ _ 0 0 1 0 hp infinityPlusLine_marked
 
 theorem anchoredPointData_geometricMark

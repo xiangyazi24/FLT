@@ -170,8 +170,9 @@ theorem exists_effective_data
       rw [hu] at hh
       simpa using hh.symm
     have hnlo := hE.2.1
-    have hnhi := hE.2.2
+    have hnhi : E.nInf ≤ 1 - (E.u.natDegree : ℤ) := by have := hE.2.2; omega
     rw [he] at hnhi
+    norm_num at hnhi
     have hm (b c : Bool) :
         Ideal.map N13IntegralFractionalHull.integralToRational
             (infinityPairData b c).charts.affineIdeal =
@@ -191,7 +192,7 @@ theorem exists_effective_data
         infinityPairData_saturated _ _⟩
       change (0 : ℤ) = E.nInf - 1
       omega
-  · let D := balancedGraph E hd
+  · let D := balancedGraph E hE.1
     obtain ⟨x, y, hc, hD⟩ :=
       SexticMumford.exists_affinePoint_of_natDegree_eq_one
         N13TwoChartPicardRealization.Model D he rfl
@@ -204,8 +205,9 @@ theorem exists_effective_data
           SexticMumford.mumfordIdeal N13TwoChartPicardRealization.Model E.u E.v := by
       rw [anchoredPointData_map_affineIdeal, N13TwoChartLineTensor.pointY_goodY, hu, hv]
     have hnlo := hE.2.1
-    have hnhi := hE.2.2
+    have hnhi : E.nInf ≤ 1 - (E.u.natDegree : ℤ) := by have := hE.2.2; omega
     rw [he] at hnhi
+    norm_num at hnhi
     interval_cases hn : E.nInf
     · refine ⟨anchoredPointData x (N13TwoChartLineTensor.goodY x y) hg false,
         raw_eq_of_map_and_mark E _ (hm _) ?_, anchoredPointData_saturated _ _ _ _⟩
@@ -215,7 +217,7 @@ theorem exists_effective_data
         raw_eq_of_map_and_mark E _ (hm _) ?_, anchoredPointData_saturated _ _ _ _⟩
       change (-1 : ℤ) = E.nInf - 1
       omega
-  · let D := balancedGraph E hd
+  · let D := balancedGraph E hE.1
     obtain ⟨R, hraw, _, hs⟩ := N13QuadraticPicardRealization.exists_saturated_data D he
     have hm := map_affineIdeal_eq_of_genericRaw_eq_mumfordRaw R.charts R.infinityOrder D hraw
     refine ⟨withMark R (E.nInf - 1), raw_eq_of_map_and_mark E _ hm rfl, hs⟩

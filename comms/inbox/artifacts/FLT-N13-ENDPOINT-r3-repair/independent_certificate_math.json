@@ -1,0 +1,3279 @@
+{
+  "method": "Independent coefficient-list convolution and Euclidean division over F2, not Lean or project code",
+  "residual_cofactors": [
+    {
+      "index": 0,
+      "cofactor_exponents": [
+        1,
+        5
+      ],
+      "cofactor_bits": 34
+    },
+    {
+      "index": 1,
+      "cofactor_exponents": [
+        1,
+        5
+      ],
+      "cofactor_bits": 34
+    },
+    {
+      "index": 2,
+      "cofactor_exponents": [
+        0,
+        2,
+        3,
+        7
+      ],
+      "cofactor_bits": 141
+    },
+    {
+      "index": 3,
+      "cofactor_exponents": [
+        0,
+        2,
+        3,
+        7
+      ],
+      "cofactor_bits": 141
+    },
+    {
+      "index": 4,
+      "cofactor_exponents": [
+        0,
+        2,
+        3,
+        7
+      ],
+      "cofactor_bits": 141
+    },
+    {
+      "index": 5,
+      "cofactor_exponents": [
+        0,
+        2,
+        3,
+        7
+      ],
+      "cofactor_bits": 141
+    }
+  ],
+  "counts": {
+    "supported": 69,
+    "unsupported_nonzero": 58,
+    "zero_norm": 1
+  },
+  "supported_max_jet_order": 7,
+  "supported_weighted_integer_values": [
+    -57,
+    -38,
+    -19,
+    0,
+    19,
+    38,
+    57
+  ],
+  "matches_other_artifact_all_128_rows": true,
+  "rows": [
+    {
+      "a": 0,
+      "b": 0,
+      "norm": 0,
+      "supported": false,
+      "jets": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "orders": [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 0
+    },
+    {
+      "a": 0,
+      "b": 1,
+      "norm": 48,
+      "supported": true,
+      "jets": [
+        144,
+        155,
+        382,
+        371,
+        756,
+        750
+      ],
+      "orders": [
+        4,
+        0,
+        1,
+        0,
+        2,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 0,
+      "b": 2,
+      "norm": 192,
+      "supported": true,
+      "jets": [
+        288,
+        310,
+        898,
+        917,
+        378,
+        375
+      ],
+      "orders": [
+        5,
+        1,
+        1,
+        0,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 0,
+      "b": 3,
+      "norm": 240,
+      "supported": true,
+      "jets": [
+        432,
+        429,
+        764,
+        742,
+        910,
+        921
+      ],
+      "orders": [
+        4,
+        0,
+        2,
+        1,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 1,
+      "b": 0,
+      "norm": 1,
+      "supported": true,
+      "jets": [
+        1,
+        1,
+        1,
+        1,
+        16,
+        16
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        4,
+        4
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 1,
+      "b": 1,
+      "norm": 58,
+      "supported": false,
+      "jets": [
+        145,
+        154,
+        383,
+        370,
+        740,
+        766
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 11
+    },
+    {
+      "a": 1,
+      "b": 2,
+      "norm": 215,
+      "supported": false,
+      "jets": [
+        289,
+        311,
+        899,
+        916,
+        362,
+        359
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        2,
+        1,
+        0
+      ],
+      "code": 13,
+      "weighted_integer": -6,
+      "remaining_factor": 59
+    },
+    {
+      "a": 1,
+      "b": 3,
+      "norm": 236,
+      "supported": false,
+      "jets": [
+        433,
+        428,
+        765,
+        743,
+        926,
+        905
+      ],
+      "orders": [
+        0,
+        2,
+        0,
+        0,
+        1,
+        0
+      ],
+      "code": 6,
+      "weighted_integer": 6,
+      "remaining_factor": 59
+    },
+    {
+      "a": 2,
+      "b": 0,
+      "norm": 4,
+      "supported": true,
+      "jets": [
+        2,
+        2,
+        3,
+        3,
+        8,
+        8
+      ],
+      "orders": [
+        1,
+        1,
+        0,
+        0,
+        3,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 2,
+      "b": 1,
+      "norm": 34,
+      "supported": true,
+      "jets": [
+        146,
+        153,
+        381,
+        368,
+        764,
+        742
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        4,
+        2,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 2,
+      "b": 2,
+      "norm": 232,
+      "supported": false,
+      "jets": [
+        290,
+        308,
+        897,
+        918,
+        370,
+        383
+      ],
+      "orders": [
+        1,
+        2,
+        0,
+        1,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 11
+    },
+    {
+      "a": 2,
+      "b": 3,
+      "norm": 206,
+      "supported": false,
+      "jets": [
+        434,
+        431,
+        767,
+        741,
+        902,
+        913
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "code": 9,
+      "weighted_integer": 9,
+      "remaining_factor": 103
+    },
+    {
+      "a": 3,
+      "b": 0,
+      "norm": 5,
+      "supported": true,
+      "jets": [
+        3,
+        3,
+        2,
+        2,
+        24,
+        24
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        1,
+        3,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 3,
+      "b": 1,
+      "norm": 40,
+      "supported": true,
+      "jets": [
+        147,
+        152,
+        380,
+        369,
+        748,
+        758
+      ],
+      "orders": [
+        0,
+        3,
+        2,
+        0,
+        2,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 3,
+      "b": 2,
+      "norm": 255,
+      "supported": true,
+      "jets": [
+        291,
+        309,
+        896,
+        919,
+        354,
+        367
+      ],
+      "orders": [
+        0,
+        0,
+        7,
+        0,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 57,
+      "remaining_factor": 1
+    },
+    {
+      "a": 3,
+      "b": 3,
+      "norm": 210,
+      "supported": false,
+      "jets": [
+        435,
+        430,
+        766,
+        740,
+        918,
+        897
+      ],
+      "orders": [
+        0,
+        1,
+        1,
+        2,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 11
+    },
+    {
+      "a": 4,
+      "b": 0,
+      "norm": 16,
+      "supported": true,
+      "jets": [
+        4,
+        4,
+        5,
+        5,
+        4,
+        4
+      ],
+      "orders": [
+        2,
+        2,
+        0,
+        0,
+        2,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 4,
+      "b": 1,
+      "norm": 12,
+      "supported": true,
+      "jets": [
+        148,
+        159,
+        379,
+        374,
+        752,
+        746
+      ],
+      "orders": [
+        2,
+        0,
+        0,
+        1,
+        4,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 4,
+      "b": 2,
+      "norm": 136,
+      "supported": true,
+      "jets": [
+        292,
+        306,
+        903,
+        912,
+        382,
+        371
+      ],
+      "orders": [
+        2,
+        1,
+        0,
+        4,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 4,
+      "b": 3,
+      "norm": 148,
+      "supported": false,
+      "jets": [
+        436,
+        425,
+        761,
+        739,
+        906,
+        925
+      ],
+      "orders": [
+        2,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "code": 10,
+      "weighted_integer": 10,
+      "remaining_factor": 37
+    },
+    {
+      "a": 5,
+      "b": 0,
+      "norm": 17,
+      "supported": true,
+      "jets": [
+        5,
+        5,
+        4,
+        4,
+        20,
+        20
+      ],
+      "orders": [
+        0,
+        0,
+        2,
+        2,
+        2,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 5,
+      "b": 1,
+      "norm": 6,
+      "supported": true,
+      "jets": [
+        149,
+        158,
+        378,
+        375,
+        736,
+        762
+      ],
+      "orders": [
+        0,
+        1,
+        1,
+        0,
+        5,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 5,
+      "b": 2,
+      "norm": 159,
+      "supported": false,
+      "jets": [
+        293,
+        307,
+        902,
+        913,
+        366,
+        355
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "code": 15,
+      "weighted_integer": 15,
+      "remaining_factor": 117
+    },
+    {
+      "a": 5,
+      "b": 3,
+      "norm": 136,
+      "supported": true,
+      "jets": [
+        437,
+        424,
+        760,
+        738,
+        922,
+        909
+      ],
+      "orders": [
+        0,
+        3,
+        3,
+        1,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 6,
+      "b": 0,
+      "norm": 20,
+      "supported": true,
+      "jets": [
+        6,
+        6,
+        6,
+        6,
+        12,
+        12
+      ],
+      "orders": [
+        1,
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 6,
+      "b": 1,
+      "norm": 30,
+      "supported": true,
+      "jets": [
+        150,
+        157,
+        376,
+        373,
+        760,
+        738
+      ],
+      "orders": [
+        1,
+        0,
+        3,
+        0,
+        3,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 6,
+      "b": 2,
+      "norm": 160,
+      "supported": true,
+      "jets": [
+        294,
+        304,
+        900,
+        915,
+        374,
+        379
+      ],
+      "orders": [
+        1,
+        4,
+        2,
+        0,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 6,
+      "b": 3,
+      "norm": 170,
+      "supported": true,
+      "jets": [
+        438,
+        427,
+        762,
+        736,
+        898,
+        917
+      ],
+      "orders": [
+        1,
+        0,
+        1,
+        5,
+        1,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 7,
+      "b": 0,
+      "norm": 21,
+      "supported": false,
+      "jets": [
+        7,
+        7,
+        7,
+        7,
+        28,
+        28
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        2,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 21
+    },
+    {
+      "a": 7,
+      "b": 1,
+      "norm": 20,
+      "supported": true,
+      "jets": [
+        151,
+        156,
+        377,
+        372,
+        744,
+        754
+      ],
+      "orders": [
+        0,
+        2,
+        0,
+        2,
+        3,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 7,
+      "b": 2,
+      "norm": 183,
+      "supported": false,
+      "jets": [
+        295,
+        305,
+        901,
+        914,
+        358,
+        363
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0
+      ],
+      "code": 1,
+      "weighted_integer": 1,
+      "remaining_factor": 109
+    },
+    {
+      "a": 7,
+      "b": 3,
+      "norm": 182,
+      "supported": false,
+      "jets": [
+        439,
+        426,
+        763,
+        737,
+        914,
+        901
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      "code": 7,
+      "weighted_integer": 7,
+      "remaining_factor": 91
+    },
+    {
+      "a": 8,
+      "b": 0,
+      "norm": 64,
+      "supported": true,
+      "jets": [
+        8,
+        8,
+        15,
+        15,
+        2,
+        2
+      ],
+      "orders": [
+        3,
+        3,
+        0,
+        0,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 8,
+      "b": 1,
+      "norm": 40,
+      "supported": true,
+      "jets": [
+        152,
+        147,
+        369,
+        380,
+        758,
+        748
+      ],
+      "orders": [
+        3,
+        0,
+        0,
+        2,
+        1,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 8,
+      "b": 2,
+      "norm": 48,
+      "supported": true,
+      "jets": [
+        296,
+        318,
+        909,
+        922,
+        376,
+        373
+      ],
+      "orders": [
+        3,
+        1,
+        0,
+        1,
+        3,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 8,
+      "b": 3,
+      "norm": 88,
+      "supported": false,
+      "jets": [
+        440,
+        421,
+        755,
+        745,
+        908,
+        923
+      ],
+      "orders": [
+        3,
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 11
+    },
+    {
+      "a": 9,
+      "b": 0,
+      "norm": 65,
+      "supported": false,
+      "jets": [
+        9,
+        9,
+        14,
+        14,
+        18,
+        18
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 21
+    },
+    {
+      "a": 9,
+      "b": 1,
+      "norm": 34,
+      "supported": true,
+      "jets": [
+        153,
+        146,
+        368,
+        381,
+        742,
+        764
+      ],
+      "orders": [
+        0,
+        1,
+        4,
+        0,
+        1,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 9,
+      "b": 2,
+      "norm": 39,
+      "supported": false,
+      "jets": [
+        297,
+        319,
+        908,
+        923,
+        360,
+        357
+      ],
+      "orders": [
+        0,
+        0,
+        2,
+        0,
+        3,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 11
+    },
+    {
+      "a": 9,
+      "b": 3,
+      "norm": 68,
+      "supported": true,
+      "jets": [
+        441,
+        420,
+        754,
+        744,
+        924,
+        907
+      ],
+      "orders": [
+        0,
+        2,
+        1,
+        3,
+        2,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 10,
+      "b": 0,
+      "norm": 68,
+      "supported": true,
+      "jets": [
+        10,
+        10,
+        12,
+        12,
+        10,
+        10
+      ],
+      "orders": [
+        1,
+        1,
+        2,
+        2,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 10,
+      "b": 1,
+      "norm": 58,
+      "supported": false,
+      "jets": [
+        154,
+        145,
+        370,
+        383,
+        766,
+        740
+      ],
+      "orders": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 11
+    },
+    {
+      "a": 10,
+      "b": 2,
+      "norm": 24,
+      "supported": true,
+      "jets": [
+        298,
+        316,
+        910,
+        921,
+        368,
+        381
+      ],
+      "orders": [
+        1,
+        2,
+        1,
+        0,
+        4,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 10,
+      "b": 3,
+      "norm": 102,
+      "supported": true,
+      "jets": [
+        442,
+        423,
+        752,
+        746,
+        900,
+        915
+      ],
+      "orders": [
+        1,
+        0,
+        4,
+        1,
+        2,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 11,
+      "b": 0,
+      "norm": 69,
+      "supported": false,
+      "jets": [
+        11,
+        11,
+        13,
+        13,
+        26,
+        26
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 69
+    },
+    {
+      "a": 11,
+      "b": 1,
+      "norm": 48,
+      "supported": true,
+      "jets": [
+        155,
+        144,
+        371,
+        382,
+        750,
+        756
+      ],
+      "orders": [
+        0,
+        4,
+        0,
+        1,
+        1,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 11,
+      "b": 2,
+      "norm": 15,
+      "supported": true,
+      "jets": [
+        299,
+        317,
+        911,
+        920,
+        352,
+        365
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        3,
+        5,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 11,
+      "b": 3,
+      "norm": 122,
+      "supported": false,
+      "jets": [
+        443,
+        422,
+        753,
+        747,
+        916,
+        899
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        0,
+        2,
+        0
+      ],
+      "code": 15,
+      "weighted_integer": 15,
+      "remaining_factor": 61
+    },
+    {
+      "a": 12,
+      "b": 0,
+      "norm": 80,
+      "supported": true,
+      "jets": [
+        12,
+        12,
+        10,
+        10,
+        6,
+        6
+      ],
+      "orders": [
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 12,
+      "b": 1,
+      "norm": 20,
+      "supported": true,
+      "jets": [
+        156,
+        151,
+        372,
+        377,
+        754,
+        744
+      ],
+      "orders": [
+        2,
+        0,
+        2,
+        0,
+        1,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 12,
+      "b": 2,
+      "norm": 120,
+      "supported": true,
+      "jets": [
+        300,
+        314,
+        904,
+        927,
+        380,
+        369
+      ],
+      "orders": [
+        2,
+        1,
+        3,
+        0,
+        2,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 12,
+      "b": 3,
+      "norm": 60,
+      "supported": true,
+      "jets": [
+        444,
+        417,
+        758,
+        748,
+        904,
+        927
+      ],
+      "orders": [
+        2,
+        0,
+        1,
+        2,
+        3,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 13,
+      "b": 0,
+      "norm": 81,
+      "supported": false,
+      "jets": [
+        13,
+        13,
+        11,
+        11,
+        22,
+        22
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 81
+    },
+    {
+      "a": 13,
+      "b": 1,
+      "norm": 30,
+      "supported": true,
+      "jets": [
+        157,
+        150,
+        373,
+        376,
+        738,
+        760
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        3,
+        1,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 13,
+      "b": 2,
+      "norm": 111,
+      "supported": false,
+      "jets": [
+        301,
+        315,
+        905,
+        926,
+        364,
+        353
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        1,
+        2,
+        0
+      ],
+      "code": 9,
+      "weighted_integer": 9,
+      "remaining_factor": 37
+    },
+    {
+      "a": 13,
+      "b": 3,
+      "norm": 32,
+      "supported": true,
+      "jets": [
+        445,
+        416,
+        759,
+        749,
+        920,
+        911
+      ],
+      "orders": [
+        0,
+        5,
+        0,
+        0,
+        3,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 14,
+      "b": 0,
+      "norm": 84,
+      "supported": false,
+      "jets": [
+        14,
+        14,
+        9,
+        9,
+        14,
+        14
+      ],
+      "orders": [
+        1,
+        1,
+        0,
+        0,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 21
+    },
+    {
+      "a": 14,
+      "b": 1,
+      "norm": 6,
+      "supported": true,
+      "jets": [
+        158,
+        149,
+        375,
+        378,
+        762,
+        736
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        1,
+        1,
+        5
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 14,
+      "b": 2,
+      "norm": 80,
+      "supported": true,
+      "jets": [
+        302,
+        312,
+        907,
+        924,
+        372,
+        377
+      ],
+      "orders": [
+        1,
+        3,
+        0,
+        2,
+        2,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 14,
+      "b": 3,
+      "norm": 2,
+      "supported": true,
+      "jets": [
+        446,
+        419,
+        757,
+        751,
+        896,
+        919
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        0,
+        7,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 57,
+      "remaining_factor": 1
+    },
+    {
+      "a": 15,
+      "b": 0,
+      "norm": 85,
+      "supported": true,
+      "jets": [
+        15,
+        15,
+        8,
+        8,
+        30,
+        30
+      ],
+      "orders": [
+        0,
+        0,
+        3,
+        3,
+        1,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 15,
+      "b": 1,
+      "norm": 12,
+      "supported": true,
+      "jets": [
+        159,
+        148,
+        374,
+        379,
+        746,
+        752
+      ],
+      "orders": [
+        0,
+        2,
+        1,
+        0,
+        1,
+        4
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 15,
+      "b": 2,
+      "norm": 71,
+      "supported": false,
+      "jets": [
+        303,
+        313,
+        906,
+        925,
+        356,
+        361
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        0,
+        2,
+        0
+      ],
+      "code": 4,
+      "weighted_integer": 23,
+      "remaining_factor": 61
+    },
+    {
+      "a": 15,
+      "b": 3,
+      "norm": 30,
+      "supported": true,
+      "jets": [
+        447,
+        418,
+        756,
+        750,
+        912,
+        903
+      ],
+      "orders": [
+        0,
+        1,
+        2,
+        1,
+        4,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 16,
+      "b": 0,
+      "norm": 256,
+      "supported": true,
+      "jets": [
+        16,
+        16,
+        17,
+        17,
+        1,
+        1
+      ],
+      "orders": [
+        4,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 16,
+      "b": 1,
+      "norm": 384,
+      "supported": true,
+      "jets": [
+        128,
+        139,
+        367,
+        354,
+        757,
+        751
+      ],
+      "orders": [
+        7,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 16,
+      "b": 2,
+      "norm": 160,
+      "supported": true,
+      "jets": [
+        304,
+        294,
+        915,
+        900,
+        379,
+        374
+      ],
+      "orders": [
+        4,
+        1,
+        0,
+        2,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 16,
+      "b": 3,
+      "norm": 32,
+      "supported": true,
+      "jets": [
+        416,
+        445,
+        749,
+        759,
+        911,
+        920
+      ],
+      "orders": [
+        5,
+        0,
+        0,
+        0,
+        0,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 17,
+      "b": 0,
+      "norm": 257,
+      "supported": true,
+      "jets": [
+        17,
+        17,
+        16,
+        16,
+        17,
+        17
+      ],
+      "orders": [
+        0,
+        0,
+        4,
+        4,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 17,
+      "b": 1,
+      "norm": 394,
+      "supported": false,
+      "jets": [
+        129,
+        138,
+        366,
+        355,
+        741,
+        767
+      ],
+      "orders": [
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "code": 6,
+      "weighted_integer": 6,
+      "remaining_factor": 67
+    },
+    {
+      "a": 17,
+      "b": 2,
+      "norm": 183,
+      "supported": false,
+      "jets": [
+        305,
+        295,
+        914,
+        901,
+        363,
+        358
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1
+      ],
+      "code": 18,
+      "weighted_integer": -1,
+      "remaining_factor": 109
+    },
+    {
+      "a": 17,
+      "b": 3,
+      "norm": 60,
+      "supported": true,
+      "jets": [
+        417,
+        444,
+        748,
+        758,
+        927,
+        904
+      ],
+      "orders": [
+        0,
+        2,
+        2,
+        1,
+        0,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 18,
+      "b": 0,
+      "norm": 260,
+      "supported": false,
+      "jets": [
+        18,
+        18,
+        18,
+        18,
+        9,
+        9
+      ],
+      "orders": [
+        1,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 21
+    },
+    {
+      "a": 18,
+      "b": 1,
+      "norm": 402,
+      "supported": false,
+      "jets": [
+        130,
+        137,
+        364,
+        353,
+        765,
+        743
+      ],
+      "orders": [
+        1,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "code": 15,
+      "weighted_integer": 15,
+      "remaining_factor": 61
+    },
+    {
+      "a": 18,
+      "b": 2,
+      "norm": 136,
+      "supported": true,
+      "jets": [
+        306,
+        292,
+        912,
+        903,
+        371,
+        382
+      ],
+      "orders": [
+        1,
+        2,
+        4,
+        0,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 18,
+      "b": 3,
+      "norm": 30,
+      "supported": true,
+      "jets": [
+        418,
+        447,
+        750,
+        756,
+        903,
+        912
+      ],
+      "orders": [
+        1,
+        0,
+        1,
+        2,
+        0,
+        4
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 19,
+      "b": 0,
+      "norm": 261,
+      "supported": false,
+      "jets": [
+        19,
+        19,
+        19,
+        19,
+        25,
+        25
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 261
+    },
+    {
+      "a": 19,
+      "b": 1,
+      "norm": 408,
+      "supported": true,
+      "jets": [
+        131,
+        136,
+        365,
+        352,
+        749,
+        759
+      ],
+      "orders": [
+        0,
+        3,
+        0,
+        5,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 19,
+      "b": 2,
+      "norm": 159,
+      "supported": false,
+      "jets": [
+        307,
+        293,
+        913,
+        902,
+        355,
+        366
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        1
+      ],
+      "code": 4,
+      "weighted_integer": -15,
+      "remaining_factor": 117
+    },
+    {
+      "a": 19,
+      "b": 3,
+      "norm": 2,
+      "supported": true,
+      "jets": [
+        419,
+        446,
+        751,
+        757,
+        919,
+        896
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        7
+      ],
+      "code": 0,
+      "weighted_integer": -57,
+      "remaining_factor": 1
+    },
+    {
+      "a": 20,
+      "b": 0,
+      "norm": 272,
+      "supported": true,
+      "jets": [
+        20,
+        20,
+        20,
+        20,
+        5,
+        5
+      ],
+      "orders": [
+        2,
+        2,
+        2,
+        2,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 20,
+      "b": 1,
+      "norm": 444,
+      "supported": false,
+      "jets": [
+        132,
+        143,
+        362,
+        359,
+        753,
+        747
+      ],
+      "orders": [
+        2,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "code": 9,
+      "weighted_integer": 9,
+      "remaining_factor": 37
+    },
+    {
+      "a": 20,
+      "b": 2,
+      "norm": 232,
+      "supported": false,
+      "jets": [
+        308,
+        290,
+        918,
+        897,
+        383,
+        370
+      ],
+      "orders": [
+        2,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 11
+    },
+    {
+      "a": 20,
+      "b": 3,
+      "norm": 68,
+      "supported": true,
+      "jets": [
+        420,
+        441,
+        744,
+        754,
+        907,
+        924
+      ],
+      "orders": [
+        2,
+        0,
+        3,
+        1,
+        0,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 21,
+      "b": 0,
+      "norm": 273,
+      "supported": false,
+      "jets": [
+        21,
+        21,
+        21,
+        21,
+        21,
+        21
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 273
+    },
+    {
+      "a": 21,
+      "b": 1,
+      "norm": 438,
+      "supported": false,
+      "jets": [
+        133,
+        142,
+        363,
+        358,
+        737,
+        763
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "code": 11,
+      "weighted_integer": -8,
+      "remaining_factor": 73
+    },
+    {
+      "a": 21,
+      "b": 2,
+      "norm": 255,
+      "supported": true,
+      "jets": [
+        309,
+        291,
+        919,
+        896,
+        367,
+        354
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        7,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": -57,
+      "remaining_factor": 1
+    },
+    {
+      "a": 21,
+      "b": 3,
+      "norm": 88,
+      "supported": false,
+      "jets": [
+        421,
+        440,
+        745,
+        755,
+        923,
+        908
+      ],
+      "orders": [
+        0,
+        3,
+        0,
+        0,
+        0,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 11
+    },
+    {
+      "a": 22,
+      "b": 0,
+      "norm": 276,
+      "supported": false,
+      "jets": [
+        22,
+        22,
+        23,
+        23,
+        13,
+        13
+      ],
+      "orders": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 69
+    },
+    {
+      "a": 22,
+      "b": 1,
+      "norm": 430,
+      "supported": false,
+      "jets": [
+        134,
+        141,
+        361,
+        356,
+        761,
+        739
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      "code": 6,
+      "weighted_integer": -13,
+      "remaining_factor": 59
+    },
+    {
+      "a": 22,
+      "b": 2,
+      "norm": 192,
+      "supported": true,
+      "jets": [
+        310,
+        288,
+        917,
+        898,
+        375,
+        378
+      ],
+      "orders": [
+        1,
+        5,
+        0,
+        1,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 22,
+      "b": 3,
+      "norm": 122,
+      "supported": false,
+      "jets": [
+        422,
+        443,
+        747,
+        753,
+        899,
+        916
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        2
+      ],
+      "code": 4,
+      "weighted_integer": -15,
+      "remaining_factor": 61
+    },
+    {
+      "a": 23,
+      "b": 0,
+      "norm": 277,
+      "supported": false,
+      "jets": [
+        23,
+        23,
+        22,
+        22,
+        29,
+        29
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 81
+    },
+    {
+      "a": 23,
+      "b": 1,
+      "norm": 420,
+      "supported": false,
+      "jets": [
+        135,
+        140,
+        360,
+        357,
+        745,
+        755
+      ],
+      "orders": [
+        0,
+        2,
+        3,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 11
+    },
+    {
+      "a": 23,
+      "b": 2,
+      "norm": 215,
+      "supported": false,
+      "jets": [
+        311,
+        289,
+        916,
+        899,
+        359,
+        362
+      ],
+      "orders": [
+        0,
+        0,
+        2,
+        0,
+        0,
+        1
+      ],
+      "code": 6,
+      "weighted_integer": 6,
+      "remaining_factor": 59
+    },
+    {
+      "a": 23,
+      "b": 3,
+      "norm": 102,
+      "supported": true,
+      "jets": [
+        423,
+        442,
+        746,
+        752,
+        915,
+        900
+      ],
+      "orders": [
+        0,
+        1,
+        1,
+        4,
+        0,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 24,
+      "b": 0,
+      "norm": 320,
+      "supported": true,
+      "jets": [
+        24,
+        24,
+        30,
+        30,
+        3,
+        3
+      ],
+      "orders": [
+        3,
+        3,
+        1,
+        1,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 24,
+      "b": 1,
+      "norm": 408,
+      "supported": true,
+      "jets": [
+        136,
+        131,
+        352,
+        365,
+        759,
+        749
+      ],
+      "orders": [
+        3,
+        0,
+        5,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 24,
+      "b": 2,
+      "norm": 80,
+      "supported": true,
+      "jets": [
+        312,
+        302,
+        924,
+        907,
+        377,
+        372
+      ],
+      "orders": [
+        3,
+        1,
+        2,
+        0,
+        0,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 24,
+      "b": 3,
+      "norm": 136,
+      "supported": true,
+      "jets": [
+        424,
+        437,
+        738,
+        760,
+        909,
+        922
+      ],
+      "orders": [
+        3,
+        0,
+        1,
+        3,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 25,
+      "b": 0,
+      "norm": 321,
+      "supported": false,
+      "jets": [
+        25,
+        25,
+        31,
+        31,
+        19,
+        19
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 321
+    },
+    {
+      "a": 25,
+      "b": 1,
+      "norm": 402,
+      "supported": false,
+      "jets": [
+        137,
+        130,
+        353,
+        364,
+        743,
+        765
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        2,
+        0,
+        0
+      ],
+      "code": 4,
+      "weighted_integer": -15,
+      "remaining_factor": 61
+    },
+    {
+      "a": 25,
+      "b": 2,
+      "norm": 71,
+      "supported": false,
+      "jets": [
+        313,
+        303,
+        925,
+        906,
+        361,
+        356
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        2
+      ],
+      "code": 15,
+      "weighted_integer": -23,
+      "remaining_factor": 61
+    },
+    {
+      "a": 25,
+      "b": 3,
+      "norm": 148,
+      "supported": false,
+      "jets": [
+        425,
+        436,
+        739,
+        761,
+        925,
+        906
+      ],
+      "orders": [
+        0,
+        2,
+        0,
+        0,
+        0,
+        1
+      ],
+      "code": 9,
+      "weighted_integer": -10,
+      "remaining_factor": 37
+    },
+    {
+      "a": 26,
+      "b": 0,
+      "norm": 324,
+      "supported": false,
+      "jets": [
+        26,
+        26,
+        29,
+        29,
+        11,
+        11
+      ],
+      "orders": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 81
+    },
+    {
+      "a": 26,
+      "b": 1,
+      "norm": 394,
+      "supported": false,
+      "jets": [
+        138,
+        129,
+        355,
+        366,
+        767,
+        741
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "code": 13,
+      "weighted_integer": -6,
+      "remaining_factor": 67
+    },
+    {
+      "a": 26,
+      "b": 2,
+      "norm": 120,
+      "supported": true,
+      "jets": [
+        314,
+        300,
+        927,
+        904,
+        369,
+        380
+      ],
+      "orders": [
+        1,
+        2,
+        0,
+        3,
+        0,
+        2
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 26,
+      "b": 3,
+      "norm": 182,
+      "supported": false,
+      "jets": [
+        426,
+        439,
+        737,
+        763,
+        901,
+        914
+      ],
+      "orders": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "code": 12,
+      "weighted_integer": -7,
+      "remaining_factor": 91
+    },
+    {
+      "a": 27,
+      "b": 0,
+      "norm": 325,
+      "supported": false,
+      "jets": [
+        27,
+        27,
+        28,
+        28,
+        27,
+        27
+      ],
+      "orders": [
+        0,
+        0,
+        2,
+        2,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 21
+    },
+    {
+      "a": 27,
+      "b": 1,
+      "norm": 384,
+      "supported": true,
+      "jets": [
+        139,
+        128,
+        354,
+        367,
+        751,
+        757
+      ],
+      "orders": [
+        0,
+        7,
+        1,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 27,
+      "b": 2,
+      "norm": 111,
+      "supported": false,
+      "jets": [
+        315,
+        301,
+        926,
+        905,
+        353,
+        364
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        2
+      ],
+      "code": 10,
+      "weighted_integer": -9,
+      "remaining_factor": 37
+    },
+    {
+      "a": 27,
+      "b": 3,
+      "norm": 170,
+      "supported": true,
+      "jets": [
+        427,
+        438,
+        736,
+        762,
+        917,
+        898
+      ],
+      "orders": [
+        0,
+        1,
+        5,
+        1,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 28,
+      "b": 0,
+      "norm": 336,
+      "supported": false,
+      "jets": [
+        28,
+        28,
+        27,
+        27,
+        7,
+        7
+      ],
+      "orders": [
+        2,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 21
+    },
+    {
+      "a": 28,
+      "b": 1,
+      "norm": 420,
+      "supported": false,
+      "jets": [
+        140,
+        135,
+        357,
+        360,
+        755,
+        745
+      ],
+      "orders": [
+        2,
+        0,
+        0,
+        3,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 11
+    },
+    {
+      "a": 28,
+      "b": 2,
+      "norm": 24,
+      "supported": true,
+      "jets": [
+        316,
+        298,
+        921,
+        910,
+        381,
+        368
+      ],
+      "orders": [
+        2,
+        1,
+        0,
+        1,
+        0,
+        4
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 1
+    },
+    {
+      "a": 28,
+      "b": 3,
+      "norm": 236,
+      "supported": false,
+      "jets": [
+        428,
+        433,
+        743,
+        765,
+        905,
+        926
+      ],
+      "orders": [
+        2,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "code": 13,
+      "weighted_integer": -6,
+      "remaining_factor": 59
+    },
+    {
+      "a": 29,
+      "b": 0,
+      "norm": 337,
+      "supported": false,
+      "jets": [
+        29,
+        29,
+        26,
+        26,
+        23,
+        23
+      ],
+      "orders": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 69
+    },
+    {
+      "a": 29,
+      "b": 1,
+      "norm": 430,
+      "supported": false,
+      "jets": [
+        141,
+        134,
+        356,
+        361,
+        739,
+        761
+      ],
+      "orders": [
+        0,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      "code": 13,
+      "weighted_integer": 13,
+      "remaining_factor": 59
+    },
+    {
+      "a": 29,
+      "b": 2,
+      "norm": 15,
+      "supported": true,
+      "jets": [
+        317,
+        299,
+        920,
+        911,
+        365,
+        352
+      ],
+      "orders": [
+        0,
+        0,
+        3,
+        0,
+        0,
+        5
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 29,
+      "b": 3,
+      "norm": 240,
+      "supported": true,
+      "jets": [
+        429,
+        432,
+        742,
+        764,
+        921,
+        910
+      ],
+      "orders": [
+        0,
+        4,
+        1,
+        2,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 30,
+      "b": 0,
+      "norm": 340,
+      "supported": true,
+      "jets": [
+        30,
+        30,
+        24,
+        24,
+        15,
+        15
+      ],
+      "orders": [
+        1,
+        1,
+        3,
+        3,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 1
+    },
+    {
+      "a": 30,
+      "b": 1,
+      "norm": 438,
+      "supported": false,
+      "jets": [
+        142,
+        133,
+        358,
+        363,
+        763,
+        737
+      ],
+      "orders": [
+        1,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "code": 8,
+      "weighted_integer": 8,
+      "remaining_factor": 73
+    },
+    {
+      "a": 30,
+      "b": 2,
+      "norm": 48,
+      "supported": true,
+      "jets": [
+        318,
+        296,
+        922,
+        909,
+        373,
+        376
+      ],
+      "orders": [
+        1,
+        3,
+        1,
+        0,
+        0,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": -19,
+      "remaining_factor": 1
+    },
+    {
+      "a": 30,
+      "b": 3,
+      "norm": 210,
+      "supported": false,
+      "jets": [
+        430,
+        435,
+        740,
+        766,
+        897,
+        918
+      ],
+      "orders": [
+        1,
+        0,
+        2,
+        1,
+        0,
+        1
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 11
+    },
+    {
+      "a": 31,
+      "b": 0,
+      "norm": 341,
+      "supported": false,
+      "jets": [
+        31,
+        31,
+        25,
+        25,
+        31,
+        31
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "code": 0,
+      "weighted_integer": 0,
+      "remaining_factor": 341
+    },
+    {
+      "a": 31,
+      "b": 1,
+      "norm": 444,
+      "supported": false,
+      "jets": [
+        143,
+        132,
+        359,
+        362,
+        747,
+        753
+      ],
+      "orders": [
+        0,
+        2,
+        0,
+        1,
+        0,
+        0
+      ],
+      "code": 10,
+      "weighted_integer": -9,
+      "remaining_factor": 37
+    },
+    {
+      "a": 31,
+      "b": 2,
+      "norm": 39,
+      "supported": false,
+      "jets": [
+        319,
+        297,
+        923,
+        908,
+        357,
+        360
+      ],
+      "orders": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        3
+      ],
+      "code": 0,
+      "weighted_integer": -38,
+      "remaining_factor": 11
+    },
+    {
+      "a": 31,
+      "b": 3,
+      "norm": 206,
+      "supported": false,
+      "jets": [
+        431,
+        434,
+        741,
+        767,
+        913,
+        902
+      ],
+      "orders": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "code": 10,
+      "weighted_integer": -9,
+      "remaining_factor": 103
+    }
+  ]
+}
