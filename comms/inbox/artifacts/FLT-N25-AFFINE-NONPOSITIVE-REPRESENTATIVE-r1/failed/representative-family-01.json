@@ -1,0 +1,10 @@
+{
+  "name": "representative-family-01",
+  "args": [
+    "/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 67.79162515200005,
+  "peak_child_rss_kib": 2877092,
+  "source_sha256": "5b27d46b0c026f9acf8612838931e78014c5bea005e51ff8de7a1d57a5de4fc3"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "majorant-01",
+  "args": [
+    "/workspace/shared/flt-n25-principal-shift/DedekindPrincipalMajorantCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 18.929652297003486,
+  "peak_child_rss_kib": 2740316,
+  "source_sha256": "5c1f4446f6395ab9e8862a2458e32022a3d956e7994de37bc364e09682e378e6"
+}

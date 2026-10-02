@@ -1,0 +1,8 @@
+/workspace/shared/flt-n25-principal-shift/DedekindPrincipalMajorantCheck.lean:16:15: warning: Variable name `ha` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+'MazurProof.N25F_DedekindPrincipalMajorant.exists_nonzero_regular_with_count_ge' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,151 @@
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:736:15: warning: Variable name `ha` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:801:82: error: unexpected token ':='; expected ')', ',' or ':'
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:801:65: error: Application type mismatch: The argument
+  FractionRing A
+has type
+  Type u_1
+but is expected to have type
+  HeightOneSpectrum ?m.87 →₀ ℤ
+in the application
+  exists_nonzero_regular_with_count_ge (FractionRing A)
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:800:33: error: unsolved goals
+C : ClosedPointGrading
+A : Type u_1
+inst✝² : CommRing A
+inst✝¹ : IsDedekindDomain A
+inst✝ : Algebra (ZMod 2) (FractionRing A)
+principal : Additive (FractionRing A)ˣ →+ C.Divisor
+boundaryAtom : Boundary → C.Atom
+e : NonBoundary C boundaryAtom ≃ HeightOneSpectrum A
+haff :
+  ∀ (f : Additive (FractionRing A)ˣ) (a : NonBoundary C boundaryAtom),
+    (principal f) ↑a = (CurveDedekindDivisor.principalDivisor f) (e a)
+D : C.Divisor
+a : ?m.87
+ha : a ≠ 0
+hcount :
+  ∀ (v : HeightOneSpectrum ?m.87),
+    sorry v ≤ FractionalIdeal.count ?m.88 v (FractionalIdeal.spanSingleton ?m.87⁰ ((algebraMap ?m.87 ?m.88) a))
+⊢ ∃ f, ∀ (A_1 : NonBoundary C boundaryAtom), D ↑A_1 ≤ (principal f) ↑A_1
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:821:78: error: Application type mismatch: The argument
+  A
+has type
+  NonBoundary C boundaryAtom
+but is expected to have type
+  Type ?u.114
+in the application
+  @affineNonpositiveRepresentative25Two C A
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:822:88: error: Application type mismatch: The argument
+  A
+has type
+  NonBoundary C boundaryAtom
+of sort `Type u_2` but is expected to have type
+  Type ?u.124
+of sort `Type (?u.124 + 1)` in the application
+  @exists_principal_affine_majorant25Two C A
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:822:90: error(lean.unknownIdentifier): Unknown identifier `principal`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:822:113: error(lean.unknownIdentifier): Unknown identifier `e`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:822:115: error(lean.unknownIdentifier): Unknown identifier `haff`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:837:10: error(lean.unknownIdentifier): Unknown constant `QuotientAddGroup.eq_zero_iff.mpr`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:838:4: error: No goals to be solved
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:851:52: error: Application type mismatch: The argument
+  principal
+has type
+  Additive (FractionRing A✝)ˣ →+ C.Divisor
+but is expected to have type
+  Additive (FractionRing A)ˣ →+ C.Divisor
+in the application
+  affineNonpositiveRepresentative25Two C A principal
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:851:11: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  CommRing A
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:851:133: error: Application type mismatch: The argument
+  A
+has type
+  Type ?u.117
+but is expected to have type
+  C.Atom
+in the application
+  (↑n • basePoleDivisor C boundaryAtom) A
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:853:50: error(lean.unknownIdentifier): Unknown identifier `A`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:853:52: error(lean.unknownIdentifier): Unknown identifier `principal`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:853:75: error(lean.unknownIdentifier): Unknown identifier `e`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:853:77: error(lean.unknownIdentifier): Unknown identifier `haff`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:859:42: error: Application type mismatch: The argument
+  A
+has type
+  Type u_3
+of sort `Type (u_3 + 1)` but is expected to have type
+  C.Atom
+of sort `Type u_2` in the application
+  IsBoundary C boundaryAtom A
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:860:54: error: Application type mismatch: The argument
+  A
+has type
+  Type u_3
+of sort `Type (u_3 + 1)` but is expected to have type
+  C.Atom
+of sort `Type u_2` in the application
+  isBoundary_iff C boundaryAtom A
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:865:68: error: Application type mismatch: The argument
+  A
+has type
+  Type u_3
+of sort `Type (u_3 + 1)` but is expected to have type
+  Boundary → C.Atom
+of sort `Type u_2` in the application
+  affineNonpositiveRepresentative25Two_nonBoundary C A
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:865:70: error(lean.unknownIdentifier): Unknown identifier `principal`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:877:41: error: unsolved goals
+C : ClosedPointGrading
+A : Type u_1
+inst✝² : CommRing A
+inst✝¹ : IsDedekindDomain A
+inst✝ : Algebra (ZMod 2) (FractionRing A)
+principal : Additive (FractionRing A)ˣ →+ C.Divisor
+hzero : ∀ (f : Additive (FractionRing A)ˣ), C.divisorDegree (principal f) = 0
+boundaryAtom : Boundary → C.Atom
+hdegree : ∀ (t : Boundary), C.atomDegree (boundaryAtom t) = 1
+e : NonBoundary C boundaryAtom ≃ HeightOneSpectrum A
+haff :
+  ∀ (f : Additive (FractionRing A)ˣ) (a : NonBoundary C boundaryAtom),
+    (principal f) ↑a = (CurveDedekindDivisor.principalDivisor f) (e a)
+D : C.Divisor
+n : ℕ
+⊢ ↑↑n * 4 - C.divisorDegree D = ↑n * 4 - C.divisorDegree D
+'MazurProof.N25F_AffineNonpositiveRepresentative.exists_principal_affine_majorant25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_nonBoundary' depends on axioms: [propext,
+ sorryAx,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_degree' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_classOf' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_finrank' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_le_basePole_multiple' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineRepresentative_complement_degree' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

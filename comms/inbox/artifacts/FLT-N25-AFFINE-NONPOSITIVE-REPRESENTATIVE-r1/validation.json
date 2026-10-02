@@ -1,0 +1,86 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "9684f1558ee05f7a388c76c181d06e5d9688f050",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_DedekindPrincipalMajorant.exists_nonzero_regular_with_count_ge",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.exists_principal_affine_majorant25Two",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_nonBoundary",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_degree",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_classOf",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_finrank",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_le_basePole_multiple",
+    "MazurProof.N25F_AffineNonpositiveRepresentative.affineRepresentative_complement_degree"
+  ],
+  "passed": [
+    {
+      "name": "majorant-01",
+      "args": [
+        "/workspace/shared/flt-n25-principal-shift/DedekindPrincipalMajorantCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 18.929652297003486,
+      "peak_child_rss_kib": 2740316,
+      "source_sha256": "5c1f4446f6395ab9e8862a2458e32022a3d956e7994de37bc364e09682e378e6"
+    },
+    {
+      "name": "representative-family-04",
+      "args": [
+        "/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 13.648182641001767,
+      "peak_child_rss_kib": 2868612,
+      "source_sha256": "30629cb224492de154d5ba076905a17364b3d7df1b3f548d95dac290411bf8fb"
+    }
+  ],
+  "failed": [
+    {
+      "name": "representative-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 67.79162515200005,
+      "peak_child_rss_kib": 2877092,
+      "source_sha256": "5b27d46b0c026f9acf8612838931e78014c5bea005e51ff8de7a1d57a5de4fc3"
+    },
+    {
+      "name": "representative-family-02",
+      "args": [
+        "/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 27.80659654700139,
+      "peak_child_rss_kib": 2870160,
+      "source_sha256": "c6afb83a84e1807c7fd5d8ca281853642976ae726942ba4a052737c4739ed10e"
+    },
+    {
+      "name": "representative-family-03",
+      "args": [
+        "/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 32.83553958799894,
+      "peak_child_rss_kib": 2864392,
+      "source_sha256": "489339444c9b4f3b81838043c9ebf0c1ed83ffc62d76b6d1372ecc5227c3f470"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "linter_warnings": [
+    "Unused existential witness name ha",
+    "Unused generic binary Algebra instance in affine majorant family"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "actual_same_degree_class_rank_shift": "PROVED IN CANDIDATE CHAIN",
+  "domination_by_nH": "PROVED AFTER ACTUAL PRINCIPAL SHIFT",
+  "effective_complement_degree": "4*n-deg(D)",
+  "general_condition_cost": "OPEN",
+  "general_divisor_lower_bound": "OPEN",
+  "picard_finiteness": "OPEN"
+}

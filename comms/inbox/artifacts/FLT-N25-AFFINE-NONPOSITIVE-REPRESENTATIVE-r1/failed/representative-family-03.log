@@ -1,0 +1,46 @@
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:737:15: warning: Variable name `ha` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:812:14: error: Invalid simp theorem: Expected a proposition, but found
+  C.Divisor → HeightOneSpectrum S →₀ ℤ
+/workspace/shared/flt-n25-principal-shift/AffineNonpositiveRepresentativeFamilyCheck.lean:812:2: error: Type mismatch: After simplification, term
+  h
+ has type
+  DFunLike.coe.{u_1 + 1, u_1 + 1, 1} (affineHeightOnePart C S boundaryAtom e D) (e A) ≤
+    (CurveDedekindDivisor.principalDivisor f) (e A)
+but is expected to have type
+  DFunLike.coe.{u_2 + 1, u_2 + 1, 1} D ↑A ≤ (CurveDedekindDivisor.principalDivisor f) (e A)
+'MazurProof.N25F_AffineNonpositiveRepresentative.exists_principal_affine_majorant25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_nonBoundary' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_degree' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_classOf' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_finrank' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineNonpositiveRepresentative25Two_le_basePole_multiple' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_AffineNonpositiveRepresentative.affineRepresentative_complement_degree' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
