@@ -1,0 +1,101 @@
+{
+  "source_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 16787,
+      "sha256": "c9cc48db06473249776aaa7df0e6871dded6ce3775464d209ac0fcc385bfdd2b"
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionEquiv.lean",
+      "encoding": "utf-8",
+      "bytes": 6589,
+      "sha256": "4809cd7b5d8db32b638c8339a287abf5eb2a1754dca2b174c808b6f9b7960f99"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/ActualXChartFractionEquivCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 841,
+      "sha256": "ad011da352be71242ccf4992f41abba5b1e3fece82065316876091bf9dda56cc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 5879,
+      "sha256": "83dc8ee9ca3cc793a79cd25ae9f0c15321bc7d601014830c8400fa174d26ebcd"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/XChartFractionEquivCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 45877,
+      "sha256": "f57fe127aafc8f04721675974801c323eba429977c69e55f8547d944ff20355b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/check-01.json",
+      "encoding": "utf-8",
+      "bytes": 292,
+      "sha256": "62e7e17b3ca6430e26983043179b5607641c19439b80d3cc0fbb900ae65b1b57"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/check-01.log",
+      "encoding": "utf-8",
+      "bytes": 11460,
+      "sha256": "04cc993767ff036500ff422c9297b49a87f96c58862929c9c3d916a087e7becc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/check-02.json",
+      "encoding": "utf-8",
+      "bytes": 292,
+      "sha256": "c0dec619ccf9e3e3e4088b395eef8be729380c80d5fbaa1fca9147882a9c54ad"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/check-02.log",
+      "encoding": "utf-8",
+      "bytes": 7735,
+      "sha256": "d11518a57f578fc5cb1c530fac0d1c46197e92a6a77a48552f7f66a3f74be5c9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/check-03.json",
+      "encoding": "utf-8",
+      "bytes": 293,
+      "sha256": "e647aca6dd382a7d30ffcb752b9a6020b9020d65d19001f49b23077e881188e0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/check-03.log",
+      "encoding": "utf-8",
+      "bytes": 7445,
+      "sha256": "1aa8935ac8a782834cb8b58409cc4891dc3c379c564e3df7d5854207bc59b1ad"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/harness-inputs.json",
+      "encoding": "utf-8",
+      "bytes": 387,
+      "sha256": "9fbb69228155d8bf8942afca3f7ea4d136d9615f8dbb4c3efe634b9a87646a30"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 1385,
+      "sha256": "bce5592b862a3ed9b0e046b2d791b07bd9abce6bf6df0574459d98df818001d7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 826,
+      "sha256": "0fc2b8aea75c461412af50b2234101f7f93f09bb200ffa16c93c2293a95aee9d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-XFIELD-EQUIV-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2314,
+      "sha256": "f481cad8429c95624f14bf8ca7944f79cb2cce0038c8bf16aed237952376a6e2"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r9-field-equiv.md",
+      "encoding": "utf-8",
+      "bytes": 3169,
+      "sha256": "33b890c3ba9fdc38b7924f0ac5962f86fd568bc58146e0857c1d63c8a20c2f10"
+    }
+  ]
+}

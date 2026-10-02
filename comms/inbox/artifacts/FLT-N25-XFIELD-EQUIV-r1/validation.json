@@ -1,0 +1,43 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "accepted_commit": "f0eb8381677bc483bddd93826871845030dd5c0e",
+  "lean": "4.31.0-rc2",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "full_project_compile": false,
+  "production_additional_premises": false,
+  "new_harness_parameter": "[IsDedekindDomain W] represents accepted canonicalWChart_isDedekindDomain, without rebuilding its geometry import closure.",
+  "prerequisite_harness_boundary": "See prerequisites/injectivity-validation.json; prerequisite map/domain-transport bodies carry [IsDomain W], and injectivity carries [IsDedekindDomain W].",
+  "algebra_structure": "xChartToFraction.toRingHom.toAlgebra, explicit letI in xChartToFraction_isFractionRing; no global competing algebra instance.",
+  "successful_check": {
+    "name": "check-03",
+    "args": [
+      "/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 48.411276045000704,
+    "peak_child_rss_kib": 2515816,
+    "source_sha256": "f57fe127aafc8f04721675974801c323eba429977c69e55f8547d944ff20355b"
+  },
+  "public_declarations_checked": 11,
+  "allowed_harness_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "successful_harness_sorryAx": false,
+  "exact_source_snapshots_reverified": 14,
+  "fixture_regeneration_byte_identical": true,
+  "unchanged_prerequisites": {
+    "N25F_XChartFractionMap.lean": "cde468020a66eba45f0648fc4a8accabcce31bd6a67fb4aef7ce9566a8eb3134",
+    "N25F_XChartWChartEquiv.lean": "b002466dc2e6dcf6de5197bc5f21714da13d259793d7cba9acf68aa3dcc743fd",
+    "N25F_XChartFractionInjective.lean": "14281e0684021f327112b5d32e037d2d7cfa173f65290b828fb76407e491313b"
+  },
+  "files": {
+    "N25F_XChartFractionEquiv.lean": "4809cd7b5d8db32b638c8339a287abf5eb2a1754dca2b174c808b6f9b7960f99",
+    "XChartFractionEquivCheck.lean": "f57fe127aafc8f04721675974801c323eba429977c69e55f8547d944ff20355b",
+    "ActualXChartFractionEquivCheck.lean": "ad011da352be71242ccf4992f41abba5b1e3fece82065316876091bf9dda56cc",
+    "check-03.log": "1aa8935ac8a782834cb8b58409cc4891dc3c379c564e3df7d5854207bc59b1ad",
+    "check-03.json": "e647aca6dd382a7d30ffcb752b9a6020b9020d65d19001f49b23077e881188e0",
+    "XChartInjectiveCheck.lean": "17097210b61b026376c6cbafa913bbf9353664d5bde14fc48b98875416e7a661"
+  }
+}

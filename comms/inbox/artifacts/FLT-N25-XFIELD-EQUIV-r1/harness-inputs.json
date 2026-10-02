@@ -1,0 +1,6 @@
+{
+  "prerequisite_harness": "/workspace/shared/flt-n25-field-equivalence/prerequisites/XChartInjectiveCheck.lean",
+  "prerequisite_sha256": "17097210b61b026376c6cbafa913bbf9353664d5bde14fc48b98875416e7a661",
+  "candidate_sha256": "4809cd7b5d8db32b638c8339a287abf5eb2a1754dca2b174c808b6f9b7960f99",
+  "harness_sha256": "f57fe127aafc8f04721675974801c323eba429977c69e55f8547d944ff20355b"
+}

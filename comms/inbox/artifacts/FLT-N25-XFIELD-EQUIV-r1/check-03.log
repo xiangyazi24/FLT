@@ -1,0 +1,111 @@
+/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean:468:2: warning: Try `simp at heq` instead of `simpa using heq`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean:473:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_XChartFractionMap.fraction_qx_ne_zero`:
+  [IsDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean:477:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_XChartFractionMap.wChartPoint_eq`:
+  [IsDomain W]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain W] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean:507:8: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean:761:43: warning: This simp argument is unused:
+  map_one
+
+Hint: Omit it from the simp argument list.
+  simp only [wChartToXChart_qz, map_add, m̵a̵p̵_̵o̵n̵e̵,̵ ̵xChartToWChart_xY,
+  ̵  ̵ ̵ ̵ ̵ ̵xChartToWChart_xZ, xChartToWChart_xW]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean:916:2: warning: Try `simp at h01` instead of `simpa using h01`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+@MazurProof.N25F_XChartFractionEquiv.xFractionToFraction : [IsDedekindDomain
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing →ₐ[ZMod 2]
+    FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_XChartFractionEquiv.xFractionToFraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.xFractionToFraction_algebraMap : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  (r : MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing),
+  MazurProof.N25F_XChartFractionEquiv.xFractionToFraction
+      ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing
+          (FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing))
+        r) =
+    MazurProof.N25F_XChartFractionMap.xChartToFraction r
+'MazurProof.N25F_XChartFractionEquiv.xFractionToFraction_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.fraction_qx_mem_range : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qx ∈
+    MazurProof.N25F_XChartFractionEquiv.xFractionToFraction.fieldRange
+'MazurProof.N25F_XChartFractionEquiv.fraction_qx_mem_range' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.fraction_qy_mem_range : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qy ∈
+    MazurProof.N25F_XChartFractionEquiv.xFractionToFraction.fieldRange
+'MazurProof.N25F_XChartFractionEquiv.fraction_qy_mem_range' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.fraction_qz_mem_range : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      MazurProof.RationalPointsN25QuotientTwoWOpenPrimeSurjective.qz ∈
+    MazurProof.N25F_XChartFractionEquiv.xFractionToFraction.fieldRange
+'MazurProof.N25F_XChartFractionEquiv.fraction_qz_mem_range' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.wChart_algebraMap_mem_range : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  (w : MazurProof.N25F_NonBoundaryPrincipalDivisor.W),
+  (algebraMap MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+        (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W))
+      w ∈
+    MazurProof.N25F_XChartFractionEquiv.xFractionToFraction.fieldRange
+'MazurProof.N25F_XChartFractionEquiv.wChart_algebraMap_mem_range' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.xFractionToFraction_surjective : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Function.Surjective ⇑MazurProof.N25F_XChartFractionEquiv.xFractionToFraction
+'MazurProof.N25F_XChartFractionEquiv.xFractionToFraction_surjective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.xFractionToFraction_injective : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  Function.Injective ⇑MazurProof.N25F_XChartFractionEquiv.xFractionToFraction
+'MazurProof.N25F_XChartFractionEquiv.xFractionToFraction_injective' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.xChartFractionAlgEquiv : [IsDedekindDomain
+      MazurProof.N25F_NonBoundaryPrincipalDivisor.W] →
+  FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing ≃ₐ[ZMod 2]
+    FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W
+'MazurProof.N25F_XChartFractionEquiv.xChartFractionAlgEquiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.xChartFractionAlgEquiv_algebraMap : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W]
+  (r : MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing),
+  MazurProof.N25F_XChartFractionEquiv.xChartFractionAlgEquiv
+      ((algebraMap MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing
+          (FractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing))
+        r) =
+    MazurProof.N25F_XChartFractionMap.xChartToFraction r
+'MazurProof.N25F_XChartFractionEquiv.xChartFractionAlgEquiv_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+@MazurProof.N25F_XChartFractionEquiv.xChartToFraction_isFractionRing : ∀
+  [inst : IsDedekindDomain MazurProof.N25F_NonBoundaryPrincipalDivisor.W],
+  IsFractionRing MazurProof.RationalPointsN25QuotientTwoWBoundaryChartArtin.XChartRing
+    (FractionRing MazurProof.N25F_NonBoundaryPrincipalDivisor.W)
+'MazurProof.N25F_XChartFractionEquiv.xChartToFraction_isFractionRing' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

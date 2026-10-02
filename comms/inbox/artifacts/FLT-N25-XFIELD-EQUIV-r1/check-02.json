@@ -1,0 +1,10 @@
+{
+  "name": "check-02",
+  "args": [
+    "/workspace/shared/flt-n25-field-equivalence/XChartFractionEquivCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 58.21145173399964,
+  "peak_child_rss_kib": 2514244,
+  "source_sha256": "d1df9050f26ed8203a6639eb55463a04319a71ad3186b0ab7d860e18775c7a24"
+}
