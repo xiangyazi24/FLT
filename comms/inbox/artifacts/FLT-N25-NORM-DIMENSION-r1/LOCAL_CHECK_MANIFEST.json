@@ -1,0 +1,35 @@
+{
+  "flt_source_commit": "40efa26fea43fb0ed7d70db804f0d0dcdd71342b",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "lean_version": "4.31.0-rc2",
+  "theorem": "MazurProof.N25F_NonBoundaryPrincipalDivisor.wChart_quotient_finrank_eq_natDegree_norm",
+  "status": "Generic proof passed; actual W specialization source-reviewed but not compiled in this task",
+  "generic_check": {
+    "exit_code": 0,
+    "real_seconds": 2.485,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "runner": "/workspace/shared/lean-feedback/check-lean",
+    "cpu_count": 1,
+    "lean_memory_limit_mib": 3072,
+    "timeout_seconds": 60,
+    "proof_body_matches_actual_up_to_carrier_name": true
+  },
+  "actual_w_check": {
+    "run": false,
+    "owner": "lead integration lane",
+    "driver": "ActualWCheck.lean"
+  },
+  "accepted_quotient_helper_sha256": "b93b4090ed99594fe85811c37aaec0f751dec5389fec9bd0cb4274d0c3dd6cd9",
+  "files": {
+    "N25F_WChartNormDimension.lean": "52866e8d6e29083dd145d31a35d8da129412f534fdfd0b2858013dfaf9b4e597",
+    "GenericNormDimension.lean": "7cc532987ab977d470fc66f10bef66e32a612bca848c19110c4b6b8ac00278b9",
+    "ActualWCheck.lean": "c3290a691e04c6ffbb3a64018c10f3557a15ae470484ed37537837af92bf4376",
+    "GENERIC_CHECK.log": "3933e6dfb0c8a023d571685a063cb07bd61d5d25eea622c52dc184fe2a39ecf4",
+    "SOURCE_API_EVIDENCE.md": "52b175c452a0e0bc850dffe79ae52e7c5005f7cd0751c0665dcea051e8798b35",
+    "REVIEW.md": "2e810d1da0b69145cd6d2da708b48747ccd47f363d83ab07f8c1b204022a2df9"
+  }
+}

@@ -1,0 +1,22 @@
+/workspace/shared/flt-n25-norm-dimension/GenericNormDimension.lean:19:4: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  IsPrincipalIdealRing (Polynomial (ZMod 2))
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+/workspace/shared/flt-n25-norm-dimension/GenericNormDimension.lean:21:4: error: Application type mismatch: The argument
+  Module.Free.chooseBasis (Polynomial (ZMod 2)) S
+has type
+  Module.Basis (Module.Free.ChooseBasisIndex (Polynomial (ZMod 2)) S)
+    (@Polynomial (ZMod 2) CommRing.toCommSemiring.toSemiring) S
+but is expected to have type
+  Module.Basis ?m.92 (@Polynomial ?m.95 Field.toSemifield.toDivisionSemiring.toSemiring) S
+in the application
+  @finrank_quotient_span_eq_natDegree_norm S ?m.92 inst✝⁵ inst✝⁴ ?m.95 ?m.96 ?m.97 ?m.98 ?m.99 ?m.100
+    (Module.Free.chooseBasis (Polynomial (ZMod 2)) S)
+'N25NormDimensionCheck.binary_quotient_finrank_eq_natDegree_norm' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+
+real	0m6.416s
+user	0m5.402s
+sys	0m1.005s

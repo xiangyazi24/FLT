@@ -1,0 +1,78 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "source_commit": "40efa26fea43fb0ed7d70db804f0d0dcdd71342b",
+  "dispatch_commit": "0086d4b1abcd2a7bf95f68ada49a6f75eb8175f5",
+  "status": "actual-W norm dimension source candidate; generic kernel check PASS, actual project specialization not compiled locally",
+  "files": [
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-NORM-DIMENSION-r1/GenericNormDimension.lean",
+      "encoding": "utf-8",
+      "bytes": 990,
+      "sha256": "7cc532987ab977d470fc66f10bef66e32a612bca848c19110c4b6b8ac00278b9",
+      "git_blob": "280d8be59f94cdf072e2bfd3684616eabbc09a35"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-NORM-DIMENSION-r1/GENERIC_CHECK.log",
+      "encoding": "utf-8",
+      "bytes": 169,
+      "sha256": "3933e6dfb0c8a023d571685a063cb07bd61d5d25eea622c52dc184fe2a39ecf4",
+      "git_blob": "5486b6c56a255c158cff8b5370f596b4bc5336b0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-NORM-DIMENSION-r1/SOURCE_API_EVIDENCE.md",
+      "encoding": "utf-8",
+      "bytes": 4176,
+      "sha256": "52b175c452a0e0bc850dffe79ae52e7c5005f7cd0751c0665dcea051e8798b35",
+      "git_blob": "540fde2af6c30b0a3af351e3c86be5611e6bf7d8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-NORM-DIMENSION-r1/REVIEW.md",
+      "encoding": "utf-8",
+      "bytes": 1503,
+      "sha256": "2e810d1da0b69145cd6d2da708b48747ccd47f363d83ab07f8c1b204022a2df9",
+      "git_blob": "afa9c9f4262b86d865690731b6a6dede500dcfec"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-NORM-DIMENSION-r1/ActualWCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 597,
+      "sha256": "c3290a691e04c6ffbb3a64018c10f3557a15ae470484ed37537837af92bf4376",
+      "git_blob": "96495dcf8c73a47177304b502d5c993f07adffb2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-NORM-DIMENSION-r1/GENERIC_CHECK_MISSING_FIELD_IMPORT.log",
+      "encoding": "utf-8",
+      "bytes": 1115,
+      "sha256": "5de18fb3e15916f8e99abd542e84eefe864aefb7a14643c96cb47c8c83ed67ed",
+      "git_blob": "579f19c9d7e58d78a6b7387860473cd3f7449d10"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-NORM-DIMENSION-r1/LOCAL_CHECK_MANIFEST.json",
+      "encoding": "utf-8",
+      "bytes": 1546,
+      "sha256": "d61dc02c113b4f805d274a26d6c2f57653322a55507f5d99f9cd6a2f45bcca98",
+      "git_blob": "6f275799ddf9b245ab6667441d8e043be0ca825f"
+    },
+    {
+      "path": "comms/candidates/N25F_WChartNormDimension.lean",
+      "encoding": "utf-8",
+      "bytes": 1123,
+      "sha256": "52866e8d6e29083dd145d31a35d8da129412f534fdfd0b2858013dfaf9b4e597",
+      "git_blob": "f0fa6ff9a110359ab1aafa012dab03c63b2415fb"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N13-ENDPOINT-r7-candidate.md",
+      "encoding": "utf-8",
+      "bytes": 2821,
+      "sha256": "30a1aa52e7c7f3c5a7e4d0ccb7a441d27a1e7855842038928802237285db3362",
+      "git_blob": "495591b1b2256dd2378f62aaed5eb5603af74533"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 12117,
+      "sha256": "8ed33800f5d709bb588bb066cb8b214438b2f4dab07079b4e896a858f35450cd",
+      "git_blob": "b463b89103ae82e94eb79914807c26c33d34fa51"
+    }
+  ]
+}

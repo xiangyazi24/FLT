@@ -1,0 +1,7 @@
+'N25NormDimensionCheck.binary_quotient_finrank_eq_natDegree_norm' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+
+real	0m2.485s
+user	0m1.761s
+sys	0m0.720s
