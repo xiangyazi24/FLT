@@ -3,7 +3,9 @@ import FLT.Assumptions.MazurProof.N18AddCongrProof
 /-!
 # Wired add_congr: assembles the three branch proofs
 
-Import chain: N18AddCongr ← N18AddCongrProof ← N18AddCongrWired (no cycle).
+Import chain: N18AddCongrBasic ← N18AddCongrProof ← N18AddCongrWired ← N18AddCongr.
+The existing public xCoord from N18Block5Instantiation is used directly.
+Source-only repaired candidate; Lean and emitted-axiom checks NOT RUN.
 -/
 
 open scoped Classical
@@ -18,10 +20,6 @@ open MazurProof.N18Block5Instantiation.AddCongr
 open MazurProof.N18Block5Instantiation.AddCongrProof
 
 noncomputable section
-
-private def xCoord : E0Point → L
-  | .zero => 0
-  | .some x _ _ => x
 
 private theorem xCoord_ne_zero_of_ordPi_neg {x y : L}
     (_ : WeierstrassCurve.Affine.Nonsingular E0 x y)

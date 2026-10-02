@@ -1,12 +1,18 @@
-import FLT.Assumptions.MazurProof.N18AddCongr
+import FLT.Assumptions.MazurProof.N18AddCongrBasic
 import FLT.Assumptions.MazurProof.N18RouteC_TorsionTable
 
 /-!
-# Audit of the proposed `N18AddCongr.add_congr` statement
+# N18 near-origin branch proofs and the old-signature counterexample
 
-The concrete chart polynomial identities are recorded first.  The proposed
-valuation statement cannot be proved: the explicit order-21 table already in
-the repository supplies a counterexample.
+The inverse, distinct-x, and tangent branches prove the addition estimate for
+finite points with ordPi(x) < 0. The final countertheorem refutes the older
+z-positive bare-inequality signature; it does not refute the current
+near-origin statement. Its concrete error is nonzero, so adding only a
+zero-error disjunction to the old hypotheses would still be insufficient.
+
+Source pin: 4017da66cbb1b8deff6da7116c7af5de540e1908. Mathematical declarations
+and proof bodies are unchanged; only the toolbox import and this note change.
+This refactored import context is NOT COMPILED.
 -/
 
 open scoped Classical
