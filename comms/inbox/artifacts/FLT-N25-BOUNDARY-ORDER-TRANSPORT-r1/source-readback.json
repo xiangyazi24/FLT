@@ -1,0 +1,30 @@
+{
+  "source": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "dispatch": "9700ca106515f04411193844fbb347d40d86e481",
+  "files": [
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityLocalizations.lean",
+      "sha": "5662a1bd04f60e008ab7f94263178094a2715541"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectivePrincipalDivisor.lean",
+      "sha": "27befd6841c09076f5581c9f64bc87e9b8d09343"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_XBoundaryOrder.lean",
+      "sha": "506082d8ddbbe3b8347681b8bb43372a70cb4646"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityBoundaryAlgebras.lean",
+      "sha": "dc3af4fa7ba27da6c4497e8c0eabc07c6a46f152"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_YZBoundaryOrder.lean",
+      "sha": "091f237cf3917847f3eac83a9d9c046175cc888a"
+    },
+    {
+      "path": "FLT/Assumptions/MazurProof/N25F_ZBoundaryOrder.lean",
+      "sha": "e8647da0787abcd11dc0ecc6070f87ee5309ce30"
+    }
+  ]
+}

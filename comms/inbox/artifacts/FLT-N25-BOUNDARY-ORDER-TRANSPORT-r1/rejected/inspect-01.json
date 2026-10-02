@@ -1,0 +1,10 @@
+{
+  "name": "inspect-01",
+  "args": [
+    "/workspace/shared/flt-n25-boundary-order-transport/InspectFamily.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 12.52611601499666,
+  "peak_child_rss_kib": 2747644,
+  "source_sha256": "19b1060c7f16d113d2875b7403a1525f87e0d2422d383c322d78b5ecade8c139"
+}

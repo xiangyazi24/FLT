@@ -1,0 +1,133 @@
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:77:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_InfinityBoundaryOrderTransport.xInfinityNormalization_order`:
+  [IsDedekindDomain N]
+  [IsDomain R]
+  [IsDiscreteValuationRing R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain N] [IsDomain R] [IsDiscreteValuationRing R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:89:8: warning: declaration uses `sorry`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:90:48: warning: Variable name `hb` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:91:32: warning: Variable name `hf` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:104:2: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:107:2: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:104:2: warning: 'change
+  WithZero.log
+      (Ring.ordFrac XLocalRing
+        (algebraMap XLocalRing CurveField (infinityNormalizationToX a) /
+          algebraMap XLocalRing CurveField (infinityNormalizationToX b))) =
+    _' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:107:2: warning: 'rw [log_ordFrac_div _ _ hxa hxb, xInfinityNormalization_order xInfinityPrime xInfinityLocalizationEquiv,
+  xInfinityNormalization_order xInfinityPrime xInfinityLocalizationEquiv]' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:134:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_InfinityBoundaryOrderTransport.yzInfinityNormalization_order`:
+  [IsDedekindDomain N]
+  [IsDomain R]
+  [IsDiscreteValuationRing R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain N] [IsDomain R] [IsDiscreteValuationRing R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:146:8: warning: declaration uses `sorry`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:147:48: warning: Variable name `hb` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:148:32: warning: Variable name `hf` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:161:2: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:164:2: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:161:2: warning: 'change
+  WithZero.log
+      (Ring.ordFrac YZLocalRing
+        (algebraMap YZLocalRing CurveField (infinityNormalizationToYZ a) /
+          algebraMap YZLocalRing CurveField (infinityNormalizationToYZ b))) =
+    _' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:164:2: warning: 'rw [log_ordFrac_div _ _ hyza hyzb, yzInfinityNormalization_order yzInfinityPrime yzInfinityLocalizationEquiv,
+  yzInfinityNormalization_order yzInfinityPrime yzInfinityLocalizationEquiv]' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:191:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_InfinityBoundaryOrderTransport.zInfinityNormalization_order`:
+  [IsDedekindDomain N]
+  [IsDomain R]
+  [IsDiscreteValuationRing R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDedekindDomain N] [IsDomain R] [IsDiscreteValuationRing R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:203:8: warning: declaration uses `sorry`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:204:48: warning: Variable name `hb` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:205:32: warning: Variable name `hf` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:218:2: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:221:2: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:218:2: warning: 'change
+  WithZero.log
+      (Ring.ordFrac ZLocalRing
+        (algebraMap ZLocalRing CurveField (infinityNormalizationToZ a) /
+          algebraMap ZLocalRing CurveField (infinityNormalizationToZ b))) =
+    _' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean:221:2: warning: 'rw [log_ordFrac_div _ _ hza hzb, zInfinityNormalization_order zInfinityPrime zInfinityLocalizationEquiv,
+  zInfinityNormalization_order zInfinityPrime zInfinityLocalizationEquiv]' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+'MazurProof.N25F_FractionOrderDifference.log_ordFrac_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.xInfinityNormalization_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.xBoundaryOrder_normalization_fraction' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.yzInfinityNormalization_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.yzBoundaryOrder_normalization_fraction' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.zInfinityNormalization_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.zBoundaryOrder_normalization_fraction' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

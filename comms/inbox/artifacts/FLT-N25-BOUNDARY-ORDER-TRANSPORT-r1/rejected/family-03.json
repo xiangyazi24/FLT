@@ -1,0 +1,10 @@
+{
+  "name": "family-03",
+  "args": [
+    "/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 11.987429148997762,
+  "peak_child_rss_kib": 2747640,
+  "source_sha256": "ce76c20bc5f543d65a550640f8e4fd25b9aeee01b8a21598037505620f631190"
+}

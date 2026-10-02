@@ -1,0 +1,139 @@
+{
+  "source": {
+    "source": "51bbb4f191ad0d3753b87123635c100a638ae580",
+    "dispatch": "9700ca106515f04411193844fbb347d40d86e481",
+    "files": [
+      {
+        "path": "FLT/Assumptions/MazurProof/N25F_InfinityLocalizations.lean",
+        "sha": "5662a1bd04f60e008ab7f94263178094a2715541"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N25F_ProjectivePrincipalDivisor.lean",
+        "sha": "27befd6841c09076f5581c9f64bc87e9b8d09343"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N25F_XBoundaryOrder.lean",
+        "sha": "506082d8ddbbe3b8347681b8bb43372a70cb4646"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N25F_InfinityBoundaryAlgebras.lean",
+        "sha": "dc3af4fa7ba27da6c4497e8c0eabc07c6a46f152"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N25F_YZBoundaryOrder.lean",
+        "sha": "091f237cf3917847f3eac83a9d9c046175cc888a"
+      },
+      {
+        "path": "FLT/Assumptions/MazurProof/N25F_ZBoundaryOrder.lean",
+        "sha": "e8647da0787abcd11dc0ecc6070f87ee5309ce30"
+      }
+    ]
+  },
+  "public_declarations": [
+    "MazurProof.N25F_FractionOrderDifference.log_ordFrac_div",
+    "MazurProof.N25F_InfinityBoundaryOrderTransport.xInfinityNormalization_order",
+    "MazurProof.N25F_InfinityBoundaryOrderTransport.xBoundaryOrder_normalization_fraction",
+    "MazurProof.N25F_InfinityBoundaryOrderTransport.yzInfinityNormalization_order",
+    "MazurProof.N25F_InfinityBoundaryOrderTransport.yzBoundaryOrder_normalization_fraction",
+    "MazurProof.N25F_InfinityBoundaryOrderTransport.zInfinityNormalization_order",
+    "MazurProof.N25F_InfinityBoundaryOrderTransport.zBoundaryOrder_normalization_fraction"
+  ],
+  "production_full_imports": "NOT RUN",
+  "pending_norm_packets_required": false,
+  "production_additional_hypotheses": [],
+  "passed": [
+    {
+      "name": "generic-01",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/FractionOrderDifferenceCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 5.367664703000628,
+      "peak_child_rss_kib": 2490204,
+      "source_sha256": "33b6526507d609a7d58bce7310984eb5dd368f169e0d6861f31f5593683a33b9"
+    },
+    {
+      "name": "family-06",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 4.597343791996536,
+      "peak_child_rss_kib": 2726380,
+      "source_sha256": "a07bf21a9eba8632066ba33e1a9d400f35508de0bd245299df54fbf4f4a43379"
+    }
+  ],
+  "failed_or_superseded": [
+    {
+      "name": "family-01",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 8.112218658003258,
+      "peak_child_rss_kib": 2731784,
+      "source_sha256": "ad93cb510e26521508830ef428a0baa89598cc0e011177da5dc158a302dcc64f",
+      "classification": "FAILED"
+    },
+    {
+      "name": "family-02",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 13.006709877998219,
+      "peak_child_rss_kib": 2746784,
+      "source_sha256": "ae0c8b2a677c7ec6982479b7b109cb2f8d36946c0b3861f049c9987fd765423e",
+      "classification": "FAILED"
+    },
+    {
+      "name": "family-03",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 11.987429148997762,
+      "peak_child_rss_kib": 2747640,
+      "source_sha256": "ce76c20bc5f543d65a550640f8e4fd25b9aeee01b8a21598037505620f631190",
+      "classification": "REJECTED_SORRYAX"
+    },
+    {
+      "name": "inspect-01",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/InspectFamily.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 12.52611601499666,
+      "peak_child_rss_kib": 2747644,
+      "source_sha256": "19b1060c7f16d113d2875b7403a1525f87e0d2422d383c322d78b5ecade8c139",
+      "classification": "REJECTED_SORRYAX"
+    },
+    {
+      "name": "family-04",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 4.54329641500226,
+      "peak_child_rss_kib": 2723688,
+      "source_sha256": "d46a6754d4486a6b5381f79ef89c4ca35989028454b4ee7f5bec84f4813ccf22",
+      "classification": "FAILED"
+    },
+    {
+      "name": "family-05",
+      "args": [
+        "/workspace/shared/flt-n25-boundary-order-transport/BoundaryOrderTransportFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 8.118651072996727,
+      "peak_child_rss_kib": 2722660,
+      "source_sha256": "f19d62130310e931910c6c7e2e9aa602821e49e1812352c453a12b8ffb76f3e2",
+      "classification": "SUPERSEDED_WARNINGS"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

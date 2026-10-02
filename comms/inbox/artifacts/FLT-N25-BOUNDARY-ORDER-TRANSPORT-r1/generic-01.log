@@ -1,0 +1,1 @@
+'MazurProof.N25F_FractionOrderDifference.log_ordFrac_div' depends on axioms: [propext, Classical.choice, Quot.sound]

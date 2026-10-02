@@ -1,0 +1,19 @@
+'MazurProof.N25F_FractionOrderDifference.log_ordFrac_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.xInfinityNormalization_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.xBoundaryOrder_normalization_fraction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.yzInfinityNormalization_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.yzBoundaryOrder_normalization_fraction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.zInfinityNormalization_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityBoundaryOrderTransport.zBoundaryOrder_normalization_fraction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

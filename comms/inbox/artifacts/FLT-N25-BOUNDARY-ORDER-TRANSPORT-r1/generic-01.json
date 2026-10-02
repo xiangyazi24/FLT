@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-boundary-order-transport/FractionOrderDifferenceCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.367664703000628,
+  "peak_child_rss_kib": 2490204,
+  "source_sha256": "33b6526507d609a7d58bce7310984eb5dd368f169e0d6861f31f5593683a33b9"
+}
