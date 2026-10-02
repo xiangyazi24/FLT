@@ -1,0 +1,12 @@
+'MazurProof.N25F_FullPicardSectionRank.fullPicardSectionRank25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardSectionRank.fullEffectiveClassFiberEquiv25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardSectionRank.fullEffectiveClass_fiber_card25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_FullPicardSectionRank.fullEffectiveClass_fiber_linearSystemCard25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

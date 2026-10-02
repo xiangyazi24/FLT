@@ -1,0 +1,10 @@
+{
+  "name": "picard-02",
+  "args": [
+    "/workspace/shared/flt-n25-section-transport/FullPicardSectionRankFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 12.236533256997063,
+  "peak_child_rss_kib": 2139896,
+  "source_sha256": "fe26d26d9bbd1c5880e76e131d33639135010bf8496d2c80ad2a70f3ae908983"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "family-01",
+  "args": [
+    "/workspace/shared/flt-n25-section-transport/SectionPrincipalTransportFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 16.64153190700017,
+  "peak_child_rss_kib": 2203496,
+  "source_sha256": "3c33a3a87e384ad572aa4602cae75a54646ccdd272e0f3f85f9eb582537f471d"
+}

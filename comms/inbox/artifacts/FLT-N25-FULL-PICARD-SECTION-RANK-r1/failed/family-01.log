@@ -1,0 +1,22 @@
+/workspace/shared/flt-n25-section-transport/SectionPrincipalTransportFamilyCheck.lean:605:29: error: typeclass instance problem is stuck
+  Algebra (ZMod 2) ?m.48
+
+Note: Lean will not try to resolve this typeclass instance problem because the second and fourth type arguments to `Algebra` contain metavariables. These arguments must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-section-transport/SectionPrincipalTransportFamilyCheck.lean:614:18: error(lean.unknownIdentifier): Unknown identifier `finrank_fullRiemannRochSpace25Two_eq_of_classOf_eq`
+'MazurProof.N25F_SectionPrincipalTransport.mul_mem_fullRiemannRochSpace25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionPrincipalTransport.principalSectionLinearEquiv25Two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+/workspace/shared/flt-n25-section-transport/SectionPrincipalTransportFamilyCheck.lean:624:14: error(lean.unknownIdentifier): Unknown constant `finrank_fullRiemannRochSpace25Two_eq_of_classOf_eq`
+'MazurProof.N25F_SectionPrincipalTransport.fullClassSectionRank25Two' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_SectionPrincipalTransport.fullClassSectionRank25Two_classOf' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,71 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependency_commit": "e862c484da703650baa98747a3123600a00c39d0",
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_SectionPrincipalTransport.mul_mem_fullRiemannRochSpace25Two",
+    "MazurProof.N25F_SectionPrincipalTransport.principalSectionLinearEquiv25Two",
+    "MazurProof.N25F_SectionPrincipalTransport.finrank_fullRiemannRochSpace25Two_eq_of_classOf_eq",
+    "MazurProof.N25F_SectionPrincipalTransport.fullClassSectionRank25Two",
+    "MazurProof.N25F_SectionPrincipalTransport.fullClassSectionRank25Two_classOf",
+    "MazurProof.N25F_FullPicardSectionRank.fullPicardSectionRank25Two",
+    "MazurProof.N25F_FullPicardSectionRank.fullEffectiveClassFiberEquiv25Two",
+    "MazurProof.N25F_FullPicardSectionRank.fullEffectiveClass_fiber_card25Two",
+    "MazurProof.N25F_FullPicardSectionRank.fullEffectiveClass_fiber_linearSystemCard25Two"
+  ],
+  "passed": [
+    {
+      "name": "family-02",
+      "args": [
+        "/workspace/shared/flt-n25-section-transport/SectionPrincipalTransportFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 8.43108726599894,
+      "peak_child_rss_kib": 2158696,
+      "source_sha256": "4399ca33c29d74b1b3df95048a360ef304cd7b455dcaba51f9ef4698e8b9457e"
+    },
+    {
+      "name": "picard-02",
+      "args": [
+        "/workspace/shared/flt-n25-section-transport/FullPicardSectionRankFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 12.236533256997063,
+      "peak_child_rss_kib": 2139896,
+      "source_sha256": "fe26d26d9bbd1c5880e76e131d33639135010bf8496d2c80ad2a70f3ae908983"
+    }
+  ],
+  "failed": [
+    {
+      "name": "family-01",
+      "args": [
+        "/workspace/shared/flt-n25-section-transport/SectionPrincipalTransportFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 16.64153190700017,
+      "peak_child_rss_kib": 2203496,
+      "source_sha256": "3c33a3a87e384ad572aa4602cae75a54646ccdd272e0f3f85f9eb582537f471d"
+    }
+  ],
+  "prior": [
+    {
+      "name": "picard-01",
+      "args": [
+        "/workspace/shared/flt-n25-section-transport/FullPicardSectionRankFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 14.591971367000951,
+      "peak_child_rss_kib": 2123428,
+      "source_sha256": "c34702b4e3cdd0428339b2b17c85e2b18df69ec9809f5068df85f162d9d7949a"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "portable_generator_exact_reproduction": true,
+  "actual_full_effective_class_fibre_formula": "PROVED IN CANDIDATE CHAIN",
+  "picard_finiteness": "OPEN",
+  "riemann_roch_rank_identity": "OPEN"
+}
