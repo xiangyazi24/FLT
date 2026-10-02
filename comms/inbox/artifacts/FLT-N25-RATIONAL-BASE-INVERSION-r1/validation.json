@@ -1,0 +1,53 @@
+{
+  "source_commit": "723fc37242042afc5985caa084d626b49e304d59",
+  "exact_production_source_local_check": {
+    "name": "production-01",
+    "args": [
+      "-R",
+      "/workspace/shared/flt-n25-base-inversion",
+      "-o",
+      "/workspace/shared/flt-n25-base-inversion/N25F_RationalBaseInversion.olean",
+      "/workspace/shared/flt-n25-base-inversion/N25F_RationalBaseInversion.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 26.182137716001307,
+    "peak_child_rss_kib": 2122856,
+    "source_sha256": "da686b7db9b7cdf4129fcddabb1575cb9ff6f7ffe34a08ca94d37ebc35d5d9ce"
+  },
+  "emitted_import_audit": {
+    "name": "audit-01",
+    "args": [
+      "/workspace/shared/flt-n25-base-inversion/RationalBaseInversionAudit.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 9.520004907000839,
+    "peak_child_rss_kib": 2122856,
+    "source_sha256": "8a8b1867a8035d23160a9fde4ba4dc784909a13b0a33bcd65e728bb85b944af7"
+  },
+  "source_sha256": "da686b7db9b7cdf4129fcddabb1575cb9ff6f7ffe34a08ca94d37ebc35d5d9ce",
+  "olean_sha256": "30eb39eb13e0d6a31a75616406b5ecfc80974d25102088b00b744700afbaf5cb",
+  "public_declarations_audited": 9,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "FLT_aggregate_integration": "NOT RUN locally",
+  "r20_byte_checks": [
+    {
+      "name": "N25F_XInfinityGerm.lean",
+      "sha": "8f967ddf53ff1264f8e6c96953e7daee9d5664ea",
+      "byte_equal": true
+    },
+    {
+      "name": "N25F_ProjectivePrincipalDivisor.lean",
+      "sha": "27befd6841c09076f5581c9f64bc87e9b8d09343",
+      "byte_equal": true
+    }
+  ],
+  "r21_byte_check": {
+    "name": "N25F_InfinityBaseMaps.lean",
+    "sha": "adc82c165b33a4658bf9a74d6f802545187606f0",
+    "byte_equal": true
+  }
+}

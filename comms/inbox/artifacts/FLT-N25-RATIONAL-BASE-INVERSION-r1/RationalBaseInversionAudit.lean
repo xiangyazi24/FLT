@@ -1,0 +1,11 @@
+import N25F_RationalBaseInversion
+
+#print axioms MazurProof.N25F_RationalBaseInversion.BasePolynomial
+#print axioms MazurProof.N25F_RationalBaseInversion.BaseField
+#print axioms MazurProof.N25F_RationalBaseInversion.baseVariable
+#print axioms MazurProof.N25F_RationalBaseInversion.baseInversionHom
+#print axioms MazurProof.N25F_RationalBaseInversion.baseInversionHom_algebraMap
+#print axioms MazurProof.N25F_RationalBaseInversion.baseInversionHom_variable
+#print axioms MazurProof.N25F_RationalBaseInversion.baseInversion
+#print axioms MazurProof.N25F_RationalBaseInversion.baseInversion_variable
+#print axioms MazurProof.N25F_RationalBaseInversion.baseInversion_involutive

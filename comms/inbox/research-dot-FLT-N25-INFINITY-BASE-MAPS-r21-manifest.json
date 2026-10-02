@@ -1,0 +1,83 @@
+{
+  "source_commit": "723fc37242042afc5985caa084d626b49e304d59",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 25400,
+      "sha256": "dae5108d751446a59394e215edb3ef0675c4e46063613bd72f6d749dc8320638"
+    },
+    {
+      "path": "comms/candidates/N25F_RationalBaseInversion.lean",
+      "encoding": "utf-8",
+      "bytes": 3134,
+      "sha256": "da686b7db9b7cdf4129fcddabb1575cb9ff6f7ffe34a08ca94d37ebc35d5d9ce"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/ActualRationalBaseInversionCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 701,
+      "sha256": "d5802d7b6e1d1e9680a8fd0e0a3709fc8eb7e8dfd3b563bd88a554709badb9dc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/RationalBaseInversionAudit.lean",
+      "encoding": "utf-8",
+      "bytes": 674,
+      "sha256": "8a8b1867a8035d23160a9fde4ba4dc784909a13b0a33bcd65e728bb85b944af7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/audit-01.json",
+      "encoding": "utf-8",
+      "bytes": 291,
+      "sha256": "c8f2a2e9797f33abf7b3459a2171168c7f212b190afb79676afbeae789fbf87b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/audit-01.log",
+      "encoding": "utf-8",
+      "bytes": 1070,
+      "sha256": "be14ab8e4325ac5195c7d540050c4ef47d32990538e7922ce383fe54b936e97a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/production-01.json",
+      "encoding": "utf-8",
+      "bytes": 446,
+      "sha256": "4e8220825f1459ca5ddae8a13533e51f2a75aa34c826dfdb2a2251be173cadb7"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/production-01.log",
+      "encoding": "utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/receipt_r20.md",
+      "encoding": "utf-8",
+      "bytes": 521,
+      "sha256": "a3629af8fc08ac3496d45df65b22ec6e69352d4d7fb764ea16ea80e079e54322"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/receipt_r21.md",
+      "encoding": "utf-8",
+      "bytes": 433,
+      "sha256": "c3dd58be81a4f79d9f5d110f9ee69241becad72d0dee50f104eda863a567c4aa"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 876,
+      "sha256": "ed35d0e3db39ff74f96123bf675ea742aabcefa1aaa8e2676b7e6e74fb60156e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-RATIONAL-BASE-INVERSION-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1709,
+      "sha256": "3f0321f50ff23ecea0eb4f4e820b090911023c55840a26169374e3557d1495d3"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-INFINITY-BASE-MAPS-r21.md",
+      "encoding": "utf-8",
+      "bytes": 4276,
+      "sha256": "4035e89ac197637ea9228e8e0f6d0a5436d455633eb5b5059e95c2c3108d8de1"
+    }
+  ]
+}

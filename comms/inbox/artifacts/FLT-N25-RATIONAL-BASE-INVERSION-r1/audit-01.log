@@ -1,0 +1,17 @@
+'MazurProof.N25F_RationalBaseInversion.BasePolynomial' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.BaseField' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.baseVariable' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.baseInversionHom' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.baseInversionHom_algebraMap' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.baseInversionHom_variable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.baseInversion' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.baseInversion_variable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_RationalBaseInversion.baseInversion_involutive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

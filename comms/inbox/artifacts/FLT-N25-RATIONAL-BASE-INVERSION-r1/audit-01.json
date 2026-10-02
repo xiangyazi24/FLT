@@ -1,0 +1,10 @@
+{
+  "name": "audit-01",
+  "args": [
+    "/workspace/shared/flt-n25-base-inversion/RationalBaseInversionAudit.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 9.520004907000839,
+  "peak_child_rss_kib": 2122856,
+  "source_sha256": "8a8b1867a8035d23160a9fde4ba4dc784909a13b0a33bcd65e728bb85b944af7"
+}
