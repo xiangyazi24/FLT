@@ -1,0 +1,49 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "accepted_inputs": [
+    {
+      "file": "N25F_InfinityCanonicalSeparable.lean",
+      "sha": "241d97a4046c46a7e838ec910087561a2b478c08",
+      "equal": true
+    },
+    {
+      "file": "N25F_InfinityPrimeNorms.lean",
+      "sha": "4b349b6b0bd4cce8685f9527ae55e2c00dc1c906",
+      "equal": true
+    }
+  ],
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "generic_helpers": {
+    "name": "generic-01",
+    "args": [
+      "/workspace/shared/flt-n25-norm-multiplicity/GenericNormMultiplicityCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 5.959835900001053,
+    "peak_child_rss_kib": 2888296,
+    "source_sha256": "a90d6dbb4262a3752f8b2b431a3e14de587da5f99b6f0d68c254244505127eb5"
+  },
+  "complete_family": {
+    "name": "family-02",
+    "args": [
+      "/workspace/shared/flt-n25-norm-multiplicity/NormMultiplicityFamilyCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 5.7243908749951515,
+    "peak_child_rss_kib": 2891872,
+    "source_sha256": "81306f5b9eccb037497fe6596d7e8d130e268b1010d4110c8eabbff6bfe41e9d"
+  },
+  "family_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "public_declarations": [
+    "count_relNorm_prime_zero_of_under_ne",
+    "count_relNorm_sum_three_of_primes",
+    "infinity_prime_norm_multiplicity",
+    "infinity_relNorm_multiplicity"
+  ],
+  "full_production_acceptance": "PENDING LEAD"
+}

@@ -1,0 +1,6 @@
+import FLT.Assumptions.MazurProof.N25F_InfinityNormMultiplicity
+
+#print axioms MazurProof.N25F_InfinityNormMultiplicity.count_relNorm_prime_zero_of_under_ne
+#print axioms MazurProof.N25F_InfinityNormMultiplicity.count_relNorm_sum_three_of_primes
+#print axioms MazurProof.N25F_InfinityNormMultiplicity.infinity_prime_norm_multiplicity
+#print axioms MazurProof.N25F_InfinityNormMultiplicity.infinity_relNorm_multiplicity

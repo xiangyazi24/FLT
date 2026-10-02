@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-norm-multiplicity/GenericNormMultiplicityCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.959835900001053,
+  "peak_child_rss_kib": 2888296,
+  "source_sha256": "a90d6dbb4262a3752f8b2b431a3e14de587da5f99b6f0d68c254244505127eb5"
+}

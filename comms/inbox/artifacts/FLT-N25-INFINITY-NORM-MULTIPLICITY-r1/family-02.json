@@ -1,0 +1,10 @@
+{
+  "name": "family-02",
+  "args": [
+    "/workspace/shared/flt-n25-norm-multiplicity/NormMultiplicityFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.7243908749951515,
+  "peak_child_rss_kib": 2891872,
+  "source_sha256": "81306f5b9eccb037497fe6596d7e8d130e268b1010d4110c8eabbff6bfe41e9d"
+}
