@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-canonical-fraction-separable/GenericCanonicalSeparableCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 43.560200086001714,
+  "peak_child_rss_kib": 2393060,
+  "source_sha256": "c323a91bc6859bd2367b27236255f6f563d918ac1356c49facf74820f276feb9"
+}

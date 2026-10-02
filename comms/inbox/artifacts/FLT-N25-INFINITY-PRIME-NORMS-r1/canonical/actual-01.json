@@ -1,0 +1,10 @@
+{
+  "name": "actual-01",
+  "args": [
+    "/workspace/shared/flt-n25-canonical-fraction-separable/InfinityCanonicalSeparableCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 40.92827048199979,
+  "peak_child_rss_kib": 2537360,
+  "source_sha256": "2ee683448e950e3e5b422616c09d593249c3a427dbc4d47355990e0f37b9b617"
+}

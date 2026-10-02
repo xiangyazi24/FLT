@@ -1,0 +1,10 @@
+{
+  "name": "family-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-prime-norms/InfinityPrimeNormCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 11.962641867001366,
+  "peak_child_rss_kib": 2896592,
+  "source_sha256": "7cdbe53aa61db9870aafe1110a59272fac792a03c7f5037235f0a3fe112dd9e9"
+}

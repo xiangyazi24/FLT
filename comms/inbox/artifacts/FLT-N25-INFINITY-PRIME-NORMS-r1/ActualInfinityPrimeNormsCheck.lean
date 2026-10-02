@@ -1,0 +1,7 @@
+import FLT.Assumptions.MazurProof.N25F_InfinityPrimeNorms
+
+#print axioms MazurProof.N25F_InfinityCanonicalSeparable.canonicalFractionRing_isSeparable
+#print axioms MazurProof.N25F_InfinityCanonicalSeparable.infinityCanonicalFraction_isSeparable
+#print axioms MazurProof.N25F_InfinityPrimeNorms.xInfinityPrime_relNorm
+#print axioms MazurProof.N25F_InfinityPrimeNorms.yzInfinityPrime_relNorm
+#print axioms MazurProof.N25F_InfinityPrimeNorms.zInfinityPrime_relNorm

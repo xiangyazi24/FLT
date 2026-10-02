@@ -1,0 +1,7 @@
+@prime_relNorm : ∀ [inst : IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+  [inst_1 : IsDedekindDomain InfinityNormalization] [inst_2 : Module.Finite BasePolynomial InfinityNormalization]
+  [inst_3 : Module.IsTorsionFree BasePolynomial InfinityNormalization]
+  [Algebra.IsSeparable BaseField (FractionRing InfinityNormalization)] (q : Ideal InfinityNormalization)
+  (p : Ideal BasePolynomial) [q.IsMaximal] [p.IsMaximal] [q.LiesOver p],
+  q.inertiaDeg' BasePolynomial = 1 → (Ideal.relNorm BasePolynomial) q = p
+'MazurProof.N25F_InfinityPrimeNormsCheck.prime_relNorm' depends on axioms: [propext, Classical.choice, Quot.sound]

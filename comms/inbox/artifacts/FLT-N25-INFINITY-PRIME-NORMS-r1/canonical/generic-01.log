@@ -1,0 +1,8 @@
+@canonicalFractionRing_isSeparable : ∀ {A : Type u_1} {B : Type u_2} {L : Type u_3} [inst : CommRing A]
+  [inst_1 : IsDomain A] [inst_2 : CommRing B] [inst_3 : IsDomain B] [inst_4 : Field L] [inst_5 : Algebra A B]
+  [inst_6 : Module.IsTorsionFree A B] [inst_7 : Algebra A L] [inst_8 : Algebra B L] [IsScalarTower A B L]
+  [IsFractionRing B L] [inst_11 : Algebra (FractionRing A) L] [IsScalarTower A (FractionRing A) L]
+  [Algebra.IsSeparable (FractionRing A) L], Algebra.IsSeparable (FractionRing A) (FractionRing B)
+'MazurProof.N25F_InfinityCanonicalSeparable.canonicalFractionRing_isSeparable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

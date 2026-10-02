@@ -1,0 +1,47 @@
+{
+  "source_commit": "78a93cebddd84e069ca9d0bbc8f837e0a8c083e1",
+  "accepted_norm": {
+    "blob": "73dbafedca9406ac50e5ae1a8a0bbb7f681e92df",
+    "byte_equal": true
+  },
+  "production_full_imports": "NOT RUN",
+  "production_additional_hypotheses": [],
+  "generic_transport": {
+    "name": "generic-01",
+    "args": [
+      "/workspace/shared/flt-n25-canonical-fraction-separable/GenericCanonicalSeparableCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 43.560200086001714,
+    "peak_child_rss_kib": 2393060,
+    "source_sha256": "c323a91bc6859bd2367b27236255f6f563d918ac1356c49facf74820f276feb9"
+  },
+  "canonical_actual_family": {
+    "name": "actual-01",
+    "args": [
+      "/workspace/shared/flt-n25-canonical-fraction-separable/InfinityCanonicalSeparableCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 40.92827048199979,
+    "peak_child_rss_kib": 2537360,
+    "source_sha256": "2ee683448e950e3e5b422616c09d593249c3a427dbc4d47355990e0f37b9b617"
+  },
+  "norm_actual_family": {
+    "name": "family-01",
+    "args": [
+      "/workspace/shared/flt-n25-infinity-prime-norms/InfinityPrimeNormCheck.lean"
+    ],
+    "exit_code": 0,
+    "seconds": 11.962641867001366,
+    "peak_child_rss_kib": 2896592,
+    "source_sha256": "7cdbe53aa61db9870aafe1110a59272fac792a03c7f5037235f0a3fe112dd9e9"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "canonical_action": "FractionRing.liftAlgebra",
+  "fixture_generation": "byte-exact reproduction PASS",
+  "public_declarations": 5
+}
