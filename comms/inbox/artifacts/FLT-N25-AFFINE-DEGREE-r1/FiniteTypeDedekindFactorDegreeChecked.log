@@ -1,0 +1,3 @@
+'MazurProof.DedekindQuotientDegree.finrank_quotient_eq_sum_normalizedFactors_of_finiteType' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

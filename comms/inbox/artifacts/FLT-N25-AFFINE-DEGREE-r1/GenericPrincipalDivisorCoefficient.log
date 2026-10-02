@@ -1,0 +1,3 @@
+'MazurProof.DedekindQuotientDegree.count_spanSingleton_eq_normalizedFactors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

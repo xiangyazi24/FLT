@@ -1,0 +1,170 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "source_commit": "9ecac38589bd3b45abc144ffda01e2f711213c52",
+  "dispatch_commit": "12c72c1e508e72bd7a665ef803af2c21d774d2ce",
+  "lean_toolchain": "leanprover/lean4:v4.31.0-rc2",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "status": "Exact actual-W affine degree source proof; generic canonical modules kernel-checked, actual-W project specialization pending",
+  "production_files": [
+    "comms/candidates/N25F_DedekindFactorDegree.lean",
+    "comms/candidates/N25F_PrincipalDivisorCoefficient.lean",
+    "comms/candidates/N25F_PrincipalDivisorQuotientDegree.lean",
+    "comms/candidates/N25F_WChartPrincipalDegree.lean"
+  ],
+  "files": [
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/README.md",
+      "encoding": "utf-8",
+      "bytes": 6058,
+      "sha256": "ec701ba3fe99db30ee0f80b517a69620eca27b57e6eb542a2323a8f03053b6e4",
+      "git_blob": "577601ceebe8f4c916ae9afa28c06fa06a56669c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/LEAD_VALIDATION.lean",
+      "encoding": "utf-8",
+      "bytes": 677,
+      "sha256": "e080c8d8c30fcc5637c2473f48e3bb5ffa89777cc90a8993346e71704fd8da49",
+      "git_blob": "47d7c44bfe3001ef5abdc070800dfaa2812381cf"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/CANONICAL_COMPILE_RECEIPT.json",
+      "encoding": "utf-8",
+      "bytes": 11952,
+      "sha256": "e94b60167b937436524607cab6f74726c683a89388c70d9409ac3e3c3b6dbb1f",
+      "git_blob": "404ed599830db65aaaa24178f1745e37c6bcfefd"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/CanonicalModuleChecks.log",
+      "encoding": "utf-8",
+      "bytes": 2241,
+      "sha256": "f6f0f874667cfd0f9f0a356462a60f07ae94e3d1c15ff8f27917051f94b60928",
+      "git_blob": "2dae3ff22b353ac9cd4118b521aa999fb95c9fc9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/run_canonical_checks.py",
+      "encoding": "utf-8",
+      "bytes": 4770,
+      "sha256": "ae6d6748f60dce0fd181a25fd67f69b7b5ca2c1e4ecfc5af66badbe554bd7e83",
+      "git_blob": "b9f8ff81e83ccf3addc0cb3a34d1342c3019517a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/GenericDedekindFactorDegreeChecked.lean",
+      "encoding": "utf-8",
+      "bytes": 3588,
+      "sha256": "6d5a33a9bed7a43e438d3684d8a96dd000a77018d5c7a938653c53790196b155",
+      "git_blob": "d9ca3d1693843e334744bb40688b02fae102c02b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/GenericDedekindFactorDegreeChecked.log",
+      "encoding": "utf-8",
+      "bytes": 268,
+      "sha256": "9ac3d824a9811ff24b07dd10affd5cb1e968bb920b444c8f294734216105441e",
+      "git_blob": "52bf3b150c359f28aa155ba43fd47a4d170a80c9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/GenericPrincipalDivisorCoefficient.lean",
+      "encoding": "utf-8",
+      "bytes": 1155,
+      "sha256": "d1317bc12fdd7736f9a05ae6a45ec7d6fc9573863d4e042b424ff357eed8f74e",
+      "git_blob": "dfa76b9b3bd5397fd299ea15563472cba3d2ad92"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/GenericPrincipalDivisorCoefficient.log",
+      "encoding": "utf-8",
+      "bytes": 138,
+      "sha256": "f6ccdd77f4bf9f71acaf700c50c6511ec7c6174eaddd3d751f8f7c282f122c29",
+      "git_blob": "f4b7df6dc69e7947ec1b07a20195ffbd06d87e0c"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/PrincipalDivisorQuotientDegreeChecked.lean",
+      "encoding": "utf-8",
+      "bytes": 11901,
+      "sha256": "317e4ab5927b1f512a63730ffa7e79171824d73652f322e22a550021735c102a",
+      "git_blob": "2c5e0a8bf33e2aa2d9b893d0c58d9e430fb42644"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/PrincipalDivisorQuotientDegreeChecked.log",
+      "encoding": "utf-8",
+      "bytes": 139,
+      "sha256": "32b1dc39bec39bbfe6bf837d1770968eaabf2f2318d8e955edd8dab2b8fb14c8",
+      "git_blob": "04817315e86489d7ebe3b7409a85a373ae46303b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/FiniteTypeDedekindFactorDegreeChecked.lean",
+      "encoding": "utf-8",
+      "bytes": 4595,
+      "sha256": "788884524a1954a10be58ee7d1cca0f7e6f3e74f5fd0d31095c11878792f410a",
+      "git_blob": "7ee872d1509640b65e2ea3d6175244c2b1da8aa3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/FiniteTypeDedekindFactorDegreeChecked.log",
+      "encoding": "utf-8",
+      "bytes": 153,
+      "sha256": "604e5e238cfee451afbfcbc56e83fd6c0b991022222289c437974230258c4a8a",
+      "git_blob": "1a2ade30650975b2e9a82e0aac4a8be94ea2c413"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/FINAL_DELIVERY.md",
+      "encoding": "utf-8",
+      "bytes": 4716,
+      "sha256": "47c2f2b47218e60b351e4ebba5e5c2353d3205b38cb5135cb6c0c139cb3801f9",
+      "git_blob": "596f9b7ca6b3d07a6fc4ce905f91deb4f7c88935"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/INDEPENDENT_REVIEW.md",
+      "encoding": "utf-8",
+      "bytes": 11282,
+      "sha256": "f6d06876065c9bf17e5ab0174789ba09916dde1699778ec4fd688485ce5c7d5f",
+      "git_blob": "581e471017a8f9d3b3f2ce52a64ce476ec46cf27"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-AFFINE-DEGREE-r1/BASELINE_CurveDedekindDivisor.lean",
+      "encoding": "utf-8",
+      "bytes": 4199,
+      "sha256": "37aac2b75aca0d95e3f367a5e3e1e524c3bae2bc55e16e96c04b6f05bc9b6580",
+      "git_blob": "20c6208962f3163e4eabda838efc5c73afdc0b6c"
+    },
+    {
+      "path": "comms/candidates/N25F_DedekindFactorDegree.lean",
+      "encoding": "utf-8",
+      "bytes": 3417,
+      "sha256": "b536b08c43bbfe3d60121419ddb3d526971ea2eb8db91f02aa92ba43ca79d2f3",
+      "git_blob": "8fbc4b58fda1005453cdf6075bfd65dff22867b8"
+    },
+    {
+      "path": "comms/candidates/N25F_PrincipalDivisorCoefficient.lean",
+      "encoding": "utf-8",
+      "bytes": 1065,
+      "sha256": "ffab496854fae1b92c28c844f0ed99cc585a219741a6dac26535580285db3f50",
+      "git_blob": "33feb1f895174c7e3e1e5e9b3318db8a61b76165"
+    },
+    {
+      "path": "comms/candidates/N25F_PrincipalDivisorQuotientDegree.lean",
+      "encoding": "utf-8",
+      "bytes": 3361,
+      "sha256": "86f564f819b3bb11afc55903518afd579450457fb16ab051a555054d85174d68",
+      "git_blob": "4ff53b39ca319e8d0b06fe3993a1b604cc973164"
+    },
+    {
+      "path": "comms/candidates/N25F_WChartPrincipalDegree.lean",
+      "encoding": "utf-8",
+      "bytes": 2165,
+      "sha256": "3c5eace10e22247b0141b8f6b918e4634efc4e36b5006a4ea3f39f78a43e62aa",
+      "git_blob": "97ab5831af501f135c2182d5f7a20dad6210afaa"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N13-ENDPOINT-r8-candidate.md",
+      "encoding": "utf-8",
+      "bytes": 3340,
+      "sha256": "5995e051c55e00a32497df582311ede8b176fc39323408e76fc6176416da9052",
+      "git_blob": "6b70393ecf5b8fe9892ad6ffaa7562651eab4c0e"
+    },
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 12874,
+      "sha256": "8d27eb1853339b08a7df7edcde2fa1160cdefba8bc2860a5cfd5e755b369b6ec",
+      "git_blob": "548ca3ac25dc477eb9282a24b8117595166c69da"
+    }
+  ]
+}

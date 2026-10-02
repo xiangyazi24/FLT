@@ -1,0 +1,6 @@
+'MazurProof.DedekindQuotientDegree.finrank_quotient_eq_sum_factors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.DedekindQuotientDegree.finrank_quotient_eq_sum_normalizedFactors' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

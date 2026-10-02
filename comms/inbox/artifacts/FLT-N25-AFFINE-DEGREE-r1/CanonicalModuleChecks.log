@@ -1,0 +1,26 @@
+CHECK CurveDedekindDivisor
+COMMAND ['/workspace/shared/lean-feedback/check-lean', '-R', '/workspace/shared/flt-n25-divisor-length/check_project', '-o', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/CurveDedekindDivisor.olean', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/CurveDedekindDivisor.lean']
+EXIT 0; DURATION 3.567225s
+
+CHECK N25F_DedekindFactorDegree
+COMMAND ['/workspace/shared/lean-feedback/check-lean', '-R', '/workspace/shared/flt-n25-divisor-length/check_project', '-o', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.olean', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean']
+EXIT 0; DURATION 3.117942s
+
+CHECK N25F_PrincipalDivisorCoefficient
+COMMAND ['/workspace/shared/lean-feedback/check-lean', '-R', '/workspace/shared/flt-n25-divisor-length/check_project', '-o', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorCoefficient.olean', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorCoefficient.lean']
+EXIT 0; DURATION 2.571645s
+
+CHECK N25F_PrincipalDivisorQuotientDegree
+COMMAND ['/workspace/shared/lean-feedback/check-lean', '-R', '/workspace/shared/flt-n25-divisor-length/check_project', '-o', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorQuotientDegree.olean', '/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorQuotientDegree.lean']
+EXIT 0; DURATION 2.888633s
+
+CHECK PrincipalDegreeAxiomCheck
+COMMAND ['/workspace/shared/lean-feedback/check-lean', '-R', '/workspace/shared/flt-n25-divisor-length/check_project', '/workspace/shared/flt-n25-divisor-length/check_project/PrincipalDegreeAxiomCheck.lean']
+EXIT 0; DURATION 2.352371s
+'MazurProof.CurveDedekindDivisor.principalDivisor_regular_apply' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.CurveDedekindDivisor.principalDivisor_degree_eq_quotient_finrank' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+

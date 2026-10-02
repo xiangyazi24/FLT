@@ -1,0 +1,240 @@
+{
+  "baseline_FLT": "9ecac38589bd3b45abc144ffda01e2f711213c52",
+  "baseline_note": "Parent verified this baseline adds only the accepted norm-dimension file to 40efa26fea43fb0ed7d70db804f0d0dcdd71342b; these dependencies unchanged.",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "lean": "4.31.0-rc2",
+  "runner": {
+    "path": "/workspace/shared/lean-feedback/check-lean",
+    "bytes": 470,
+    "sha256": "a5bcc83877352d1430a389a32e63acb8eec503beb905e94a3024ff2e97337ce5",
+    "git_blob": "e875e0800894ac036a8f2e9a13542a0d16270dd0",
+    "cpu_threads": 1,
+    "lean_memory_limit_MB": 3072,
+    "timeout_seconds": 60
+  },
+  "overlay_root": "/workspace/shared/flt-n25-divisor-length/check_project",
+  "production_root": "/workspace/shared/flt-n25-divisor-length/production",
+  "original_curve_materialization": {
+    "path": "/workspace/shared/flt-n25-divisor-length/sources/CurveDedekindDivisor.lean",
+    "bytes": 4200,
+    "sha256": "b929c54d296c5598639dfa0ca1fd186ade72353654af0d95df225b6a27298b12",
+    "git_blob": "1ad8e8b2b9d3e3a367e0a9a2f1de24f34b5a96bc"
+  },
+  "canonical_curve_source": {
+    "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/CurveDedekindDivisor.lean",
+    "bytes": 4199,
+    "sha256": "37aac2b75aca0d95e3f367a5e3e1e524c3bae2bc55e16e96c04b6f05bc9b6580",
+    "git_blob": "20c6208962f3163e4eabda838efc5c73afdc0b6c",
+    "correction": "Removed exactly one extra terminal newline from connector-materialized source; all other bytes unchanged; resulting blob matches parent-supplied accepted Git blob."
+  },
+  "production_files": [
+    {
+      "path": "/workspace/shared/flt-n25-divisor-length/production/N25F_DedekindFactorDegree.lean",
+      "bytes": 3417,
+      "sha256": "b536b08c43bbfe3d60121419ddb3d526971ea2eb8db91f02aa92ba43ca79d2f3",
+      "git_blob": "8fbc4b58fda1005453cdf6075bfd65dff22867b8"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-divisor-length/production/N25F_PrincipalDivisorCoefficient.lean",
+      "bytes": 1065,
+      "sha256": "ffab496854fae1b92c28c844f0ed99cc585a219741a6dac26535580285db3f50",
+      "git_blob": "33feb1f895174c7e3e1e5e9b3318db8a61b76165"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-divisor-length/production/N25F_PrincipalDivisorQuotientDegree.lean",
+      "bytes": 3361,
+      "sha256": "86f564f819b3bb11afc55903518afd579450457fb16ab051a555054d85174d68",
+      "git_blob": "4ff53b39ca319e8d0b06fe3993a1b604cc973164"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-divisor-length/production/N25F_WChartPrincipalDegree.lean",
+      "bytes": 2165,
+      "sha256": "3c5eace10e22247b0141b8f6b918e4634efc4e36b5006a4ea3f39f78a43e62aa",
+      "git_blob": "97ab5831af501f135c2182d5f7a20dad6210afaa"
+    }
+  ],
+  "source_harness_identity": [
+    {
+      "source_path": "/workspace/shared/flt-n25-divisor-length/sources/CurveDedekindDivisor.lean",
+      "harness_path": "/workspace/shared/flt-n25-divisor-length/PrincipalDivisorQuotientDegreeChecked.lean",
+      "comparison": "Exact line-preserved source body, excluding only import lines, appears contiguously in previously checked harness; imports were consolidated at top.",
+      "body_sha256": "77a6eec29140db96a0701bcd723b56eb46d049563b2f9d902f6fdca2e0d7f6de",
+      "identical": true
+    },
+    {
+      "source_path": "/workspace/shared/flt-n25-divisor-length/GenericDedekindFactorDegree.lean",
+      "harness_path": "/workspace/shared/flt-n25-divisor-length/PrincipalDivisorQuotientDegreeChecked.lean",
+      "comparison": "Exact line-preserved source body, excluding only import lines, appears contiguously in previously checked harness; imports were consolidated at top.",
+      "body_sha256": "e9ce7fd20413d52257ffe28a241a62f0b04ce132b23374b9a0d85decee8961b6",
+      "identical": true
+    },
+    {
+      "source_path": "/workspace/shared/flt-n25-divisor-length/N25F_PrincipalDivisorCoefficient.lean",
+      "harness_path": "/workspace/shared/flt-n25-divisor-length/PrincipalDivisorQuotientDegreeChecked.lean",
+      "comparison": "Exact line-preserved source body, excluding only import lines, appears contiguously in previously checked harness; imports were consolidated at top.",
+      "body_sha256": "9016774c5618bf9917f805aed2252262a5c5505f256b0099168340ac8d163efd",
+      "identical": true
+    },
+    {
+      "source_path": "/workspace/shared/flt-n25-divisor-length/N25F_PrincipalDivisorQuotientDegree.lean",
+      "harness_path": "/workspace/shared/flt-n25-divisor-length/PrincipalDivisorQuotientDegreeChecked.lean",
+      "comparison": "Exact line-preserved source body, excluding only import lines, appears contiguously in previously checked harness; imports were consolidated at top.",
+      "body_sha256": "db5237612de180a8a016c6a6d10ee36bbdf60561718564506ef25f697762b62e",
+      "identical": true
+    }
+  ],
+  "checks": [
+    {
+      "name": "CurveDedekindDivisor",
+      "argv": [
+        "/workspace/shared/lean-feedback/check-lean",
+        "-R",
+        "/workspace/shared/flt-n25-divisor-length/check_project",
+        "-o",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/CurveDedekindDivisor.olean",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/CurveDedekindDivisor.lean"
+      ],
+      "environment_additions": {
+        "LEAN_PATH": "/workspace/shared/flt-n25-divisor-length/check_project"
+      },
+      "started_utc": "2026-10-02T06:57:59.060509+00:00",
+      "duration_seconds": 3.5672247020011127,
+      "exit_code": 0,
+      "source": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/CurveDedekindDivisor.lean",
+        "bytes": 4199,
+        "sha256": "37aac2b75aca0d95e3f367a5e3e1e524c3bae2bc55e16e96c04b6f05bc9b6580",
+        "git_blob": "20c6208962f3163e4eabda838efc5c73afdc0b6c"
+      },
+      "output": "",
+      "olean": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/CurveDedekindDivisor.olean",
+        "bytes": 102216,
+        "sha256": "5ebe6bd2996ebd508d35024790c91258da8b8019643900ac7cc4432403fbfe28",
+        "git_blob": "dd04ac8289773162d0fb3d00e793bd2faabc484b"
+      }
+    },
+    {
+      "name": "N25F_DedekindFactorDegree",
+      "argv": [
+        "/workspace/shared/lean-feedback/check-lean",
+        "-R",
+        "/workspace/shared/flt-n25-divisor-length/check_project",
+        "-o",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.olean",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean"
+      ],
+      "environment_additions": {
+        "LEAN_PATH": "/workspace/shared/flt-n25-divisor-length/check_project"
+      },
+      "started_utc": "2026-10-02T06:58:02.628596+00:00",
+      "duration_seconds": 3.1179416499999206,
+      "exit_code": 0,
+      "source": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean",
+        "bytes": 3417,
+        "sha256": "b536b08c43bbfe3d60121419ddb3d526971ea2eb8db91f02aa92ba43ca79d2f3",
+        "git_blob": "8fbc4b58fda1005453cdf6075bfd65dff22867b8"
+      },
+      "output": "",
+      "olean": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.olean",
+        "bytes": 86128,
+        "sha256": "3642efe14078e78174f4dd4c7aa5ef5de0beebaa91c2983b4d50e1806e92ea92",
+        "git_blob": "c6668b5c58e6f62bf195bd7b752707fe07279af4"
+      }
+    },
+    {
+      "name": "N25F_PrincipalDivisorCoefficient",
+      "argv": [
+        "/workspace/shared/lean-feedback/check-lean",
+        "-R",
+        "/workspace/shared/flt-n25-divisor-length/check_project",
+        "-o",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorCoefficient.olean",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorCoefficient.lean"
+      ],
+      "environment_additions": {
+        "LEAN_PATH": "/workspace/shared/flt-n25-divisor-length/check_project"
+      },
+      "started_utc": "2026-10-02T06:58:05.747415+00:00",
+      "duration_seconds": 2.5716452799988474,
+      "exit_code": 0,
+      "source": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorCoefficient.lean",
+        "bytes": 1065,
+        "sha256": "ffab496854fae1b92c28c844f0ed99cc585a219741a6dac26535580285db3f50",
+        "git_blob": "33feb1f895174c7e3e1e5e9b3318db8a61b76165"
+      },
+      "output": "",
+      "olean": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorCoefficient.olean",
+        "bytes": 37336,
+        "sha256": "e4f1b971109c60d8350da8d76a0a85a3cf078387a17908e128b004866953a265",
+        "git_blob": "d319c6e308bc8091d206b216818bdd39efe6738f"
+      }
+    },
+    {
+      "name": "N25F_PrincipalDivisorQuotientDegree",
+      "argv": [
+        "/workspace/shared/lean-feedback/check-lean",
+        "-R",
+        "/workspace/shared/flt-n25-divisor-length/check_project",
+        "-o",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorQuotientDegree.olean",
+        "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorQuotientDegree.lean"
+      ],
+      "environment_additions": {
+        "LEAN_PATH": "/workspace/shared/flt-n25-divisor-length/check_project"
+      },
+      "started_utc": "2026-10-02T06:58:08.320683+00:00",
+      "duration_seconds": 2.888633013000799,
+      "exit_code": 0,
+      "source": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorQuotientDegree.lean",
+        "bytes": 3361,
+        "sha256": "86f564f819b3bb11afc55903518afd579450457fb16ab051a555054d85174d68",
+        "git_blob": "4ff53b39ca319e8d0b06fe3993a1b604cc973164"
+      },
+      "output": "",
+      "olean": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_PrincipalDivisorQuotientDegree.olean",
+        "bytes": 122040,
+        "sha256": "5d025370e0512d0af937974ca0eaa838dbeba3483d37e89a7d67e2043182f846",
+        "git_blob": "831f245adfda85cee4193e15bcad22f0ff77bed3"
+      }
+    },
+    {
+      "name": "PrincipalDegreeAxiomCheck",
+      "argv": [
+        "/workspace/shared/lean-feedback/check-lean",
+        "-R",
+        "/workspace/shared/flt-n25-divisor-length/check_project",
+        "/workspace/shared/flt-n25-divisor-length/check_project/PrincipalDegreeAxiomCheck.lean"
+      ],
+      "environment_additions": {
+        "LEAN_PATH": "/workspace/shared/flt-n25-divisor-length/check_project"
+      },
+      "started_utc": "2026-10-02T06:58:11.210404+00:00",
+      "duration_seconds": 2.3523705339994194,
+      "exit_code": 0,
+      "source": {
+        "path": "/workspace/shared/flt-n25-divisor-length/check_project/PrincipalDegreeAxiomCheck.lean",
+        "bytes": 237,
+        "sha256": "928dbf8b057118cecaedbd2695ebc7454e28e9c65db08783a3e84441c61221ac",
+        "git_blob": "484e534898e005970df4949fcfc39be2347aa6ad"
+      },
+      "output": "'MazurProof.CurveDedekindDivisor.principalDivisor_regular_apply' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'MazurProof.CurveDedekindDivisor.principalDivisor_degree_eq_quotient_finrank' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n"
+    }
+  ],
+  "actual_W_project_compile": {
+    "status": "not_run",
+    "reason": "The actual-W geometry import closure is lead-owned; no broad FLT build was requested locally."
+  },
+  "all_canonical_checks_passed": true,
+  "emitted_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}
