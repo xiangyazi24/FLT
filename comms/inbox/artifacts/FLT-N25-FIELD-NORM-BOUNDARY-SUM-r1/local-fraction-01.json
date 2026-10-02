@@ -1,0 +1,10 @@
+{
+  "name": "local-fraction-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-norm-fraction/LocalFractionFactorOrderCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 17.93490967600519,
+  "peak_child_rss_kib": 2690040,
+  "source_sha256": "bb52e678f88cf05c33301d75d82c408371bd787cde7d0273cd8af3e1df1892b0"
+}

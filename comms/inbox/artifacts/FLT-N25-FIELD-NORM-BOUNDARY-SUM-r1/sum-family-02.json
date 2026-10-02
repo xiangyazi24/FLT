@@ -1,0 +1,10 @@
+{
+  "name": "sum-family-02",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-norm-fraction/InfinityNormBoundarySumFamilyCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 102.40959371699864,
+  "peak_child_rss_kib": 2887252,
+  "source_sha256": "feab732f1b0ee759e91b61db2315a6e61e09240a1a755f4e63829d65c4feb441"
+}

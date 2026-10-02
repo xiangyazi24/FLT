@@ -1,0 +1,10 @@
+{
+  "name": "actual-01",
+  "args": [
+    "/workspace/shared/flt-n25-infinity-norm-fraction/InfinityNormFractionCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 40.38177761500265,
+  "peak_child_rss_kib": 2675576,
+  "source_sha256": "eb57912877572d982e1efccf72782b428b3c0547532baca5f163390a8c4a1fee"
+}

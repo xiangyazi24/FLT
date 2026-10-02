@@ -1,0 +1,142 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependencies": [
+    "6a4110a03ca7bee2db5fb2e506eb75edd3643ce0",
+    "b6bae08bf96ddbd1fe1c81db4705ec2524a5ac83",
+    "fc653e9e48c5e2c66c3d315652b59f2b741bc85c"
+  ],
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 33255,
+      "sha256": "67e1a79895fccd85c6925cb3a6a1ebbc95e69e3eedc50c09d496742b2842220e"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityNormBoundarySum.lean",
+      "encoding": "utf-8",
+      "bytes": 4741,
+      "sha256": "06bb905d907ce23f968b76e63f4f78241cbbfe3a8cfcd5af837e8aca4b19f52d"
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityNormFraction.lean",
+      "encoding": "utf-8",
+      "bytes": 3045,
+      "sha256": "400b08e007519eb24caf9065393e474dc1b8c11e101ce91218a86160e4d59c38"
+    },
+    {
+      "path": "comms/candidates/N25F_LocalFractionFactorOrder.lean",
+      "encoding": "utf-8",
+      "bytes": 1672,
+      "sha256": "c838aa7d0d4d57038d1c98c723dfd8e457adc36bf7b7102df0db70d1b2275663"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/ActualInfinityNormBoundarySumCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 544,
+      "sha256": "c1333f2ab302185d084524866fa7a9af12d31f823685e1d3d302b876eefe07c8"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/InfinityNormBoundarySumFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 10971,
+      "sha256": "feab732f1b0ee759e91b61db2315a6e61e09240a1a755f4e63829d65c4feb441"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/InfinityNormFractionCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 3592,
+      "sha256": "eb57912877572d982e1efccf72782b428b3c0547532baca5f163390a8c4a1fee"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/LocalFractionFactorOrderCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 4939,
+      "sha256": "bb52e678f88cf05c33301d75d82c408371bd787cde7d0273cd8af3e1df1892b0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/actual-01.json",
+      "encoding": "utf-8",
+      "bytes": 299,
+      "sha256": "b8d1dd3c7e95be304d77d4244f9ac07ff29b37c73403bc5f654794526948a445"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/actual-01.log",
+      "encoding": "utf-8",
+      "bytes": 961,
+      "sha256": "1957d6497671151ccc55b01eaeffa5347b62a643f73dd3974026215e353cb499"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/local-fraction-01.json",
+      "encoding": "utf-8",
+      "bytes": 311,
+      "sha256": "78e6bace518fa857ef4203376827adcb85e5612e4beb474d4ed75a2255e67670"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/local-fraction-01.log",
+      "encoding": "utf-8",
+      "bytes": 128,
+      "sha256": "00a1f421861513e64d0d1a68b152c10f27d2bb2afb2f4869e0af524787246261"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 1318,
+      "sha256": "8420738966d3e6134b1288dfd39a97a0a37393897ef7a95980a26ea88ad85ad0"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/make_sum_family.py",
+      "encoding": "utf-8",
+      "bytes": 4765,
+      "sha256": "c982845f9a5affba7c3a523ed68c3e3861fdc5f6fab46c4d426b60b3b89ed6cf"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/rejected/InfinityNormBoundarySumFamilyCheck.attempt01.lean",
+      "encoding": "utf-8",
+      "bytes": 10933,
+      "sha256": "398a57e0e05dc80925859ae8576f53f30f566f49d71fb50653cb5e560a598249"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/rejected/sum-family-01.json",
+      "encoding": "utf-8",
+      "bytes": 312,
+      "sha256": "c9b65cd161a57eeab44f5b62192ed1d6656c21b8e5798562d6e10f2d6b6db570"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/rejected/sum-family-01.log",
+      "encoding": "utf-8",
+      "bytes": 2034,
+      "sha256": "0df0023f44121f199ebf43ff455aa74c3df53c1a63521e171da19be4206fceb4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 884,
+      "sha256": "5e942ba86c6a74cbd1cbefac796eea51abc74d2bfcd484d0540c8b869604d6fc"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/sum-family-02.json",
+      "encoding": "utf-8",
+      "bytes": 313,
+      "sha256": "a7c0ed302d22e2f0396bb9313b5d6043717bacc58cbc775300774ba32959b424"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/sum-family-02.log",
+      "encoding": "utf-8",
+      "bytes": 1267,
+      "sha256": "66163a76b93ad4fcd563f53ad0e74f9f7fc460430d41323e967895eb61006490"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1/validation.json",
+      "encoding": "utf-8",
+      "bytes": 2428,
+      "sha256": "ffe2887ff1975224154663738e9d7532cf0a1366e0f6e4644ca547821fc988c8"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-FIELD-NORM-BOUNDARY-SUM-r1.md",
+      "encoding": "utf-8",
+      "bytes": 5646,
+      "sha256": "f786361b589417db84b663357d0d26c0bea34dbdd18e715e53fd73a5d37681f9"
+    }
+  ]
+}

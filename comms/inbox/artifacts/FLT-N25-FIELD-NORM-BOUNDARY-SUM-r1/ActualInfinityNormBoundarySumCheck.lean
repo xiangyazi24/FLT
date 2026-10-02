@@ -1,0 +1,8 @@
+import FLT.Assumptions.MazurProof.N25F_InfinityNormBoundarySum
+
+#print axioms MazurProof.N25F_InfinityNormFraction.infinity_norm_normalization
+#print axioms MazurProof.N25F_InfinityNormFraction.infinity_norm_fraction
+#print axioms MazurProof.N25F_InfinityNormFraction.exists_normalization_fraction
+#print axioms MazurProof.N25F_LocalFractionFactorOrder.log_ordFrac_atPrime_div
+#print axioms MazurProof.N25F_InfinityNormBoundarySum.infinityBaseFractionOrder
+#print axioms MazurProof.N25F_InfinityNormBoundarySum.infinity_norm_boundary_order_sum

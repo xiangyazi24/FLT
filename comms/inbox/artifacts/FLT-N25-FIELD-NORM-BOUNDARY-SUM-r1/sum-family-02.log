@@ -1,0 +1,22 @@
+/workspace/shared/flt-n25-infinity-norm-fraction/InfinityNormBoundarySumFamilyCheck.lean:125:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_InfinityNormFraction.infinity_norm_fraction`:
+  [IsFractionRing N L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsFractionRing N L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'MazurProof.N25F_InfinityNormFraction.infinity_norm_normalization' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormFraction.infinity_norm_fraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'MazurProof.N25F_InfinityNormFraction.exists_normalization_fraction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_LocalFractionFactorOrder.log_ordFrac_atPrime_div' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormBoundarySum.infinityBaseFractionOrder' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_InfinityNormBoundarySum.infinity_norm_boundary_order_sum' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

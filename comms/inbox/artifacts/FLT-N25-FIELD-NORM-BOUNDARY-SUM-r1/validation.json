@@ -1,0 +1,69 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "pending_dependencies": [
+    "6a4110a03ca7bee2db5fb2e506eb75edd3643ce0",
+    "b6bae08bf96ddbd1fe1c81db4705ec2524a5ac83",
+    "fc653e9e48c5e2c66c3d315652b59f2b741bc85c"
+  ],
+  "production_full_imports": "NOT RUN",
+  "public_declarations": [
+    "MazurProof.N25F_InfinityNormFraction.infinity_norm_normalization",
+    "MazurProof.N25F_InfinityNormFraction.infinity_norm_fraction",
+    "MazurProof.N25F_InfinityNormFraction.exists_normalization_fraction",
+    "MazurProof.N25F_LocalFractionFactorOrder.log_ordFrac_atPrime_div",
+    "MazurProof.N25F_InfinityNormBoundarySum.infinityBaseFractionOrder",
+    "MazurProof.N25F_InfinityNormBoundarySum.infinity_norm_boundary_order_sum"
+  ],
+  "production_additional_hypotheses": [],
+  "passed": [
+    {
+      "name": "actual-01",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-norm-fraction/InfinityNormFractionCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 40.38177761500265,
+      "peak_child_rss_kib": 2675576,
+      "source_sha256": "eb57912877572d982e1efccf72782b428b3c0547532baca5f163390a8c4a1fee"
+    },
+    {
+      "name": "local-fraction-01",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-norm-fraction/LocalFractionFactorOrderCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 17.93490967600519,
+      "peak_child_rss_kib": 2690040,
+      "source_sha256": "bb52e678f88cf05c33301d75d82c408371bd787cde7d0273cd8af3e1df1892b0"
+    },
+    {
+      "name": "sum-family-02",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-norm-fraction/InfinityNormBoundarySumFamilyCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 102.40959371699864,
+      "peak_child_rss_kib": 2887252,
+      "source_sha256": "feab732f1b0ee759e91b61db2315a6e61e09240a1a755f4e63829d65c4feb441"
+    }
+  ],
+  "failed": [
+    {
+      "name": "sum-family-01",
+      "args": [
+        "/workspace/shared/flt-n25-infinity-norm-fraction/InfinityNormBoundarySumFamilyCheck.lean"
+      ],
+      "exit_code": 1,
+      "seconds": 58.28403609099769,
+      "peak_child_rss_kib": 2893696,
+      "source_sha256": "398a57e0e05dc80925859ae8576f53f30f566f49d71fb50653cb5e560a598249"
+    }
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "warnings": "Unused fixture parameters only in actual-01 and sum-family-02",
+  "wrapper_elapsed_includes_gate_wait": true
+}

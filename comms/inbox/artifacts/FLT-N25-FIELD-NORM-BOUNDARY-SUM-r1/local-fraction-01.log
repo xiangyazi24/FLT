@@ -1,0 +1,3 @@
+'MazurProof.N25F_LocalFractionFactorOrder.log_ordFrac_atPrime_div' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
