@@ -1,0 +1,10 @@
+{
+  "name": "point-04",
+  "args": [
+    "/workspace/shared/flt-n25-yz-local-dvr/CurvePointLocalDVRCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 12.384936201000528,
+  "peak_child_rss_kib": 2820404,
+  "source_sha256": "c1c6de808b2adba1d3ed6999fbe1c7cc564974220db58e279d071a2d015d0b91"
+}

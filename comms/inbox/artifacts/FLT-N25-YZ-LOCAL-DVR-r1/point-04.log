@@ -1,0 +1,17 @@
+'N25LocalDedekindCheck.local_dedekind_of_away_equiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+@curve_point_local_isDedekind : ∀ [IsDedekindDomain N25F_NonBoundaryPrincipalDivisor.W]
+  (f : YChartRing →ₐ[ZMod 2] ZMod 2), f yZ = 1 → IsDedekindDomain (Localization.AtPrime (RingHom.ker f.toRingHom))
+'N25ActualCurvePointCheck.curve_point_local_isDedekind' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25LocalNonzeroCheck.local_nonzero_of_away_equiv' depends on axioms: [propext, Classical.choice, Quot.sound]
+@curve_point_germ_ne_zero : ∀ [IsDedekindDomain W] [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  (f : YChartRing →ₐ[ZMod 2] ZMod 2),
+  f yZ = 1 → (algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW ≠ 0
+@curve_point_isDVR : ∀ [inst : IsDedekindDomain W] [Module.IsTorsionFree (Polynomial (ZMod 2)) W]
+  (f : YChartRing →ₐ[ZMod 2] ZMod 2) (hf : f yZ = 1),
+  Ring.ord (Localization.AtPrime (RingHom.ker f.toRingHom))
+        ((algebraMap YChartRing (Localization.AtPrime (RingHom.ker f.toRingHom))) yzW) =
+      1 →
+    IsDiscreteValuationRing (Localization.AtPrime (RingHom.ker f.toRingHom))
+'N25CurvePointDVRCheck.curve_point_germ_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointDVRCheck.curve_point_not_isField' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N25CurvePointDVRCheck.curve_point_isDVR' depends on axioms: [propext, Classical.choice, Quot.sound]

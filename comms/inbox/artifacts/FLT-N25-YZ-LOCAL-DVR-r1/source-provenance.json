@@ -1,0 +1,22 @@
+{
+  "fixture_imports": [
+    {
+      "module": "YZAffineOverlapEquivCheck",
+      "path": "/workspace/shared/flt-n25-affine-overlap-equiv/YZAffineOverlapEquivCheck.lean",
+      "source_sha256": "055dbb9c8673c87641ef16f00ed3cbbe1601590e040978ba09503b097b0a4e49",
+      "olean_sha256": "b07483d27d23f1989b9482a7b928ebbff72f240637e57c16d4b6f4032081b210"
+    },
+    {
+      "module": "ZChartFractionEquivCheck",
+      "path": "/workspace/shared/flt-n25-zfield-equivalence/ZChartFractionEquivCheck.lean",
+      "source_sha256": "f25ea10e112b5959eed4b18113a25056d4563ae1f4e4221811ebaf37c54fe24c",
+      "olean_sha256": "6037a2b6b4a9e7c353e2aca8036595f8bfb3cfe2c8290063c59b474b714662ef"
+    },
+    {
+      "module": "ZChartInjectiveCheck",
+      "path": "/workspace/shared/flt-n25-zfraction-injective/ZChartInjectiveCheck.lean",
+      "source_sha256": "525985ce211f4c05c0b916949c026346d266f060263dfcbda296c28dc3daed17",
+      "olean_sha256": "244000f7f98bb99214bb655d62ef27a55c7886825ac5477d25abe170be3f0844"
+    }
+  ]
+}

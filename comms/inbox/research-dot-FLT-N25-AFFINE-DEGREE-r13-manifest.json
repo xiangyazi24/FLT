@@ -1,0 +1,96 @@
+{
+  "accepted_source_commit": "56bed095c61c28fda99ad99e8bf0cb74542058ad",
+  "dispatch_commit": "036a897eaf1e4325dd1f3176020bf5c0208b43ae",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 21809,
+      "sha256": "9ccd5a4207ccd62ae2c33bfa163397e3e6aeaaee3a41d2f368fe3d9d4cb27c7d"
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalDVR.lean",
+      "encoding": "utf-8",
+      "bytes": 4483,
+      "sha256": "f7df4c6e578b2a1a37d91528c6f1d2521994b8696546e26ecba5ea083480bcf6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/ActualYZLocalDVRCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 373,
+      "sha256": "53b90ee90e8de84841165111adb61116203e3edbd31aa10c2d04c5c58a737e8f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/CurvePointLocalDVRCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 8535,
+      "sha256": "c1c6de808b2adba1d3ed6999fbe1c7cc564974220db58e279d071a2d015d0b91"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/GenericLocalNonzero.lean",
+      "encoding": "utf-8",
+      "bytes": 2494,
+      "sha256": "4e951042846fd58d996519cf8c13f613e28220ee434c1e7d1e03ec8b63d750ae"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/accepted-dedekind-byte-check.json",
+      "encoding": "utf-8",
+      "bytes": 153,
+      "sha256": "fa5215a9ab22de3f7e2a8903fa2c20e91119298a773f595f483b79a4fb7aa741"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 284,
+      "sha256": "5f475bb36ee6bb0b217586f9bac0e79d6266bc4365f6ebf306fb6c66049a524b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 110,
+      "sha256": "0e396cfa24ccfd4cb7df5b48bb31e4bd4f7c506cdadbed9adb8d7ab7fa831dd2"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/lead-receipt-r13.md",
+      "encoding": "utf-8",
+      "bytes": 499,
+      "sha256": "0dfdb4793e09cbf1ad4660515868d82abd2e5cbf9ce11a4fb570f15f785b8583"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/make_checks.py",
+      "encoding": "utf-8",
+      "bytes": 5710,
+      "sha256": "4ab3c5cc53148574cb687c2c1c6e8aac602d406339c5821d9f48307c155ba3b4"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/point-04.json",
+      "encoding": "utf-8",
+      "bytes": 287,
+      "sha256": "47db78a434ab6d8faf9e695c478cefa777a6776950721b10f0496008d0fb0ce3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/point-04.log",
+      "encoding": "utf-8",
+      "bytes": 1500,
+      "sha256": "0f6c42ff684ad3f7b4bfe8a0c29d530e15961c0865c30fa1c0f82dfe45e28e2f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 874,
+      "sha256": "7adc235ccdb7d5e1791c178e34aa690885029ac9ca7f0bf87a00eb494b2afd7b"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-YZ-LOCAL-DVR-r1/source-provenance.json",
+      "encoding": "utf-8",
+      "bytes": 1014,
+      "sha256": "f2221a40aad5ea48fd1c0d82faeb344d49b2e458869281807d30a59620ba1b11"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-AFFINE-DEGREE-r13.md",
+      "encoding": "utf-8",
+      "bytes": 4245,
+      "sha256": "d4023735f15f6cddb941495aa9c791bf1c063bd1cf9be49f699da05d55213d37"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "generic-02",
+  "args": [
+    "/workspace/shared/flt-n25-yz-local-dvr/GenericLocalNonzero.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 5.147629790997598,
+  "peak_child_rss_kib": 2167792,
+  "source_sha256": "4e951042846fd58d996519cf8c13f613e28220ee434c1e7d1e03ec8b63d750ae"
+}
