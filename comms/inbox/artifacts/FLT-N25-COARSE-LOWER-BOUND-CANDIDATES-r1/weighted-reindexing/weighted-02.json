@@ -1,0 +1,14 @@
+{
+  "name": "weighted-02",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-weighted-reindexing",
+    "-o",
+    "/workspace/shared/flt-n25-weighted-reindexing/N25F_ExactCountWeightedSum.olean",
+    "/workspace/shared/flt-n25-weighted-reindexing/N25F_ExactCountWeightedSum.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 14.582494444999611,
+  "peak_child_rss_kib": 2814208,
+  "source_sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65"
+}

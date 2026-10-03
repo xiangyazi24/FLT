@@ -1,0 +1,10 @@
+{
+  "name": "ideal-02",
+  "args": [
+    "/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 4.244995057000779,
+  "peak_child_rss_kib": 2811820,
+  "source_sha256": "06e2a492a323b746b057d0038de2a0e53d6c4ee24b90ff9ae45617d733c7a675"
+}

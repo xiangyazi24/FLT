@@ -1,0 +1,182 @@
+{
+  "repository": "xiangyazi24/FLT",
+  "source_branch": "verify-sorry-restore",
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "dispatch_commit": "9700ca106515f04411193844fbb347d40d86e481",
+  "output_base_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+  "note": "The accepted source pin and later output producer pin are distinct. Prior candidate modules are not assumed integrated. No whole-closure build was run.",
+  "original_boundary_payload_sha256": "ffe8493d60a8c47e24767c4ffd2f73f7eeeea60b60a63705f9e9493f4fdd9fc7",
+  "original_boundary_payload_entry_count": 18,
+  "original_boundary_entries_byte_preserved": true,
+  "reused_input_aliases": [
+    {
+      "expected_local_filename": "BoundarySectionFiltrationFamilyInput.lean",
+      "stage": "total-boundary-cost",
+      "use_repo_path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/BoundarySectionFiltrationFamilyCheck.lean",
+      "sha256": "717d57d634ac89d102fbbac71c3d1499eafb3c6a4e236912888cec8b72112800",
+      "reason": "Exact predecessor bytes reused once; avoid duplicate 31 KB input copy."
+    }
+  ],
+  "weighted_overlay_dependency": {
+    "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+    "path": "FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean",
+    "sha256": "b536b08c43bbfe3d60121419ddb3d526971ea2eb8db91f02aa92ba43ca79d2f3",
+    "git_blob_sha": "8fbc4b58fda1005453cdf6075bfd65dff22867b8",
+    "olean_shipping": false,
+    "historical_cached_olean_hash": "3642efe14078e78174f4dd4c7aa5ef5de0beebaa91c2983b4d50e1806e92ea92"
+  },
+  "direct_FLT_import_producers": [
+    {
+      "consumer": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_BinaryResidueCancellation",
+      "producer": "prior-output-candidate-not-presumed-integrated",
+      "source_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+      "path": "comms/candidates/N25F_BinaryResidueCancellation.lean",
+      "git_blob_sha": "e7ff09b684eba917cf4106c3994c14c2e6972301"
+    },
+    {
+      "consumer": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityResidueFields",
+      "producer": "accepted-source-pin",
+      "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityResidueFields.lean",
+      "git_blob_sha": "18c50ccdb25902a9dc513699195381689946700e"
+    },
+    {
+      "consumer": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_SectionMultiplication",
+      "producer": "prior-output-candidate-not-presumed-integrated",
+      "source_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+      "path": "comms/candidates/N25F_SectionMultiplication.lean",
+      "git_blob_sha": "7907640ba7fb28a3737ed110ea0b708131b9b7f4"
+    },
+    {
+      "consumer": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_SectionFiniteness",
+      "producer": "prior-output-candidate-not-presumed-integrated",
+      "source_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+      "path": "comms/candidates/N25F_SectionFiniteness.lean",
+      "git_blob_sha": "408e918e34608b559add7d61fcd20ce131f9ad5a"
+    },
+    {
+      "consumer": "comms/candidates/N25F_EffectiveAffineIdeal.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_DedekindOrderMembership",
+      "producer": "prior-output-candidate-not-presumed-integrated",
+      "source_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+      "path": "comms/candidates/N25F_DedekindOrderMembership.lean",
+      "git_blob_sha": "163894845753ce2b62b1cef15f0fea5a26ed00ae"
+    },
+    {
+      "consumer": "comms/candidates/N25F_TotalBoundaryCost.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_BoundarySectionFiltration",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "sha256": "e7573e6240a38a24361242bcc335099b11523dec07dcab24ee613997c0224f70",
+      "git_blob_sha": "01b6e6a4deca2efba58a30f12624e39d6f0f21f8"
+    },
+    {
+      "consumer": "comms/candidates/N25F_ShiftedAffineIdeal.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_EffectiveAffineIdeal",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/N25F_EffectiveAffineIdeal.lean",
+      "sha256": "0a77343036bf707a38ab746e0ba5c6f2eb1aec70ac616bbc8d5a7b430e4bf9bd",
+      "git_blob_sha": "bda1152f63ae1c39d7428c06111fc8888b58faa7"
+    },
+    {
+      "consumer": "comms/candidates/N25F_ShiftedAffineIdeal.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_AffineNonpositiveRepresentative",
+      "producer": "prior-output-candidate-not-presumed-integrated",
+      "source_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+      "path": "comms/candidates/N25F_AffineNonpositiveRepresentative.lean",
+      "git_blob_sha": "50d05b5af294a5b4225eed06b11b41f91c26e570"
+    },
+    {
+      "consumer": "comms/candidates/N25F_ExactCountQuotientDegree.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_ExactCountWeightedSum",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/N25F_ExactCountWeightedSum.lean",
+      "sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65",
+      "git_blob_sha": "a2f6796290cfb59d3e6ec30252ee4b4d162e4a07"
+    },
+    {
+      "consumer": "comms/candidates/N25F_ExactCountQuotientDegree.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_DedekindFactorDegree",
+      "producer": "accepted-source-pin",
+      "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+      "path": "FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean",
+      "git_blob_sha": "8fbc4b58fda1005453cdf6075bfd65dff22867b8"
+    },
+    {
+      "consumer": "comms/candidates/N25F_KernelSectionInjection.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_WAffineConditionCost",
+      "producer": "prior-output-candidate-not-presumed-integrated",
+      "source_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+      "path": "comms/candidates/N25F_WAffineConditionCost.lean",
+      "git_blob_sha": "f48c8af7f469b739c7b9de7d945f2a797dda5798"
+    },
+    {
+      "consumer": "comms/candidates/N25F_KernelSectionInjection.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_TotalBoundaryCost",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/N25F_TotalBoundaryCost.lean",
+      "sha256": "de6a5ab438f83b889bfcfc38983860d699fed01eecdaa385cc8f532e56856179",
+      "git_blob_sha": "a38a3647bc8aa566620081cf28a59aa4ff2ce2e9"
+    },
+    {
+      "consumer": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_KernelSectionInjection",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/N25F_KernelSectionInjection.UNCOMPILED.lean",
+      "sha256": "dbfb2bad1d005afda471fbed1ebfd9ad16427bf7369104a72f8f831daf711fd6",
+      "git_blob_sha": "a42572aadb0f2f9fe7535c5faac2234fcb239def"
+    },
+    {
+      "consumer": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_ShiftedAffineIdeal",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/N25F_ShiftedAffineIdeal.UNCOMPILED.lean",
+      "sha256": "c20620e9eaebdefb6efb24ca006b9fc8905e6e1a7c5aaa9d209743ccdcc94917",
+      "git_blob_sha": "fea3357fb1126d046e3b607b00e28ae79fcb12cc"
+    },
+    {
+      "consumer": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorDegree",
+      "producer": "accepted-source-pin",
+      "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectiveDivisorDegree.lean",
+      "git_blob_sha": "30b90a32ee153c3c7eedb0b4746a882d25be34b4"
+    },
+    {
+      "consumer": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_ExactCountWeightedSum",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/N25F_ExactCountWeightedSum.lean",
+      "sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65",
+      "git_blob_sha": "a2f6796290cfb59d3e6ec30252ee4b4d162e4a07"
+    },
+    {
+      "consumer": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.N25F_WPolynomialWindow",
+      "producer": "prior-output-candidate-not-presumed-integrated",
+      "source_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+      "path": "comms/candidates/N25F_WPolynomialWindow.lean",
+      "git_blob_sha": "486ea9da44c62baca2c3a2cda55b378343488746"
+    },
+    {
+      "consumer": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "module": "FLT.Assumptions.MazurProof.DegreeReindex",
+      "producer": "this-uncommitted-delivery",
+      "path": "comms/candidates/DegreeReindex.lean",
+      "sha256": "d020a59200646835c6676a684df565d710311f404cd49c00294e710b3ee93237",
+      "git_blob_sha": "9bd144b0fe66d8a8ca5487f18d9d3a50fb3e00c7"
+    }
+  ],
+  "toolchain": {
+    "lean": "4.31.0-rc2",
+    "compiler_commit": "5e44d5f905127c78a2da7a015fe7a47840c95eb1",
+    "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05"
+  },
+  "actual_geometry_import_closure": "NOT RUN",
+  "full_FLT_build": "NOT RUN",
+  "fresh_kernel_rerun": "NOT RUN"
+}

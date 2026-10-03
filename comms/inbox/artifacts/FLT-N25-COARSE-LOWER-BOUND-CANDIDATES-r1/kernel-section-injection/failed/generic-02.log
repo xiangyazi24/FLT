@@ -1,0 +1,13 @@
+/workspace/shared/flt-n25-kernel-section-injection/KernelSectionLinearAlgebra.lean:25:29: error: Application type mismatch: The argument
+  he
+has type
+  (kernelIntoSubmodule S T q h) f = (kernelIntoSubmodule S T q h) g
+but is expected to have type
+  ↑f = ↑g
+in the application
+  congrArg Subtype.val he
+'KernelSectionLinearAlgebra.kernelIntoSubmodule' depends on axioms: [propext, Quot.sound]
+'KernelSectionLinearAlgebra.kernelIntoSubmodule_injective' depends on axioms: [propext, sorryAx, Quot.sound]
+'KernelSectionLinearAlgebra.finrank_kernel_le' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+'KernelSectionLinearAlgebra.deficits_cast' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KernelSectionLinearAlgebra.deficit_cost_identity' depends on axioms: [propext, Classical.choice, Quot.sound]

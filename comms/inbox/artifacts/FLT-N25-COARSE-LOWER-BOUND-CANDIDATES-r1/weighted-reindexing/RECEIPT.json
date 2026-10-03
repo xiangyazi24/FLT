@@ -1,0 +1,113 @@
+{
+  "status": "PASS_LOCAL_ONLY",
+  "mathlib": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "lean": "4.31.0-rc2",
+  "gate": "/workspace/shared/lean-feedback/with-compiler-slot",
+  "runner": "/workspace/shared/lean-feedback/check-lean",
+  "limits": {
+    "threads": 1,
+    "memory_MiB": 3072,
+    "active_timeout_seconds": 60
+  },
+  "LEAN_PATH": "/workspace/shared/flt-n25-weighted-reindexing/check_project",
+  "sources": [
+    {
+      "path": "/workspace/shared/flt-n25-weighted-reindexing/N25F_ExactCountWeightedSum.lean",
+      "sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65",
+      "canonical_module": "FLT.Assumptions.MazurProof.N25F_ExactCountWeightedSum",
+      "canonical_source_byte_identical": true,
+      "olean_sha256": "b522b3675a60ca788f2cf14fc2099db72c5251e16a39203bedaedcba4e7bc1e9"
+    },
+    {
+      "path": "/workspace/shared/flt-n25-weighted-reindexing/N25F_ExactCountQuotientDegree.lean",
+      "sha256": "f6605960738d8f115334d4e1f594c67400b22d56416f920fe705ca81cb43eda6",
+      "canonical_module": "FLT.Assumptions.MazurProof.N25F_ExactCountQuotientDegree",
+      "canonical_source_byte_identical": true,
+      "olean_sha256": "a0fc6c904afc9808900c233b22d27156b28c880d3405ac09ff0f1e2948039b68"
+    }
+  ],
+  "reused_dependencies": [
+    {
+      "path": "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean",
+      "reused_from": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean",
+      "sha256": "b536b08c43bbfe3d60121419ddb3d526971ea2eb8db91f02aa92ba43ca79d2f3",
+      "byte_identical": true
+    },
+    {
+      "path": "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.olean",
+      "reused_from": "/workspace/shared/flt-n25-divisor-length/check_project/FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.olean",
+      "sha256": "3642efe14078e78174f4dd4c7aa5ef5de0beebaa91c2983b4d50e1806e92ea92",
+      "byte_identical": true
+    }
+  ],
+  "successful_checks": [
+    {
+      "name": "weighted-02",
+      "args": [
+        "-R",
+        "/workspace/shared/flt-n25-weighted-reindexing",
+        "-o",
+        "/workspace/shared/flt-n25-weighted-reindexing/N25F_ExactCountWeightedSum.olean",
+        "/workspace/shared/flt-n25-weighted-reindexing/N25F_ExactCountWeightedSum.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 14.582494444999611,
+      "peak_child_rss_kib": 2814208,
+      "source_sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65"
+    },
+    {
+      "name": "weighted-canonical",
+      "args": [
+        "-R",
+        "/workspace/shared/flt-n25-weighted-reindexing/check_project",
+        "-o",
+        "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountWeightedSum.olean",
+        "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountWeightedSum.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 28.554027059988584,
+      "peak_child_rss_kib": 2814024,
+      "source_sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65"
+    },
+    {
+      "name": "quotient-03",
+      "args": [
+        "-R",
+        "/workspace/shared/flt-n25-weighted-reindexing/check_project",
+        "-o",
+        "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountQuotientDegree.olean",
+        "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountQuotientDegree.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 2.9495720340055414,
+      "peak_child_rss_kib": 2815296,
+      "source_sha256": "f6605960738d8f115334d4e1f594c67400b22d56416f920fe705ca81cb43eda6"
+    },
+    {
+      "name": "audit",
+      "args": [
+        "/workspace/shared/flt-n25-weighted-reindexing/ExactCountAudit.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 2.541618228002335,
+      "peak_child_rss_kib": 2815296,
+      "source_sha256": "0ee4934ed1517d7953d17d025874542be7d242c6b9f2b6de71ace5f0811def8e"
+    }
+  ],
+  "failed_attempts_retained": [
+    "weighted-01: omitted -R when emitting olean",
+    "quotient-01: overlay first-prefix import resolution required dependency in same FLT root",
+    "quotient-02: weight function needed explicitly in rewrite"
+  ],
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "forbidden_axioms": false,
+  "full_FLT_build": "NOT RUN",
+  "actual_W_geometry_import_closure": "NOT RUN",
+  "external_writes": false,
+  "bookkeeping": "/workspace/shared/flt-n25-weighted-reindexing/DEGREE_BOOKKEEPING.md",
+  "bound_note": "Elapsed seconds include shared compiler gate wait. RSS is runner child high-water mark."
+}

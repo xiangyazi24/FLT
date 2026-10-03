@@ -1,0 +1,26 @@
+{
+  "status": "LOCAL_ONLY_PRODUCTION_CANDIDATE_UNCOMPILED_GENERIC_CHECKED",
+  "publication": "No GitHub writes; canceled publication remains blocked",
+  "toolchain": "Lean 4.31.0-rc2 / Mathlib 96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "limits": "shared compiler gate; 1 CPU/thread; 3072 MiB; 60 active seconds",
+  "files": {
+    "KernelSectionLinearAlgebra.lean": "09cff9525bbe410872ac500997a46e628a277d01ba36aae151e9c1883a64083f",
+    "N25F_KernelSectionInjection.UNCOMPILED.lean": "dbfb2bad1d005afda471fbed1ebfd9ad16427bf7369104a72f8f831daf711fd6",
+    "generic-03.json": "cc16befa82097278c34726eef09728c4ee20c392067a0f1e21e9db47f24add2e",
+    "generic-03.log": "2c6b0861311efbf13cefaf272007d00033ed8d942c553ec4d6e5a6b9aedfc7af"
+  },
+  "production_compilation": "NOT RUN: actual-W geometry .olean import closure absent; no full build or downloads attempted",
+  "clean_checked_declarations": [
+    "KernelSectionLinearAlgebra.kernelIntoSubmodule",
+    "KernelSectionLinearAlgebra.kernelIntoSubmodule_injective",
+    "KernelSectionLinearAlgebra.finrank_kernel_le",
+    "KernelSectionLinearAlgebra.deficits_cast",
+    "KernelSectionLinearAlgebra.deficit_cost_identity"
+  ],
+  "open_gaps": [
+    "Full production import elaboration and kernel checking of candidate",
+    "Actual ideal construction adapter was previously source-only, remains so",
+    "Geometric affine sum transport between full atoms, maximal ideals, and height-one spectrum, then affineCost+a+b+c=4n-degD",
+    "General lower bound and downstream effectiveness/Picard finiteness remain unproved"
+  ]
+}

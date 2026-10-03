@@ -1,0 +1,10 @@
+{
+  "name": "generic-final",
+  "args": [
+    "/workspace/shared/flt-n25-coarse-lower-bound/DegreeReindex.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 4.30282272300974,
+  "peak_child_rss_kib": 1719196,
+  "source_sha256": "d020a59200646835c6676a684df565d710311f404cd49c00294e710b3ee93237"
+}

@@ -1,0 +1,4 @@
+import FLT.Assumptions.MazurProof.N25F_ExactCountQuotientDegree
+#print axioms MazurProof.N25F_ExactCountWeightedSum.weighted_sum_eq_of_exact_counts
+#print axioms MazurProof.N25F_ExactCountWeightedSum.weighted_sum_eq_quotient_finrank_of_exact_counts
+#print axioms MazurProof.N25F_ExactCountWeightedSum.binary_weighted_sum_eq_quotient_finrank_of_exact_counts

@@ -1,0 +1,29 @@
+/workspace/shared/flt-n25-total-boundary-cost/TotalBoundaryCostCheck.lean:550:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_BoundarySectionFiltration.unit_mk0_eq`:
+  [Algebra (ZMod 2) L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (ZMod 2) L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-total-boundary-cost/TotalBoundaryCostCheck.lean:565:14: warning: This simp argument is unused:
+  Ne.symm hA
+
+Hint: Omit it from the simp argument list.
+  simp [hA,̵ ̵N̵e̵.̵s̵y̵m̵m̵ ̵h̵A̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-total-boundary-cost/TotalBoundaryCostCheck.lean:675:14: warning: This simp argument is unused:
+  Finsupp.smul_apply
+
+Hint: Omit it from the simp argument list.
+  simp ̵[̵F̵i̵n̵s̵u̵p̵p̵.̵s̵m̵u̵l̵_̵a̵p̵p̵l̵y̵]̵
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-total-boundary-cost/TotalBoundaryCostCheck.lean:693:0: warning: automatically included section variable(s) unused in theorem `MazurProof.N25F_BoundarySectionFiltration.boundary_cancellation_from_DVR`:
+  [Algebra (ZMod 2) L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (ZMod 2) L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'MazurProof.N25F_TotalBoundaryCost.finrank_le_sub_three_boundaries' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

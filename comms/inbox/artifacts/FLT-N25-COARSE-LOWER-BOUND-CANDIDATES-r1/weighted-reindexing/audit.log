@@ -1,0 +1,9 @@
+'MazurProof.N25F_ExactCountWeightedSum.weighted_sum_eq_of_exact_counts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ExactCountWeightedSum.weighted_sum_eq_quotient_finrank_of_exact_counts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_ExactCountWeightedSum.binary_weighted_sum_eq_quotient_finrank_of_exact_counts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

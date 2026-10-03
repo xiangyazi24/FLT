@@ -1,0 +1,10 @@
+{
+  "name": "generic-01",
+  "args": [
+    "/workspace/shared/flt-n25-kernel-section-injection/KernelSectionLinearAlgebra.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 10.030549949005945,
+  "peak_child_rss_kib": 815256,
+  "source_sha256": "834a5f50180bc79f8e1b80ba499f919129c0307aadc278296c6a881dbc76e13e"
+}

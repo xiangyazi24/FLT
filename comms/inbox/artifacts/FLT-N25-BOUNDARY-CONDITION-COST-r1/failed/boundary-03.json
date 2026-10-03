@@ -1,0 +1,10 @@
+{
+  "name": "boundary-03",
+  "args": [
+    "/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 10.547295910000685,
+  "peak_child_rss_kib": 2972012,
+  "source_sha256": "94d4ba379bf2baf2e5f1a1a839979be916a3a988b9fd304a238e8f79f04ee811"
+}

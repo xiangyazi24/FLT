@@ -1,0 +1,10 @@
+{
+  "name": "audit",
+  "args": [
+    "/workspace/shared/flt-n25-weighted-reindexing/ExactCountAudit.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 2.541618228002335,
+  "peak_child_rss_kib": 2815296,
+  "source_sha256": "0ee4934ed1517d7953d17d025874542be7d242c6b9f2b6de71ace5f0811def8e"
+}

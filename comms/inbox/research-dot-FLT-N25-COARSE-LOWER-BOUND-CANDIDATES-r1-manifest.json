@@ -1,0 +1,641 @@
+{
+  "task_id": "FLT-N25-COARSE-LOWER-BOUND-CANDIDATES",
+  "revision": 1,
+  "repository": "xiangyazi24/FLT",
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "dispatch_commit": "9700ca106515f04411193844fbb347d40d86e481",
+  "base_commit": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+  "original_package": "FLT-N25-BOUNDARY-CONDITION-COST@1",
+  "original_payload_sha256": "ffe8493d60a8c47e24767c4ffd2f73f7eeeea60b60a63705f9e9493f4fdd9fc7",
+  "original_entries_unchanged": 18,
+  "production_imports": "NOT RUN",
+  "fresh_kernel_rerun": "NOT RUN",
+  "independent_review": "NOT AVAILABLE; preparation audit included",
+  "manifest_self_hash": "Recorded only in the subsequent publication/readback receipt to avoid self-reference.",
+  "files": [
+    {
+      "path": "comms/ACTIVITY.md",
+      "encoding": "utf-8",
+      "bytes": 39689,
+      "sha256": "b5114fefe2a914d00a9ce215aef80ee198d93a399539785b8f91ab26bfb740d5",
+      "git_blob_sha": "9e74449eb9677bbf6cf3c844c8e97c608edcc208",
+      "role": "append-only-activity"
+    },
+    {
+      "path": "comms/candidates/DegreeReindex.lean",
+      "encoding": "utf-8",
+      "bytes": 1494,
+      "sha256": "d020a59200646835c6676a684df565d710311f404cd49c00294e710b3ee93237",
+      "git_blob_sha": "9bd144b0fe66d8a8ca5487f18d9d3a50fb3e00c7",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/KernelSectionLinearAlgebra.lean",
+      "encoding": "utf-8",
+      "bytes": 2415,
+      "sha256": "09cff9525bbe410872ac500997a46e628a277d01ba36aae151e9c1883a64083f",
+      "git_blob_sha": "9157db79a38c195d360483ac4d236e3e812eaa37",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "encoding": "utf-8",
+      "bytes": 9687,
+      "sha256": "e7573e6240a38a24361242bcc335099b11523dec07dcab24ee613997c0224f70",
+      "git_blob_sha": "01b6e6a4deca2efba58a30f12624e39d6f0f21f8",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "encoding": "utf-8",
+      "bytes": 10928,
+      "sha256": "5bacba498657a48f2de6afb0061e783e1691152beb6d4d3278b3d80e2818b548",
+      "git_blob_sha": "509fe4b9d66e90a508c170f1753a7cee49b91b88",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/N25F_EffectiveAffineIdeal.lean",
+      "encoding": "utf-8",
+      "bytes": 3119,
+      "sha256": "0a77343036bf707a38ab746e0ba5c6f2eb1aec70ac616bbc8d5a7b430e4bf9bd",
+      "git_blob_sha": "bda1152f63ae1c39d7428c06111fc8888b58faa7",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/N25F_ExactCountQuotientDegree.lean",
+      "encoding": "utf-8",
+      "bytes": 1949,
+      "sha256": "f6605960738d8f115334d4e1f594c67400b22d56416f920fe705ca81cb43eda6",
+      "git_blob_sha": "27359df69e7e00058c49d6c5b0daf5cd0be51120",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/N25F_ExactCountWeightedSum.lean",
+      "encoding": "utf-8",
+      "bytes": 2050,
+      "sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65",
+      "git_blob_sha": "a2f6796290cfb59d3e6ec30252ee4b4d162e4a07",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/N25F_KernelSectionInjection.UNCOMPILED.lean",
+      "encoding": "utf-8",
+      "bytes": 9290,
+      "sha256": "dbfb2bad1d005afda471fbed1ebfd9ad16427bf7369104a72f8f831daf711fd6",
+      "git_blob_sha": "a42572aadb0f2f9fe7535c5faac2234fcb239def",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/N25F_ShiftedAffineIdeal.UNCOMPILED.lean",
+      "encoding": "utf-8",
+      "bytes": 2492,
+      "sha256": "c20620e9eaebdefb6efb24ca006b9fc8905e6e1a7c5aaa9d209743ccdcc94917",
+      "git_blob_sha": "fea3357fb1126d046e3b607b00e28ae79fcb12cc",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/candidates/N25F_TotalBoundaryCost.lean",
+      "encoding": "utf-8",
+      "bytes": 1339,
+      "sha256": "de6a5ab438f83b889bfcfc38983860d699fed01eecdaa385cc8f532e56856179",
+      "git_blob_sha": "a38a3647bc8aa566620081cf28a59aa4ff2ce2e9",
+      "role": "new-candidate-unmodified"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/ActualBoundarySectionFiltrationCheck.UNCOMPILED.lean",
+      "encoding": "utf-8",
+      "bytes": 779,
+      "sha256": "79f3d879e7ebac9c68b205f3227b01b011923a49a4ece5d651bb221f9f712411",
+      "git_blob_sha": "fdc07e0641bad0b282cb5aa595656dac8934fccf",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/BoundaryDVRAssembly.lean.part",
+      "encoding": "utf-8",
+      "bytes": 1287,
+      "sha256": "9b36c07b1b8384cdee275e0f9776b936ca904155193654b5d2fc0c9cab0e4a71",
+      "git_blob_sha": "3d479778532049a4e55569965af24fba7daa4e10",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/BoundarySectionFiltrationFamilyCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 31093,
+      "sha256": "717d57d634ac89d102fbbac71c3d1499eafb3c6a4e236912888cec8b72112800",
+      "git_blob_sha": "85d4f4eb47ed7db9b4119a3875c4e5d180a5a145",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/boundary-04.json",
+      "encoding": "utf-8",
+      "bytes": 314,
+      "sha256": "fd23422bc2a24b30c4d98ada8364980c31d2c3212d487d415382db7ead4254ec",
+      "git_blob_sha": "3e1887f2b3687dad5bc5ebb451727b6a1f83e3b2",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/boundary-04.log",
+      "encoding": "utf-8",
+      "bytes": 2898,
+      "sha256": "c6c036a76b44130ec8d0904b2c6452da82301dd7587a7fe5fd435a4a49be9ec9",
+      "git_blob_sha": "02be0cb2eaa03cfbf7827ecd234f5335a1810055",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-01.json",
+      "encoding": "utf-8",
+      "bytes": 313,
+      "sha256": "051b9f6ecff7a0730598e6a600042f31226994010e75288b2f7c154d209136e6",
+      "git_blob_sha": "206459022fc93130cb42fa696c004a528075e2a2",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-01.log",
+      "encoding": "utf-8",
+      "bytes": 10298,
+      "sha256": "8c7f1508a71d81166a565f59455a4bfdaa10286b375bc8f40791705be9ec1ed3",
+      "git_blob_sha": "1af7770b5101a18af7169b3fbb5bd2fa7a2c8e2b",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-02.json",
+      "encoding": "utf-8",
+      "bytes": 314,
+      "sha256": "5952445aecb443aa1120d69261423b67dff5a437d211bf420829cd82b181d97e",
+      "git_blob_sha": "795d5aeb192abc0105e2e066db10256cadfccf41",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-02.log",
+      "encoding": "utf-8",
+      "bytes": 2829,
+      "sha256": "79fbf5ce8fd09b3dbf56e09ab69b0940cc0c512d3e81a5f76acd55726c219f96",
+      "git_blob_sha": "1a8b79eb217d06772aeb3ca2821df94242f1b5a2",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-03.json",
+      "encoding": "utf-8",
+      "bytes": 314,
+      "sha256": "7867a154308825883878e70eadd0b97a78fc81d86c50d0c424a77f9f2ff8b91a",
+      "git_blob_sha": "630c38f98042ff74714c8bdc7ad3c201329ae324",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-03.log",
+      "encoding": "utf-8",
+      "bytes": 5164,
+      "sha256": "cfe38cda0ccb4530cf7ac83d7e7394bb3cadb3980aee8c6f7048f22e911c2e11",
+      "git_blob_sha": "cee46a5d79e0e4f030ffc4a498ff32fbdaa8b7db",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/inputs/BinaryResidueCancellationCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 4814,
+      "sha256": "dd88968ea17e258d7f49ac6ed15ed2d99ddf4155cd10be11cfc2b0f091e9a246",
+      "git_blob_sha": "2a6c082cf92f5257eadce537bdf15a3411e595d5",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/inputs/SectionFinitenessFamilyInput.lean",
+      "encoding": "utf-8",
+      "bytes": 17241,
+      "sha256": "a3e87a3eee2c6be8b211b710469714196eaf2ca74e72058b42ddb54b6dcf5d9f",
+      "git_blob_sha": "1ea3f1bfea4a0d1c8a9db6ee3078022370e6d32d",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/make_family.py",
+      "encoding": "utf-8",
+      "bytes": 3595,
+      "sha256": "361524a9cbd39966dc7482d6d80117510c575191c1e3c7c385c2518f3262547d",
+      "git_blob_sha": "7c29eae60cdc13e8249675da61e37aa6ee82dd48",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 885,
+      "sha256": "5060a59ec98b9cf7483dd536c7fa94adf4ee0c5503be25fa0a7edb5974762c81",
+      "git_blob_sha": "44dc5fd5e8e11299c9320a767af0a9e35ad4fcd2",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/CHECK_AUDIT.json",
+      "encoding": "utf-8",
+      "bytes": 11828,
+      "sha256": "d67075d7df0e32bc9dc4e0e9abb899cad1ef26ac970ba2cb6c0c8e33a326f72b",
+      "git_blob_sha": "8bafd93a4d6b5ba79619253e3c20cd5c20ff68ba",
+      "role": "source-receipt-axiom-audit"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/DELIVERY_SOURCE_AUDIT.md",
+      "encoding": "utf-8",
+      "bytes": 3936,
+      "sha256": "e43b1f2415d49cab9b507837e54555f4590ef21dca6baa3f143a0e3858930520",
+      "git_blob_sha": "07777300be4a308fc088a7f981dbfa9561e4c683",
+      "role": "preparer-audit-not-independent-not-kernel"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/SOURCE_PROVENANCE.json",
+      "encoding": "utf-8",
+      "bytes": 9506,
+      "sha256": "d3aacd15a07b8a1af0b92c335147971c07158f04e07fbfbc006324a654b294d1",
+      "git_blob_sha": "8b30bd14031b768cfbf41057eded1e366cff41ba",
+      "role": "source-pin-and-producer-map"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/coarse-lower-bound/MANIFEST.json",
+      "encoding": "utf-8",
+      "bytes": 472,
+      "sha256": "c6ac0aef29f14f6dce1bcdf8fc7f80aba88d9a287bb4d550856cc9ff5d86e6b2",
+      "git_blob_sha": "a18ab05da20faaf10b580951f498610337431a02",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/coarse-lower-bound/RESULT.md",
+      "encoding": "utf-8",
+      "bytes": 7006,
+      "sha256": "125da446e1256b80b1f5d60d592023441d3101525b7943ded56aad49c81871e7",
+      "git_blob_sha": "c0dcfa797eacf2357d2789755de0388e0d9c646f",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/coarse-lower-bound/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 143,
+      "sha256": "8b9cbcd6a8775bb3ad999ef3aafd2eda96783e2dca754d3904578e4691df359e",
+      "git_blob_sha": "cc02ca4e0811637c2121fca3aa3eb82eeb8f623f",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/coarse-lower-bound/generic-final.json",
+      "encoding": "utf-8",
+      "bytes": 286,
+      "sha256": "79c8d4f2f940470d49d530b2ed5cca8f9747ef5e95798960dcdd9c7cbc1ea91d",
+      "git_blob_sha": "335ab42f83ee0a856c70d217d0a56bb6878325a1",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/coarse-lower-bound/generic-final.log",
+      "encoding": "utf-8",
+      "bytes": 143,
+      "sha256": "8b9cbcd6a8775bb3ad999ef3aafd2eda96783e2dca754d3904578e4691df359e",
+      "git_blob_sha": "cc02ca4e0811637c2121fca3aa3eb82eeb8f623f",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/coarse-lower-bound/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 880,
+      "sha256": "e4e939dad7fc1cb59d8673ad61bfa73ce413e16d0c109cba4f49c0a0a6ddbbae",
+      "git_blob_sha": "919b3ff6abe45868d8c1ceaf7151be791bc98e85",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/MANIFEST.json",
+      "encoding": "utf-8",
+      "bytes": 1572,
+      "sha256": "2b1cf1f439827b561e2d92e87f23432985b53274f4c0534c2bf0a36e3dcc5a34",
+      "git_blob_sha": "48031d8814cadbcc2fd835499ff9ee61b23b8503",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/RESULT.md",
+      "encoding": "utf-8",
+      "bytes": 3293,
+      "sha256": "7e752d3c12b7824bf6fd13eb81374316043b86e4d56775d08418108f1bc9e106",
+      "git_blob_sha": "c6e4bb0d2ae6afef31f5215596e4b218eef8fb59",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/failed/generic-01.json",
+      "encoding": "utf-8",
+      "bytes": 303,
+      "sha256": "411bd5b25c396e97996df73da0d9fb153753b1276278f9c00418ddba123af979",
+      "git_blob_sha": "6ee024f161249fc11626aefb0ed5f80f46a95ed1",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/failed/generic-01.log",
+      "encoding": "utf-8",
+      "bytes": 243,
+      "sha256": "ab33a1e6fc90c64273a742e541e35bc9de2b70769e7397de8a4091803b662e78",
+      "git_blob_sha": "74f8bc511fe83f781c6d78a8ad8a3e626f1d95d1",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/failed/generic-02.json",
+      "encoding": "utf-8",
+      "bytes": 304,
+      "sha256": "9a5a4cfaf06a401ae05349c8030b135615e6844648bd6d473fc7e4fd442bde55",
+      "git_blob_sha": "1ad34e2b818968fe2a0bc3550e9f7b7b82cce509",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/failed/generic-02.log",
+      "encoding": "utf-8",
+      "bytes": 833,
+      "sha256": "311cd345e23007c2931f2f50cef5df14fee4b892544f2252025751b9b1d1915a",
+      "git_blob_sha": "d6a7d908722594bc835c942b783d3ffe1df8a934",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/generic-03.json",
+      "encoding": "utf-8",
+      "bytes": 304,
+      "sha256": "cc16befa82097278c34726eef09728c4ee20c392067a0f1e21e9db47f24add2e",
+      "git_blob_sha": "78192cde528573d3ea94cf62377e2d8733b5a561",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/generic-03.log",
+      "encoding": "utf-8",
+      "bytes": 508,
+      "sha256": "2c6b0861311efbf13cefaf272007d00033ed8d942c553ec4d6e5a6b9aedfc7af",
+      "git_blob_sha": "fae55adb0deb4fa45aad2daf0d6ce754a53bf1da",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/kernel-section-injection/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 886,
+      "sha256": "3a1cd7a9271d6941de24d1ab90bc5fb2106fc6177d9269b5060f017183749478",
+      "git_blob_sha": "e2edbf08a7667a1fbee92f984437d3ba65ba4199",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/EffectiveAffineIdealCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 10648,
+      "sha256": "06e2a492a323b746b057d0038de2a0e53d6c4ee24b90ff9ae45617d733c7a675",
+      "git_blob_sha": "77c060544944cad529b32e5ad8e0f163637ed989",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/RESULT.md",
+      "encoding": "utf-8",
+      "bytes": 2609,
+      "sha256": "9bb077612b2008be924de944e3e9517c31ee24a7f876f0ca44f95431551eabb9",
+      "git_blob_sha": "dd29630e12bb196c8a6ac9c86d8106de94b4e94d",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/TotalBoundaryCostCheck.lean",
+      "encoding": "utf-8",
+      "bytes": 32626,
+      "sha256": "78ab7c566acb4be609af0afb6974f378740351619f79e51ae6cfc8be17bfc07d",
+      "git_blob_sha": "2dfa178439f632ed2f3b2a027e1e2731de8b128d",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/failed/ideal-01.json",
+      "encoding": "utf-8",
+      "bytes": 296,
+      "sha256": "49d92b1a3cd062c54644137b839c40e4e61c2fc4bf6e0c52e6eeae157a655817",
+      "git_blob_sha": "fe74dd6e022fa38bc1da6396a1e7a4b4cd21129c",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/failed/ideal-01.log",
+      "encoding": "utf-8",
+      "bytes": 2382,
+      "sha256": "87209d792aaa308fa6c5bc715844761a2a405060b6cec60e7015d24ff22414fb",
+      "git_blob_sha": "5a0844cb2c8b9328a5896656de4f823a53932b7d",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/ideal-02.json",
+      "encoding": "utf-8",
+      "bytes": 295,
+      "sha256": "5415b9fe646953fe02484fa23a91250ccde22f885d717061540b484b9ec92071",
+      "git_blob_sha": "c53da6837590c3e67babef74e0252c07dc570b29",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/ideal-02.log",
+      "encoding": "utf-8",
+      "bytes": 558,
+      "sha256": "3895b63fe624dfb5f7afb5b7a02d6948dbd3071e3ce25a24064c11b601b00586",
+      "git_blob_sha": "1f292556202353bce0e37acdf721233ed8080ac2",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/make_check.py",
+      "encoding": "utf-8",
+      "bytes": 2341,
+      "sha256": "ba1863be87a8d367afcc7c594ce6cbaae31e6f7d1156b2beda338714a63d7739",
+      "git_blob_sha": "513cf48beb8b3202e619494d8d282c0c6ed9c169",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 881,
+      "sha256": "e8d3a37d1082fc0bf36036a6fc88e045d139f43f00ca9d45a64fd4d4c1f26c6c",
+      "git_blob_sha": "8abeaa270ea3a70b377391652f59acd927899707",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/total-01.json",
+      "encoding": "utf-8",
+      "bytes": 292,
+      "sha256": "bec1ac0503e05ac279aa8084033c4bdac469e939c6aad0502cf613b5e9ed6d1b",
+      "git_blob_sha": "b12e4e709df7412a588311ac122364da09fa7e09",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/total-01.log",
+      "encoding": "utf-8",
+      "bytes": 1758,
+      "sha256": "1ef3f03d9773f4b2ebd5ec8ac50d81627b4788ef77994c86137a2175173c436f",
+      "git_blob_sha": "7d60eb7545644a784eca8ebfc6b581814c59b89f",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/total-boundary-cost/validation.json",
+      "encoding": "utf-8",
+      "bytes": 1473,
+      "sha256": "58350fb7cff66204232bf0b5e3797f26f2f94003ef993dd0efb5b1c67c0eeba6",
+      "git_blob_sha": "9a09def290502c7c99038cefdbde1de520293b04",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/DEGREE_BOOKKEEPING.md",
+      "encoding": "utf-8",
+      "bytes": 4992,
+      "sha256": "38fd1b85dcf620fa7cf4d65347f20056f3e8df16cca7b4316586066159320443",
+      "git_blob_sha": "6c836124ef57aef2654f6dd22f3a4a842c34faf0",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/ExactCountAudit.lean",
+      "encoding": "utf-8",
+      "bytes": 357,
+      "sha256": "0ee4934ed1517d7953d17d025874542be7d242c6b9f2b6de71ace5f0811def8e",
+      "git_blob_sha": "68f0bc0d6cae575cb87cfe7e5d8293791a5ad9d9",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/RECEIPT.json",
+      "encoding": "utf-8",
+      "bytes": 4845,
+      "sha256": "85165b3926933c8d7e794f5743e318541574a624d3159d6308a02db6644662ba",
+      "git_blob_sha": "d8fb01b33e52a9632362709c407d71e77edd5b3d",
+      "role": "historical-stage-report"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/audit.json",
+      "encoding": "utf-8",
+      "bytes": 282,
+      "sha256": "d65fa5a9e8c5d67658d4ffd33effc9b4b1a51c3fe28b019192427fe080f3f6b7",
+      "git_blob_sha": "97671fa0eb760830c000d77f0a1914c0d2448694",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/audit.log",
+      "encoding": "utf-8",
+      "bytes": 440,
+      "sha256": "9ab3ec7ad019b751f6f19a6da408f2aa154135502f7bc4956076a50b6d622550",
+      "git_blob_sha": "c4aabc1727c1d3ba61c6ffa8270e77057e9893bb",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/check_all.sh",
+      "encoding": "utf-8",
+      "bytes": 565,
+      "sha256": "510fd3bf72e3cf2480b026b35b347523dba8a270993dd95ec645d43e8441ed7d",
+      "git_blob_sha": "0d109b01b403911277c737a1eac263215534cf75",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/failed/quotient-01.json",
+      "encoding": "utf-8",
+      "bytes": 560,
+      "sha256": "f913bc51f25e2a1d922639730f98899ad54e0aee1e8e9fba4a8248dcf42ab3cb",
+      "git_blob_sha": "0e1a9ac91b7feb642f6ed006d0b3832f3f04164e",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/failed/quotient-01.log",
+      "encoding": "utf-8",
+      "bytes": 345,
+      "sha256": "c4a4ac530cbc08a05d7828af4805e208b01907700dd520aec0712291ebf63365",
+      "git_blob_sha": "65d285e7805e9c158e1c790143a6239c3c7d6abc",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/failed/quotient-02.json",
+      "encoding": "utf-8",
+      "bytes": 561,
+      "sha256": "94457c328ab5605f9b29ad45e65672ec3a93f4ea739f997bb9b5282ef6d77ff1",
+      "git_blob_sha": "1b72375e0cfc935f587b1dfa82026c8c711773c1",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/failed/quotient-02.log",
+      "encoding": "utf-8",
+      "bytes": 911,
+      "sha256": "61659a626cf874f9302b7fecb7b41fe3853e75b36015f62d56aa3a5b9f812851",
+      "git_blob_sha": "ba58c809d48170fda3d46ebdef1926f81ec96bc7",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/failed/weighted-01.json",
+      "encoding": "utf-8",
+      "bytes": 395,
+      "sha256": "560faf6baddacc437e2fefe4c5a73bc06d2287ec5be767d0ac16d0accf270d94",
+      "git_blob_sha": "33d99b7c53efe35e7404010f329ff3ed1af2e245",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/failed/weighted-01.log",
+      "encoding": "utf-8",
+      "bytes": 170,
+      "sha256": "4e16553df93a72523d50e476a2fb1edbc29a57740fc7678ad67fb6555c5b9451",
+      "git_blob_sha": "284701224acd4d5479973f54b0a68720387fde79",
+      "role": "failed-attempt-not-success"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/quotient-03.json",
+      "encoding": "utf-8",
+      "bytes": 561,
+      "sha256": "1a2fd8f527bc8757e2d9231d28e30d0fcb9ac3489d7ec78a3f5b326dac7802bd",
+      "git_blob_sha": "712dc005b3008cc66194d935125718500057b3a1",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/quotient-03.log",
+      "encoding": "utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/run_check.py",
+      "encoding": "utf-8",
+      "bytes": 881,
+      "sha256": "de73dcde3e43e4db2762048b76baafc3125db1ff4bd40658778aa9c0c936bd58",
+      "git_blob_sha": "382b57c6df10ae3c32faa66bfa4849a6536433d8",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/weighted-02.json",
+      "encoding": "utf-8",
+      "bytes": 459,
+      "sha256": "3f8ab274c2c38f74b245e832904071e22adc237e3aefd522e8b323aee2ed974b",
+      "git_blob_sha": "0d7b4b3a2c4d52dde57f9677df5d0824f40ff348",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/weighted-02.log",
+      "encoding": "utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/weighted-canonical.json",
+      "encoding": "utf-8",
+      "bytes": 562,
+      "sha256": "69ae70328bacd0d093d63aa48cb2bacec07d1a697b98e374bd246b8e602af7d1",
+      "git_blob_sha": "c16dce9a6b974ad608e4df0e8e57fe9bb1aa90ff",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1/weighted-reindexing/weighted-canonical.log",
+      "encoding": "utf-8",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "git_blob_sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "role": "checked-source-or-receipt"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-BOUNDARY-CONDITION-COST-r1-manifest.json",
+      "encoding": "utf-8",
+      "bytes": 3426,
+      "sha256": "fd82268743f7c2634486d7b7b1c5c21b21aaba5ef77049eb3dec21e98545dd28",
+      "git_blob_sha": "5e78315da4a167c8ada3aa329135a559b75329bf",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-BOUNDARY-CONDITION-COST-r1.md",
+      "encoding": "utf-8",
+      "bytes": 2801,
+      "sha256": "6a11833fb0dabece60a384d72cef1c02715f8c0763621cd14c59cc27f37f31c2",
+      "git_blob_sha": "70a297eee350563dd1378a18ec38dda72f09ff76",
+      "role": "original-boundary-r1-byte-preserved"
+    },
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-COARSE-LOWER-BOUND-CANDIDATES-r1.md",
+      "encoding": "utf-8",
+      "bytes": 5453,
+      "sha256": "b918673761ba7cfaa75b1c2433eb2a298e946205846ca8802b0e7a648680fb5c",
+      "git_blob_sha": "efe602696db4626937c56b79c0d60134566c2bca",
+      "role": "current-result-envelope"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "weighted-canonical",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-weighted-reindexing/check_project",
+    "-o",
+    "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountWeightedSum.olean",
+    "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountWeightedSum.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 28.554027059988584,
+  "peak_child_rss_kib": 2814024,
+  "source_sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65"
+}

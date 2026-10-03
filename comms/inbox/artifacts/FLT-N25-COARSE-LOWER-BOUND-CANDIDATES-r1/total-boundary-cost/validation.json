@@ -1,0 +1,32 @@
+{
+  "published_head": "20f43b99f3a906637e369439c0eab2e78ed1d1b0",
+  "publication": "BLOCKED; no GitHub write attempted for this unit",
+  "predecessor": "unpublished 8-audit boundary-condition-cost package",
+  "checks": [
+    {
+      "name": "total-01",
+      "args": [
+        "/workspace/shared/flt-n25-total-boundary-cost/TotalBoundaryCostCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 34.28861195700301,
+      "peak_child_rss_kib": 2946580,
+      "source_sha256": "78ab7c566acb4be609af0afb6974f378740351619f79e51ae6cfc8be17bfc07d"
+    },
+    {
+      "name": "ideal-02",
+      "args": [
+        "/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean"
+      ],
+      "exit_code": 0,
+      "seconds": 4.244995057000779,
+      "peak_child_rss_kib": 2811820,
+      "source_sha256": "06e2a492a323b746b057d0038de2a0e53d6c4ee24b90ff9ae45617d733c7a675"
+    }
+  ],
+  "production_imports": "NOT RUN",
+  "assumptions": {
+    "effective_ideal": "CommRing R, IsDedekindDomain R, Field K, Algebra R K, IsFractionRing R K. Nonnegative/ nonpositive divisor coefficients only; existence and membership conclusions are proved.",
+    "total_boundary": "Genuine bounded-pole section carrier, principal minimum law, principal degree zero and injectivity, binary leading-order cancellation at the three points. The previous checked DVR producer discharges cancellation; the named production source calls the previous actual three-boundary candidate."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "quotient-01",
+  "args": [
+    "-R",
+    "/workspace/shared/flt-n25-weighted-reindexing/check_project",
+    "-o",
+    "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountQuotientDegree.olean",
+    "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountQuotientDegree.lean"
+  ],
+  "exit_code": 1,
+  "seconds": 2.2826411049900344,
+  "peak_child_rss_kib": 890056,
+  "source_sha256": "53a61797486faa0ea261428985e53d013fba02e02aa237ae6510e77c2eca596a"
+}

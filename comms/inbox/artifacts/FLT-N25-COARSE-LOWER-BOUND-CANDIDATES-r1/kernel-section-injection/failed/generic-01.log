@@ -1,0 +1,1 @@
+/workspace/shared/flt-n25-kernel-section-injection/KernelSectionLinearAlgebra.lean:1:0: error: object file '/workspace/shared/lean-feedback/mathlib/.lake/build/lib/lean/Mathlib/Tactic/Omega.olean' of module Mathlib.Tactic.Omega does not exist

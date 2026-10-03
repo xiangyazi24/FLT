@@ -1,0 +1,352 @@
+{
+  "historical_audited_declarations": 22,
+  "checks": [
+    {
+      "stage": "boundary-condition-cost",
+      "check": "boundary-04",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "BoundarySectionFiltrationFamilyCheck.lean",
+      "source_sha256": "717d57d634ac89d102fbbac71c3d1499eafb3c6a4e236912888cec8b72112800",
+      "scope": "bounded-family-with-DVR-producer",
+      "receipt": {
+        "name": "boundary-04",
+        "args": [
+          "/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 10.702762292989064,
+        "peak_child_rss_kib": 2972808,
+        "source_sha256": "717d57d634ac89d102fbbac71c3d1499eafb3c6a4e236912888cec8b72112800"
+      },
+      "axiom_audits": [
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.boundary_cancellation_from_DVR",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.boundary_multiplicity_cost_from_DVR",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.fullRiemannRochSpace25Two_sub_boundary_le",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.mem_fullRiemannRochSpace25Two_sub_boundary_iff",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.boundary_principal_eq_neg_of_not_mem",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.sub_mem_fullRiemannRochSpace25Two_sub_boundary",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.finrank_fullRiemannRochSpace25Two_le_sub_boundary_add_one",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_BoundarySectionFiltration.finrank_fullRiemannRochSpace25Two_le_sub_boundary_multiple",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ],
+      "fresh_kernel_rerun": "NOT RUN"
+    },
+    {
+      "stage": "total-boundary-cost",
+      "check": "ideal-02",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "EffectiveAffineIdealCheck.lean",
+      "source_sha256": "06e2a492a323b746b057d0038de2a0e53d6c4ee24b90ff9ae45617d733c7a675",
+      "scope": "generic-Dedekind-harness",
+      "receipt": {
+        "name": "ideal-02",
+        "args": [
+          "/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 4.244995057000779,
+        "peak_child_rss_kib": 2811820,
+        "source_sha256": "06e2a492a323b746b057d0038de2a0e53d6c4ee24b90ff9ae45617d733c7a675"
+      },
+      "axiom_audits": [
+        {
+          "declaration": "MazurProof.N25F_EffectiveAffineIdeal.exists_ideal_with_exact_counts",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_EffectiveAffineIdeal.ideal_eq_of_exact_counts",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_EffectiveAffineIdeal.exists_ideal_for_nonpositive_divisor",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ],
+      "fresh_kernel_rerun": "NOT RUN"
+    },
+    {
+      "stage": "total-boundary-cost",
+      "check": "total-01",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "TotalBoundaryCostCheck.lean",
+      "source_sha256": "78ab7c566acb4be609af0afb6974f378740351619f79e51ae6cfc8be17bfc07d",
+      "scope": "bounded-section-family",
+      "receipt": {
+        "name": "total-01",
+        "args": [
+          "/workspace/shared/flt-n25-total-boundary-cost/TotalBoundaryCostCheck.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 34.28861195700301,
+        "peak_child_rss_kib": 2946580,
+        "source_sha256": "78ab7c566acb4be609af0afb6974f378740351619f79e51ae6cfc8be17bfc07d"
+      },
+      "axiom_audits": [
+        {
+          "declaration": "MazurProof.N25F_TotalBoundaryCost.finrank_le_sub_three_boundaries",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ],
+      "fresh_kernel_rerun": "NOT RUN"
+    },
+    {
+      "stage": "weighted-reindexing",
+      "check": "weighted-canonical",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "N25F_ExactCountWeightedSum.lean",
+      "source_sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65",
+      "scope": "exact-named-module-overlay",
+      "receipt": {
+        "name": "weighted-canonical",
+        "args": [
+          "-R",
+          "/workspace/shared/flt-n25-weighted-reindexing/check_project",
+          "-o",
+          "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountWeightedSum.olean",
+          "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountWeightedSum.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 28.554027059988584,
+        "peak_child_rss_kib": 2814024,
+        "source_sha256": "e72608c5003e73655bc6291450c3c591b5cf7c6abdb3960ce3d6855f18089e65"
+      },
+      "axiom_audits": [],
+      "fresh_kernel_rerun": "NOT RUN"
+    },
+    {
+      "stage": "weighted-reindexing",
+      "check": "quotient-03",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "N25F_ExactCountQuotientDegree.lean",
+      "source_sha256": "f6605960738d8f115334d4e1f594c67400b22d56416f920fe705ca81cb43eda6",
+      "scope": "exact-named-module-overlay",
+      "receipt": {
+        "name": "quotient-03",
+        "args": [
+          "-R",
+          "/workspace/shared/flt-n25-weighted-reindexing/check_project",
+          "-o",
+          "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountQuotientDegree.olean",
+          "/workspace/shared/flt-n25-weighted-reindexing/check_project/FLT/Assumptions/MazurProof/N25F_ExactCountQuotientDegree.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 2.9495720340055414,
+        "peak_child_rss_kib": 2815296,
+        "source_sha256": "f6605960738d8f115334d4e1f594c67400b22d56416f920fe705ca81cb43eda6"
+      },
+      "axiom_audits": [],
+      "fresh_kernel_rerun": "NOT RUN"
+    },
+    {
+      "stage": "weighted-reindexing",
+      "check": "audit",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "ExactCountAudit.lean",
+      "source_sha256": "0ee4934ed1517d7953d17d025874542be7d242c6b9f2b6de71ace5f0811def8e",
+      "scope": "exact-named-module-overlay-axiom-audit",
+      "receipt": {
+        "name": "audit",
+        "args": [
+          "/workspace/shared/flt-n25-weighted-reindexing/ExactCountAudit.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 2.541618228002335,
+        "peak_child_rss_kib": 2815296,
+        "source_sha256": "0ee4934ed1517d7953d17d025874542be7d242c6b9f2b6de71ace5f0811def8e"
+      },
+      "axiom_audits": [
+        {
+          "declaration": "MazurProof.N25F_ExactCountWeightedSum.weighted_sum_eq_of_exact_counts",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_ExactCountWeightedSum.weighted_sum_eq_quotient_finrank_of_exact_counts",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "MazurProof.N25F_ExactCountWeightedSum.binary_weighted_sum_eq_quotient_finrank_of_exact_counts",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ],
+      "fresh_kernel_rerun": "NOT RUN"
+    },
+    {
+      "stage": "kernel-section-injection",
+      "check": "generic-03",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "KernelSectionLinearAlgebra.lean",
+      "source_sha256": "09cff9525bbe410872ac500997a46e628a277d01ba36aae151e9c1883a64083f",
+      "scope": "model-independent-generic-only",
+      "receipt": {
+        "name": "generic-03",
+        "args": [
+          "/workspace/shared/flt-n25-kernel-section-injection/KernelSectionLinearAlgebra.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 12.227104819990927,
+        "peak_child_rss_kib": 2137860,
+        "source_sha256": "09cff9525bbe410872ac500997a46e628a277d01ba36aae151e9c1883a64083f"
+      },
+      "axiom_audits": [
+        {
+          "declaration": "KernelSectionLinearAlgebra.kernelIntoSubmodule",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "KernelSectionLinearAlgebra.kernelIntoSubmodule_injective",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "KernelSectionLinearAlgebra.finrank_kernel_le",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "KernelSectionLinearAlgebra.deficits_cast",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "KernelSectionLinearAlgebra.deficit_cost_identity",
+          "axioms": [
+            "propext",
+            "Classical.choice",
+            "Quot.sound"
+          ]
+        }
+      ],
+      "fresh_kernel_rerun": "NOT RUN"
+    },
+    {
+      "stage": "coarse-lower-bound",
+      "check": "generic-final",
+      "status": "PASS_HISTORICAL_RECEIPT_HASH_RECHECKED",
+      "source_file": "DegreeReindex.lean",
+      "source_sha256": "d020a59200646835c6676a684df565d710311f404cd49c00294e710b3ee93237",
+      "scope": "model-independent-generic-only",
+      "receipt": {
+        "name": "generic-final",
+        "args": [
+          "/workspace/shared/flt-n25-coarse-lower-bound/DegreeReindex.lean"
+        ],
+        "exit_code": 0,
+        "seconds": 4.30282272300974,
+        "peak_child_rss_kib": 1719196,
+        "source_sha256": "d020a59200646835c6676a684df565d710311f404cd49c00294e710b3ee93237"
+      },
+      "axiom_audits": [
+        {
+          "declaration": "DegreeReindex.sum_neg_reindex",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        },
+        {
+          "declaration": "DegreeReindex.coarse_bound",
+          "axioms": [
+            "propext",
+            "Quot.sound"
+          ]
+        }
+      ],
+      "fresh_kernel_rerun": "NOT RUN"
+    }
+  ],
+  "audit_kind": "fresh receipt/content audit, not a new Lean invocation"
+}

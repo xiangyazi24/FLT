@@ -1,0 +1,24 @@
+
+variable (R : Type*) [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+  [Algebra R L] [IsFractionRing R L]
+variable (e : IsLocalRing.ResidueField R ≃+* ZMod 2)
+variable (hcoeff : ∀ f : Additive Lˣ, principal f P = WithZero.log (Ring.ordFrac R (f.toMul : L)))
+include e hcoeff in
+theorem boundary_cancellation_from_DVR
+    (a b : L) (ha : a ≠ 0) (hb : b ≠ 0) (hab : a ≠ b)
+    (h : principal (Additive.ofMul (Units.mk0 a ha)) P = principal (Additive.ofMul (Units.mk0 b hb)) P) :
+    principal (Additive.ofMul (Units.mk0 b hb)) P <
+      principal (Additive.ofMul (Units.mk0 (a-b) (sub_ne_zero.mpr hab))) P := by
+  simp only [hcoeff] at h ⊢
+  exact log_ordFrac_sub_gt_of_log_eq e a b ha hb hab h
+
+include e hcoeff hzero hinj in
+theorem boundary_multiplicity_cost_from_DVR (D : C.Divisor) (k : ℕ) :
+    Module.finrank (ZMod 2) (fullRiemannRochSpace25Two C principal hmin D) ≤
+      Module.finrank (ZMod 2) (fullRiemannRochSpace25Two C principal hmin
+        (D - (k : ℤ) • Finsupp.single P 1)) + k := by
+  exact finrank_fullRiemannRochSpace25Two_le_sub_boundary_multiple C principal hmin P
+    (boundary_cancellation_from_DVR C principal P R e hcoeff) hzero hinj D k
+
+#print axioms boundary_cancellation_from_DVR
+#print axioms boundary_multiplicity_cost_from_DVR

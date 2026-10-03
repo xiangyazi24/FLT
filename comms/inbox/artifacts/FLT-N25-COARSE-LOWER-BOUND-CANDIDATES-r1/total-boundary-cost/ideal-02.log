@@ -1,0 +1,10 @@
+/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean:132:12: warning: `mul_le_mul_right'` has been deprecated: Use `mul_le_mul_left` instead
+'MazurProof.N25F_EffectiveAffineIdeal.exists_ideal_with_exact_counts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_EffectiveAffineIdeal.ideal_eq_of_exact_counts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_EffectiveAffineIdeal.exists_ideal_for_nonpositive_divisor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

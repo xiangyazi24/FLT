@@ -1,0 +1,2 @@
+'DegreeReindex.sum_neg_reindex' depends on axioms: [propext, Quot.sound]
+'DegreeReindex.coarse_bound' depends on axioms: [propext, Quot.sound]

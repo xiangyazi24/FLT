@@ -1,0 +1,180 @@
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:545:46: error: Application type mismatch: The argument
+  add_le_add_right (h A) ?m.138
+has type
+  ?m.138 + D A ≤ ?m.138 + E A
+but is expected to have type
+  D A + (principal (Additive.ofMul (Units.mk0 f hn))) A ≤ E A + (principal (Additive.ofMul (Units.mk0 f hn))) A
+in the application
+  le_trans (hf A) (add_le_add_right (h A) ?m.138)
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:546:42: error(lean.unknownIdentifier): Unknown identifier `K`
+
+Note: It is not possible to treat `K` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:557:20: error(lean.unknownIdentifier): Unknown identifier `fullBoundaryAtomOfTag`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:561:2: error: unsolved goals
+case neg
+L : Type u_1
+inst✝¹ : Field L
+inst✝ : Algebra (ZMod 2) L
+C : ClosedPointGrading
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+P : C.Atom
+D : C.Divisor
+A : C.Atom
+hA : ¬A = sorry
+⊢ 0 ≤ (Finsupp.single P 1) A
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:559:34: warning: This simp argument is unused:
+  Finsupp.single_eq_same
+
+Hint: Omit it from the simp argument list.
+  simp only [Finsupp.sub_apply,̵ ̵F̵i̵n̵s̵u̵p̵p̵.̵s̵i̵n̵g̵l̵e̵_̵e̵q̵_̵s̵a̵m̵e̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:561:10: warning: This simp argument is unused:
+  hA
+
+Hint: Omit it from the simp argument list.
+  simp [h̵A̵,̵ ̵Ne.symm hA]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:564:19: error(lean.unknownIdentifier): Unknown identifier `K`
+
+Note: It is not possible to treat `K` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:572:16: error(lean.unknownIdentifier): Unknown identifier `unit_mk0_eq`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:578:8: error(lean.unknownIdentifier): Unknown identifier `unit_mk0_eq`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:583:8: error(lean.unknownIdentifier): Unknown identifier `unit_mk0_eq`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:591:19: error(lean.unknownIdentifier): Unknown identifier `K`
+
+Note: It is not possible to treat `K` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:600:6: error(lean.unknownIdentifier): Unknown identifier `unit_mk0_eq`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:595:28: error: unsolved goals
+case inr
+L : Type u_1
+inst✝¹ : Field L
+inst✝ : Algebra (ZMod 2) L
+C : ClosedPointGrading
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+P : C.Atom
+D : C.Divisor
+f : Additive sorry
+hnot : sorry ∉ fullRiemannRochSpace25Two C principal hmin (D - Finsupp.single P 1)
+hn : ¬-D P < (principal sorry) P
+hf0 : sorry ≠ 0
+hb : ∀ (A : C.Atom), 0 ≤ D A + (principal (Additive.ofMul (Units.mk0 sorry hf0))) A
+hp : 0 ≤ D P + (principal (Additive.ofMul (Units.mk0 sorry hf0))) P
+⊢ (principal sorry) P = -D P
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:604:8: warning: declaration uses `sorry`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:605:16: warning: Variable name `ha` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:606:5: warning: Variable name `hb` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:607:5: warning: Variable name `hanot` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:608:5: warning: Variable name `hbnot` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:618:2: warning: 'apply
+  (mem_fullRiemannRochSpace25Two_sub_boundary_iff C principal hmin P D
+      (Additive.ofMul (Units.mk0 (a - b) (sub_ne_zero.mpr hab)))
+      ((fullRiemannRochSpace25Two C principal hmin D).sub_mem ha hb)).mpr' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:621:2: warning: 'omega' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:621:2: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:623:73: error: unexpected token 'include'; expected 'lemma'
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:660:94: error: unexpected token 'include'; expected 'lemma'
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:668:9: error: unsolved goals
+case zero
+L : Type u_1
+inst✝¹ : Field L
+inst✝ : Algebra (ZMod 2) L
+C : ClosedPointGrading
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+P : C.Atom
+hcancel :
+  ∀ (a b : L) (ha : a ≠ 0) (hb : b ≠ 0) (hab : a ≠ b),
+    (principal (Additive.ofMul (Units.mk0 a ha))) P = (principal (Additive.ofMul (Units.mk0 b hb))) P →
+      (principal (Additive.ofMul (Units.mk0 b hb))) P < (principal (Additive.ofMul (Units.mk0 (a - b) ⋯))) P
+hzero : ∀ (f : Additive Lˣ), C.divisorDegree (principal f) = 0
+hinj : Function.Injective ⇑principal
+D : C.Divisor
+⊢ Module.finrank (ZMod 2) ↥(fullRiemannRochSpace25Two C principal hmin D) ≤
+    Module.finrank (ZMod 2) ↥(fullRiemannRochSpace25Two C principal hmin (D - ↑0 • Finsupp.single P 1))
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:668:23: warning: This simp argument is unused:
+  Nat.cast_zero
+
+Hint: Omit it from the simp argument list.
+  simp only [̵N̵a̵t̵.̵c̵a̵s̵t̵_̵z̵e̵r̵o̵,̵ ̵z̵e̵r̵o̵_̵s̵m̵u̵l̵,̵[̲z̲e̲r̲o̲_̲s̲m̲u̲l̲,̲ sub_zero, add_zero, le_refl]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:668:38: warning: This simp argument is unused:
+  zero_smul
+
+Hint: Omit it from the simp argument list.
+  simp only [Nat.cast_zero, z̵e̵r̵o̵_̵s̵m̵u̵l̵,̵ ̵sub_zero, add_zero, le_refl]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:668:49: warning: This simp argument is unused:
+  sub_zero
+
+Hint: Omit it from the simp argument list.
+  simp only [Nat.cast_zero, zero_smul, s̵u̵b̵_̵z̵e̵r̵o̵,̵ ̵add_zero, le_refl]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:668:69: warning: This simp argument is unused:
+  le_refl
+
+Hint: Omit it from the simp argument list.
+  simp only [Nat.cast_zero, zero_smul, sub_zero, add_zero,̵ ̵l̵e̵_̵r̵e̵f̵l̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+'MazurProof.N25F_BoundarySectionFiltration.fullRiemannRochSpace25Two_sub_boundary_le' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.mem_fullRiemannRochSpace25Two_sub_boundary_iff' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.boundary_principal_eq_neg_of_not_mem' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.sub_mem_fullRiemannRochSpace25Two_sub_boundary' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.finrank_fullRiemannRochSpace25Two_le_sub_boundary_add_one' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.finrank_fullRiemannRochSpace25Two_le_sub_boundary_multiple' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

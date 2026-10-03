@@ -1,0 +1,10 @@
+{
+  "name": "total-01",
+  "args": [
+    "/workspace/shared/flt-n25-total-boundary-cost/TotalBoundaryCostCheck.lean"
+  ],
+  "exit_code": 0,
+  "seconds": 34.28861195700301,
+  "peak_child_rss_kib": 2946580,
+  "source_sha256": "78ab7c566acb4be609af0afb6974f378740351619f79e51ae6cfc8be17bfc07d"
+}

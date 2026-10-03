@@ -1,0 +1,74 @@
+{
+  "source_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "production_full_imports": "NOT RUN",
+  "files": [
+    {
+      "path": "comms/inbox/research-dot-FLT-N25-BOUNDARY-CONDITION-COST-r1.md",
+      "sha256": "6a11833fb0dabece60a384d72cef1c02715f8c0763621cd14c59cc27f37f31c2"
+    },
+    {
+      "path": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "sha256": "e7573e6240a38a24361242bcc335099b11523dec07dcab24ee613997c0224f70"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/BoundarySectionFiltrationFamilyCheck.lean",
+      "sha256": "717d57d634ac89d102fbbac71c3d1499eafb3c6a4e236912888cec8b72112800"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/BoundaryDVRAssembly.lean.part",
+      "sha256": "9b36c07b1b8384cdee275e0f9776b936ca904155193654b5d2fc0c9cab0e4a71"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/ActualBoundarySectionFiltrationCheck.UNCOMPILED.lean",
+      "sha256": "79f3d879e7ebac9c68b205f3227b01b011923a49a4ece5d651bb221f9f712411"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/make_family.py",
+      "sha256": "361524a9cbd39966dc7482d6d80117510c575191c1e3c7c385c2518f3262547d"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/run_check.py",
+      "sha256": "5060a59ec98b9cf7483dd536c7fa94adf4ee0c5503be25fa0a7edb5974762c81"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/boundary-04.json",
+      "sha256": "fd23422bc2a24b30c4d98ada8364980c31d2c3212d487d415382db7ead4254ec"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/boundary-04.log",
+      "sha256": "c6c036a76b44130ec8d0904b2c6452da82301dd7587a7fe5fd435a4a49be9ec9"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/inputs/SectionFinitenessFamilyInput.lean",
+      "sha256": "a3e87a3eee2c6be8b211b710469714196eaf2ca74e72058b42ddb54b6dcf5d9f"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/inputs/BinaryResidueCancellationCheck.lean",
+      "sha256": "dd88968ea17e258d7f49ac6ed15ed2d99ddf4155cd10be11cfc2b0f091e9a246"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-01.json",
+      "sha256": "051b9f6ecff7a0730598e6a600042f31226994010e75288b2f7c154d209136e6"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-01.log",
+      "sha256": "8c7f1508a71d81166a565f59455a4bfdaa10286b375bc8f40791705be9ec1ed3"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-02.json",
+      "sha256": "5952445aecb443aa1120d69261423b67dff5a437d211bf420829cd82b181d97e"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-02.log",
+      "sha256": "79fbf5ce8fd09b3dbf56e09ab69b0940cc0c512d3e81a5f76acd55726c219f96"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-03.json",
+      "sha256": "7867a154308825883878e70eadd0b97a78fc81d86c50d0c424a77f9f2ff8b91a"
+    },
+    {
+      "path": "comms/inbox/artifacts/FLT-N25-BOUNDARY-CONDITION-COST-r1/failed/boundary-03.log",
+      "sha256": "cfe38cda0ccb4530cf7ac83d7e7394bb3cadb3980aee8c6f7048f22e911c2e11"
+    }
+  ]
+}

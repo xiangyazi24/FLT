@@ -1,0 +1,53 @@
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:550:8: warning: automatically included section variable(s) unused in theorem `_private._stdin.0.MazurProof.N25F_BoundarySectionFiltration.unit_mk0_eq`:
+  [Algebra (ZMod 2) L]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Algebra (ZMod 2) L] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:565:14: warning: This simp argument is unused:
+  Ne.symm hA
+
+Hint: Omit it from the simp argument list.
+  simp [hA,̵ ̵N̵e̵.̵s̵y̵m̵m̵ ̵h̵A̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/shared/flt-n25-boundary-condition-cost/BoundarySectionFiltrationFamilyCheck.lean:672:9: error: unsolved goals
+case zero
+L : Type u_1
+inst✝¹ : Field L
+inst✝ : Algebra (ZMod 2) L
+C : ClosedPointGrading
+principal : Additive Lˣ →+ C.Divisor
+hmin :
+  ∀ (f g h : Additive Lˣ),
+    ↑(Additive.toMul h) = ↑(Additive.toMul f) + ↑(Additive.toMul g) →
+      ∀ (A : C.Atom), min ((principal f) A) ((principal g) A) ≤ (principal h) A
+P : C.Atom
+hcancel :
+  ∀ (a b : L) (ha : a ≠ 0) (hb : b ≠ 0) (hab : a ≠ b),
+    (principal (Additive.ofMul (Units.mk0 a ha))) P = (principal (Additive.ofMul (Units.mk0 b hb))) P →
+      (principal (Additive.ofMul (Units.mk0 b hb))) P < (principal (Additive.ofMul (Units.mk0 (a - b) ⋯))) P
+hzero : ∀ (f : Additive Lˣ), C.divisorDegree (principal f) = 0
+hinj : Function.Injective ⇑principal
+D : C.Divisor
+⊢ Module.finrank (ZMod 2) ↥(fullRiemannRochSpace25Two C principal hmin D) ≤
+    Module.finrank (ZMod 2) ↥(fullRiemannRochSpace25Two C principal hmin (D - 0 • Finsupp.single P 1))
+'MazurProof.N25F_BoundarySectionFiltration.fullRiemannRochSpace25Two_sub_boundary_le' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.mem_fullRiemannRochSpace25Two_sub_boundary_iff' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.boundary_principal_eq_neg_of_not_mem' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.sub_mem_fullRiemannRochSpace25Two_sub_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.finrank_fullRiemannRochSpace25Two_le_sub_boundary_add_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_BoundarySectionFiltration.finrank_fullRiemannRochSpace25Two_le_sub_boundary_multiple' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]

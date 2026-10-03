@@ -1,0 +1,47 @@
+/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean:132:12: warning: `mul_le_mul_right'` has been deprecated: Use `mul_le_mul_left` instead
+/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean:192:10: error: typeclass instance problem is stuck
+  IsFractionRing R ?m.163
+
+Note: Lean will not try to resolve this typeclass instance problem because the third, fourth, and fifth type arguments to `IsFractionRing` contain metavariables. These arguments must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean:195:4: error: Tactic `assumption` failed
+
+case refine_2
+R : Type u_1
+K : Type u_2
+inst✝⁴ : CommRing R
+inst✝³ : IsDedekindDomain R
+inst✝² : Field K
+inst✝¹ : Algebra R K
+inst✝ : IsFractionRing R K
+d : HeightOneSpectrum R →₀ ℤ
+hd : ∀ (v : HeightOneSpectrum R), 0 ≤ d v
+J : FractionalIdeal R⁰ K := d.prod fun v m => ↑v.asIdeal ^ m
+hJ : J ≠ 0
+hcount : ∀ (v : HeightOneSpectrum R), FractionalIdeal.count K v J = d v
+hle : J ≤ 1
+I : Ideal R
+hI : ↑I = J
+v : HeightOneSpectrum R
+⊢ FractionalIdeal.count K v J = d v
+/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean:202:43: error: Invalid argument name `S` for function `FractionalIdeal.coeIdeal_injective`
+
+Hint: Perhaps you meant one of the following parameter names:
+  • `R`: S̵R̲
+  • `K`: S̵K̲
+  • `a₁`: S̵a̲₁̲
+  • `a₂`: S̵a̲₂̲
+/workspace/shared/flt-n25-total-boundary-cost/EffectiveAffineIdealCheck.lean:203:2: error: No goals to be solved
+'MazurProof.N25F_EffectiveAffineIdeal.exists_ideal_with_exact_counts' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_EffectiveAffineIdeal.ideal_eq_of_exact_counts' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
+'MazurProof.N25F_EffectiveAffineIdeal.exists_ideal_for_nonpositive_divisor' depends on axioms: [propext,
+ sorryAx,
+ Classical.choice,
+ Quot.sound]
