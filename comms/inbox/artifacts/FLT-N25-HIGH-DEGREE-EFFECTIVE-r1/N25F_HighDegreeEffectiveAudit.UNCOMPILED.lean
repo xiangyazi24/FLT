@@ -1,0 +1,20 @@
+import FLT.Assumptions.MazurProof.N25F_HighDegreeEffective
+
+/-! Prospective audit commands only. NOT RUN in the source-only task. -/
+set_option pp.all true in
+#print MazurProof.N25F_HighDegreeEffective.finrank_pos_of_degree_gt_four_basis_bound
+set_option pp.all true in
+#print MazurProof.N25F_HighDegreeEffective.nonzeroSection_nonempty_of_degree_gt_four_basis_bound
+set_option pp.all true in
+#print MazurProof.N25F_HighDegreeEffective.riemannRochSpace_ne_bot_of_degree_gt_four_basis_bound
+set_option pp.all true in
+#print MazurProof.N25F_HighDegreeEffective.exists_effective_representative_of_degree_gt_four_basis_bound
+
+#print axioms MazurProof.N25F_CoarseLowerBound.degree_le_finrank_add_four_basis_bound
+#print axioms MazurProof.N25F_SectionFiniteness.fullRiemannRochSpace25Two_moduleFinite
+#print axioms MazurProof.N25F_SectionClassFiber.nonzeroSectionToFullClassFiber25Two
+#print axioms MazurProof.N25F_HighDegreeEffective.finrank_pos_of_degree_gt_four_basis_bound
+#print axioms MazurProof.N25F_HighDegreeEffective.nonzeroSection_nonempty_of_degree_gt_four_basis_bound
+#print axioms MazurProof.N25F_HighDegreeEffective.riemannRochSpace_ne_bot_of_degree_gt_four_basis_bound
+#print axioms MazurProof.N25F_HighDegreeEffective.exists_effective_representative_of_degree_gt_four_basis_bound
+

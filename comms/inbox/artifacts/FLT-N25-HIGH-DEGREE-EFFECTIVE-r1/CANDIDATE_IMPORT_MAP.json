@@ -1,0 +1,607 @@
+{
+  "scope": "Source-only FLT candidate overlay closure. Traverse imports from CoarseLowerBound and SectionClassFiber; stop at modules present in the production pin. This is not a transitive production axiom audit.",
+  "production_pin": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "candidate_pin": "bebaf732e868c6cd34b2072135cf9879c69bd123",
+  "root_imports": [
+    "FLT.Assumptions.MazurProof.N25F_CoarseLowerBound",
+    "FLT.Assumptions.MazurProof.N25F_SectionClassFiber"
+  ],
+  "candidate_overlay_modules": 43,
+  "production_boundary_modules": 20,
+  "new_candidate_modules": 1,
+  "total_candidate_modules_including_new": 44,
+  "missing_source_paths": [],
+  "nodes": [
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_CoarseLowerBound",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "blob": "509fe4b9d66e90a508c170f1753a7cee49b91b88",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_KernelSectionInjection",
+        "FLT.Assumptions.MazurProof.N25F_ShiftedAffineIdeal",
+        "FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorDegree",
+        "FLT.Assumptions.MazurProof.N25F_ExactCountWeightedSum",
+        "FLT.Assumptions.MazurProof.N25F_WPolynomialWindow",
+        "FLT.Assumptions.MazurProof.DegreeReindex"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_SectionClassFiber",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_SectionClassFiber.lean",
+      "blob": "8199280acb1ff29912df5b4253ab5b93dd83e43a",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_SectionFiniteness",
+        "FLT.Assumptions.MazurProof.N25F_FullPicardDegree",
+        "Mathlib.FieldTheory.Finiteness",
+        "Mathlib.SetTheory.Cardinal.NatCard"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_KernelSectionInjection",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_KernelSectionInjection.UNCOMPILED.lean",
+      "blob": "a42572aadb0f2f9fe7535c5faac2234fcb239def",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_WAffineConditionCost",
+        "FLT.Assumptions.MazurProof.N25F_TotalBoundaryCost",
+        "Mathlib.Tactic.Abel",
+        "Lean.Elab.Tactic.Omega"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ShiftedAffineIdeal",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_ShiftedAffineIdeal.UNCOMPILED.lean",
+      "blob": "fea3357fb1126d046e3b607b00e28ae79fcb12cc",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_EffectiveAffineIdeal",
+        "FLT.Assumptions.MazurProof.N25F_AffineNonpositiveRepresentative"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorDegree",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectiveDivisorDegree.lean",
+      "blob": "30b90a32ee153c3c7eedb0b4746a882d25be34b4"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ExactCountWeightedSum",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_ExactCountWeightedSum.lean",
+      "blob": "a2f6796290cfb59d3e6ec30252ee4b4d162e4a07",
+      "imports": [
+        "Mathlib.RingTheory.DedekindDomain.Factorization",
+        "Mathlib.Algebra.BigOperators.Finsupp.Basic"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_WPolynomialWindow",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_WPolynomialWindow.lean",
+      "blob": "486ea9da44c62baca2c3a2cda55b378343488746",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_PolynomialBasisWindow",
+        "FLT.Assumptions.MazurProof.N25F_BasePolePowers",
+        "FLT.Assumptions.MazurProof.N25F_SectionFiniteness",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Basic"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.DegreeReindex",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/DegreeReindex.lean",
+      "blob": "9bd144b0fe66d8a8ca5487f18d9d3a50fb3e00c7",
+      "imports": [
+        "Mathlib.Algebra.BigOperators.Finsupp.Basic",
+        "Mathlib.Data.Int.Order.Basic",
+        "Lean.Elab.Tactic.Omega"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_SectionFiniteness",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_SectionFiniteness.lean",
+      "blob": "408e918e34608b559add7d61fcd20ce131f9ad5a",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_ZeroDegreeConstants",
+        "FLT.Assumptions.MazurProof.CurveDivisorPicard",
+        "Mathlib.Logic.Equiv.Option"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_FullPicardDegree",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_FullPicardDegree.lean",
+      "blob": "ff3c3b7bbda266de4c76b69fc5fd472a1e6db505",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_ProjectiveProductFormula",
+        "FLT.Assumptions.MazurProof.CurveDivisorPicard"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_WAffineConditionCost",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_WAffineConditionCost.lean",
+      "blob": "f48c8af7f469b739c7b9de7d945f2a797dda5798",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_WRegularSectionLift",
+        "FLT.Assumptions.MazurProof.N25F_SectionFiniteness",
+        "FLT.Assumptions.MazurProof.N25F_DedekindFactorDegree",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+        "Mathlib.RingTheory.Jacobson.Artinian",
+        "Mathlib.RingTheory.KrullDimension.Zero"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_TotalBoundaryCost",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_TotalBoundaryCost.lean",
+      "blob": "a38a3647bc8aa566620081cf28a59aa4ff2ce2e9",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_BoundarySectionFiltration"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_EffectiveAffineIdeal",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_EffectiveAffineIdeal.lean",
+      "blob": "bda1152f63ae1c39d7428c06111fc8888b58faa7",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_DedekindOrderMembership"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_AffineNonpositiveRepresentative",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_AffineNonpositiveRepresentative.lean",
+      "blob": "50d05b5af294a5b4225eed06b11b41f91c26e570",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_DedekindPrincipalMajorant",
+        "FLT.Assumptions.MazurProof.N25F_WPolynomialWindow",
+        "FLT.Assumptions.MazurProof.N25F_FullPicardSectionRank"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_PolynomialBasisWindow",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_PolynomialBasisWindow.lean",
+      "blob": "e85240919cc3e7129b053716b5546037d899bae0",
+      "imports": [
+        "Mathlib.Algebra.Polynomial.Basis",
+        "Mathlib.RingTheory.AlgebraTower"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_BasePolePowers",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_BasePolePowers.lean",
+      "blob": "09a14e436557a8fc7e3cf536b1eec636adc45b4e",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_WBasisPoleSections",
+        "FLT.Assumptions.MazurProof.N25F_SectionMultiplication",
+        "FLT.Assumptions.MazurProof.N25F_ZeroDegreeConstants"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ZeroDegreeConstants",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_ZeroDegreeConstants.lean",
+      "blob": "09cfa7fe95fddce0895413a26afe02bf8e518879",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_RiemannRochSpace",
+        "FLT.Assumptions.MazurProof.N25F_BinaryResidueOrder",
+        "FLT.Assumptions.MazurProof.N25F_InfinityResidueFields",
+        "FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorDegree",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Basic"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.CurveDivisorPicard",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/CurveDivisorPicard.lean",
+      "blob": "b18241f067c4cc82e5cd22c2ee857179aecf42bf"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ProjectiveProductFormula",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_ProjectiveProductFormula.lean",
+      "blob": "65131694f270c8fc1fded79e88629c45cc011fdd",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_InfinityNormBoundarySum",
+        "FLT.Assumptions.MazurProof.N25F_BaseInversionOrder",
+        "FLT.Assumptions.MazurProof.N25F_AffineNormPolynomial",
+        "FLT.Assumptions.MazurProof.N25F_WChartNormDimension",
+        "FLT.Assumptions.MazurProof.N25F_ProjectivePrincipalDivisor",
+        "Lean.Elab.Tactic.Omega"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_WRegularSectionLift",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_WRegularSectionLift.lean",
+      "blob": "5b7bf5cda9eb13a91a60568686ead35103104427",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_DedekindOrderMembership",
+        "FLT.Assumptions.MazurProof.N25F_WPolynomialWindow"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_DedekindFactorDegree",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_DedekindFactorDegree.lean",
+      "blob": "8fbc4b58fda1005453cdf6075bfd65dff22867b8"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_BoundarySectionFiltration",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "blob": "01b6e6a4deca2efba58a30f12624e39d6f0f21f8",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_BinaryResidueCancellation",
+        "FLT.Assumptions.MazurProof.N25F_InfinityResidueFields",
+        "FLT.Assumptions.MazurProof.N25F_SectionMultiplication",
+        "FLT.Assumptions.MazurProof.N25F_SectionFiniteness",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_DedekindOrderMembership",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_DedekindOrderMembership.lean",
+      "blob": "163894845753ce2b62b1cef15f0fea5a26ed00ae",
+      "imports": [
+        "FLT.Assumptions.MazurProof.CurveDedekindDivisor",
+        "Mathlib.Algebra.Order.BigOperators.Group.Finset"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_DedekindPrincipalMajorant",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_DedekindPrincipalMajorant.lean",
+      "blob": "414c81dde7fa19f0d30e3bf82908a6ff53fb8f43",
+      "imports": [
+        "Mathlib.RingTheory.DedekindDomain.Factorization"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_FullPicardSectionRank",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_FullPicardSectionRank.lean",
+      "blob": "23c759e14d1408f9acf2fb54f5a0302d612934d7",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_SectionPrincipalTransport",
+        "FLT.Assumptions.MazurProof.CurveZetaClassNumber"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_WBasisPoleSections",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_WBasisPoleSections.lean",
+      "blob": "b549577ebe22f902d19d8eda28c837b7a4d1c2eb",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_WBasisPoleBound",
+        "FLT.Assumptions.MazurProof.N25F_RiemannRochSpace",
+        "FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorDegree"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_SectionMultiplication",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_SectionMultiplication.lean",
+      "blob": "7907640ba7fb28a3737ed110ea0b708131b9b7f4",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_RiemannRochSpace"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_RiemannRochSpace",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_RiemannRochSpace.lean",
+      "blob": "c949d1cc9c88451a8733b612085b756475984bd9",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_ProjectivePrincipalAddition",
+        "FLT.Assumptions.MazurProof.N25F_ProjectiveProductFormula",
+        "Mathlib.Data.Finsupp.Order",
+        "Lean.Elab.Tactic.Omega"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_BinaryResidueOrder",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_BinaryResidueOrder.lean",
+      "blob": "5fd21997ed367c9f9cf5e7a0e57cfefc08d0e2a7",
+      "imports": [
+        "Mathlib.RingTheory.OrderOfVanishing.Noetherian",
+        "Mathlib.RingTheory.LocalRing.ResidueField.Basic",
+        "Mathlib.Algebra.Field.ZMod",
+        "Lean.Elab.Tactic.Omega"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityResidueFields",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityResidueFields.lean",
+      "blob": "18c50ccdb25902a9dc513699195381689946700e"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityNormBoundarySum",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_InfinityNormBoundarySum.lean",
+      "blob": "75927588fc16230a6451ee16088585a9bf4a6f9f",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_InfinityNormFraction",
+        "FLT.Assumptions.MazurProof.N25F_InfinityBoundaryOrderTransport",
+        "FLT.Assumptions.MazurProof.N25F_InfinityNormMultiplicity",
+        "FLT.Assumptions.MazurProof.N25F_LocalFractionFactorOrder",
+        "Lean.Elab.Tactic.Omega"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_BaseInversionOrder",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_BaseInversionOrder.lean",
+      "blob": "c95dbec07dbb8ea8929ccf06639ccc8066c3e730",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_RationalBaseInversion",
+        "FLT.Assumptions.MazurProof.N25F_InfinityPrimeContraction",
+        "Mathlib.RingTheory.DedekindDomain.Dvr",
+        "Mathlib.RingTheory.OrderOfVanishing.Noetherian",
+        "Mathlib.RingTheory.Valuation.IsTrivialOn",
+        "Mathlib.Tactic.NormNum"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_AffineNormPolynomial",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_AffineNormPolynomial.lean",
+      "blob": "cf4d9b5ef15f94ca6fe69378d0bc404702e621b8",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_InfinityAffineNormComparison",
+        "Mathlib.RingTheory.IntegralClosure.IntegralRestrict"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_WChartNormDimension",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_WChartNormDimension.lean",
+      "blob": "f0fa6ff9a110359ab1aafa012dab03c63b2415fb"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ProjectivePrincipalDivisor",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_ProjectivePrincipalDivisor.lean",
+      "blob": "27befd6841c09076f5581c9f64bc87e9b8d09343"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_BinaryResidueCancellation",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_BinaryResidueCancellation.lean",
+      "blob": "e7ff09b684eba917cf4106c3994c14c2e6972301",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_BinaryResidueOrder"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.CurveDedekindDivisor",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/CurveDedekindDivisor.lean",
+      "blob": "20c6208962f3163e4eabda838efc5c73afdc0b6c"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_SectionPrincipalTransport",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_SectionPrincipalTransport.lean",
+      "blob": "1a6825fa76b59f78db7db4f50e9cc90873a7ea9a",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_SectionClassFiber",
+        "Mathlib.Algebra.Module.Submodule.Equiv"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.CurveZetaClassNumber",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/CurveZetaClassNumber.lean",
+      "blob": "9cdd1f0b2ace516072ff96335c54f96231d49df3"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_WBasisPoleBound",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_WBasisPoleBound.lean",
+      "blob": "49fa9f408d9a560d3ddf06ee998a05e51f60912e",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_WChartBaseNorm",
+        "FLT.Assumptions.MazurProof.N25F_PolynomialBoundaryOrders",
+        "Mathlib.LinearAlgebra.Dimension.Free"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ProjectivePrincipalAddition",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_ProjectivePrincipalAddition.lean",
+      "blob": "88432c881631dc482b969a2729c0c0c85afbb682",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_PrincipalOrderAddition",
+        "FLT.Assumptions.MazurProof.N25F_ProjectivePrincipalCoefficients"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityNormFraction",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_InfinityNormFraction.lean",
+      "blob": "32600738e9d68cb71036b3e1efcb8cc372eeec55",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_InfinityCanonicalSeparable",
+        "Mathlib.RingTheory.IntegralClosure.IntegralRestrict"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityBoundaryOrderTransport",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_InfinityBoundaryOrderTransport.lean",
+      "blob": "937874e2b90477fff4e577b2562a26a8a16b7aa8",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_InfinityLocalizations",
+        "FLT.Assumptions.MazurProof.N25F_InfinityBoundaryAlgebras",
+        "FLT.Assumptions.MazurProof.N25F_OrderRingEquiv",
+        "FLT.Assumptions.MazurProof.N25F_FractionOrderDifference",
+        "FLT.Assumptions.MazurProof.N25F_YZBoundaryOrder"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityNormMultiplicity",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_InfinityNormMultiplicity.lean",
+      "blob": "ca993b71f9881f70b993117354000bd1484d0fe1",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_InfinityPrimeNorms",
+        "FLT.Assumptions.MazurProof.N25F_InfinityBoundaryAlgebras",
+        "Mathlib.RingTheory.Ideal.Norm.RelNorm",
+        "Lean.Elab.Tactic.Omega"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_LocalFractionFactorOrder",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_LocalFractionFactorOrder.lean",
+      "blob": "6039cd57f1f0bdcf21260f6aa1d7a7fa530cbf00",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_LocalFactorOrder",
+        "FLT.Assumptions.MazurProof.N25F_FractionOrderDifference",
+        "Mathlib.RingTheory.Localization.LocalizationLocalization"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_RationalBaseInversion",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_RationalBaseInversion.lean",
+      "blob": "fd91633415b572fc0233f35e54ae6ac8f580017d"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityPrimeContraction",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityPrimeContraction.lean",
+      "blob": "4903a9ee73d3d8216de471dcb02cdcccbb9482d8"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityAffineNormComparison",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_InfinityAffineNormComparison.lean",
+      "blob": "73c464e3be1762d5ea210ce82a46f0d39ef8532f",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_InfinityNormalization",
+        "FLT.Assumptions.MazurProof.N25F_NormBaseTwist"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_WChartBaseNorm",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_WChartBaseNorm.lean",
+      "blob": "c98235ce39e3f417b29fcc68afb5f4f8f177b299"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_PolynomialBoundaryOrders",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_PolynomialBoundaryOrders.lean",
+      "blob": "d5a06f029cc01151e76a26c217408106bdeb76b5"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_PrincipalOrderAddition",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_PrincipalOrderAddition.lean",
+      "blob": "24e36af143fdca9d0283a37f6f0b194d76e61384",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_PrincipalDivisorCoefficient",
+        "FLT.Assumptions.MazurProof.N25F_LocalFractionFactorOrder",
+        "Mathlib.RingTheory.OrderOfVanishing.Noetherian"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_ProjectivePrincipalCoefficients",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_ProjectivePrincipalCoefficients.lean",
+      "blob": "998722ccac97042f6dde1f1a6e2c280fff2fc3d7",
+      "imports": [
+        "FLT.Assumptions.MazurProof.N25F_ProjectivePrincipalDivisor"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityCanonicalSeparable",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityCanonicalSeparable.lean",
+      "blob": "241d97a4046c46a7e838ec910087561a2b478c08"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityLocalizations",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityLocalizations.lean",
+      "blob": "5662a1bd04f60e008ab7f94263178094a2715541"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityBoundaryAlgebras",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityBoundaryAlgebras.lean",
+      "blob": "dc3af4fa7ba27da6c4497e8c0eabc07c6a46f152"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_OrderRingEquiv",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_OrderRingEquiv.lean",
+      "blob": "0df13983fa47a513bb3b4c835a9e79f06724bde7"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_FractionOrderDifference",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_FractionOrderDifference.lean",
+      "blob": "9d559e4248edbd10b32376b86a65834d3710bf82",
+      "imports": [
+        "Mathlib.RingTheory.OrderOfVanishing.Basic"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_YZBoundaryOrder",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_YZBoundaryOrder.lean",
+      "blob": "091f237cf3917847f3eac83a9d9c046175cc888a"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityPrimeNorms",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityPrimeNorms.lean",
+      "blob": "4b349b6b0bd4cce8685f9527ae55e2c00dc1c906"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_LocalFactorOrder",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_LocalFactorOrder.lean",
+      "blob": "f1e14fe6385be164e307a2f5c63d137bf7b87ab2",
+      "imports": [
+        "Mathlib.RingTheory.DedekindDomain.Dvr",
+        "Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas",
+        "Mathlib.RingTheory.OrderOfVanishing.Basic"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_InfinityNormalization",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_InfinityNormalization.lean",
+      "blob": "e287c76528c8e6a982b1a3c9ff3f26fd6ea7a0df"
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_NormBaseTwist",
+      "status": "candidate-unverified",
+      "path": "comms/candidates/N25F_NormBaseTwist.lean",
+      "blob": "ed0ce2810e1787ae1462845e85fbbd1d38080a40",
+      "imports": [
+        "Mathlib.RingTheory.Norm.Basic"
+      ]
+    },
+    {
+      "module": "FLT.Assumptions.MazurProof.N25F_PrincipalDivisorCoefficient",
+      "status": "production-pin-boundary",
+      "path": "FLT/Assumptions/MazurProof/N25F_PrincipalDivisorCoefficient.lean",
+      "blob": "33feb1f895174c7e3e1e5e9b3318db8a61b76165"
+    }
+  ]
+}

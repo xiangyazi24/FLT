@@ -1,0 +1,13 @@
+{
+  "kind": "Static textual check, not Lean elaboration or transitive axiom verification",
+  "new_candidate_declarations": [
+    "finrank_pos_of_degree_gt_four_basis_bound",
+    "nonzeroSection_nonempty_of_degree_gt_four_basis_bound",
+    "riemannRochSpace_ne_bot_of_degree_gt_four_basis_bound",
+    "exists_effective_representative_of_degree_gt_four_basis_bound"
+  ],
+  "new_candidate_forbidden_token_matches": [],
+  "existing_candidate_overlay_forbidden_token_matches": [],
+  "existing_candidate_modules_scanned": 43,
+  "production_sources_and_transitive_mathlib_not_scanned": true
+}

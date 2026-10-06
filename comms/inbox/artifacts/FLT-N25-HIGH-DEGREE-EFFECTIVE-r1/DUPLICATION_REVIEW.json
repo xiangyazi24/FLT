@@ -1,0 +1,533 @@
+{
+  "scope": "103 N25F candidate sources at the collaboration pin, production/dispatch tree names, and current N25 coarse-bound envelope; not a claim of semantic equivalence search across all repository proofs.",
+  "collaboration_pin": "bebaf732e868c6cd34b2072135cf9879c69bd123",
+  "production_pin": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "dispatch_pin": "9700ca106515f04411193844fbb347d40d86e481",
+  "conclusion": "No existing high-degree endpoint found. Current existing envelope explicitly lists high-degree effectiveness as unestablished. Existing nonzeroSectionToFullClassFiber25Two is reused, not reimplemented.",
+  "candidate_sources": [
+    {
+      "path": "comms/candidates/N25F_AffineNonpositiveRepresentative.lean",
+      "blob": "50d05b5af294a5b4225eed06b11b41f91c26e570",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_AffineNormPolynomial.lean",
+      "blob": "cf4d9b5ef15f94ca6fe69378d0bc404702e621b8",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_BaseInversionOrder.lean",
+      "blob": "c95dbec07dbb8ea8929ccf06639ccc8066c3e730",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_BasePolePowers.lean",
+      "blob": "09a14e436557a8fc7e3cf536b1eec636adc45b4e",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_BinaryResidueCancellation.lean",
+      "blob": "e7ff09b684eba917cf4106c3994c14c2e6972301",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_BinaryResidueOrder.lean",
+      "blob": "5fd21997ed367c9f9cf5e7a0e57cfefc08d0e2a7",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_BoundarySectionFiltration.lean",
+      "blob": "01b6e6a4deca2efba58a30f12624e39d6f0f21f8",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_CenterLocalization.lean",
+      "blob": "b90b79bff039050985faf5541aaf4863410a405b",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "blob": "509fe4b9d66e90a508c170f1753a7cee49b91b88",
+      "endpoint_keyword_matches": [
+        {
+          "line": 181,
+          "text": "theorem degree_le_finrank_add_four_basis_bound (D : ProjectiveDivisor25Two) :"
+        },
+        {
+          "line": 205,
+          "text": "#print axioms degree_le_finrank_add_four_basis_bound"
+        }
+      ]
+    },
+    {
+      "path": "comms/candidates/N25F_DVRIntegralLift.lean",
+      "blob": "cc5f5b348e7dc263e1a2d6036ec2d47fdf6d91f7",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_DedekindFactorDegree.lean",
+      "blob": "8fbc4b58fda1005453cdf6075bfd65dff22867b8",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_DedekindOrderMembership.lean",
+      "blob": "163894845753ce2b62b1cef15f0fea5a26ed00ae",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_DedekindPrincipalMajorant.lean",
+      "blob": "414c81dde7fa19f0d30e3bf82908a6ff53fb8f43",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_EffectiveAffineIdeal.lean",
+      "blob": "bda1152f63ae1c39d7428c06111fc8888b58faa7",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ExactCountQuotientDegree.lean",
+      "blob": "27359df69e7e00058c49d6c5b0daf5cd0be51120",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ExactCountWeightedSum.lean",
+      "blob": "a2f6796290cfb59d3e6ec30252ee4b4d162e4a07",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_FractionOrderDifference.lean",
+      "blob": "9d559e4248edbd10b32376b86a65834d3710bf82",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_FullPicardBasePoint.lean",
+      "blob": "6f77f579cbc8939f788929ba6c8b2db204603507",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_FullPicardDegree.lean",
+      "blob": "ff3c3b7bbda266de4c76b69fc5fd472a1e6db505",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_FullPicardSectionRank.lean",
+      "blob": "23c759e14d1408f9acf2fb54f5a0302d612934d7",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityAffineNormComparison.lean",
+      "blob": "73c464e3be1762d5ea210ce82a46f0d39ef8532f",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityBaseMaps.lean",
+      "blob": "adc82c165b33a4658bf9a74d6f802545187606f0",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityBoundaryAlgebras.lean",
+      "blob": "dc3af4fa7ba27da6c4497e8c0eabc07c6a46f152",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityBoundaryCenters.lean",
+      "blob": "54d051db598c150de32cad8a00a268f8aa968eb0",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityBoundaryMaps.lean",
+      "blob": "e1e28e58504e8ce511aa2e9fc90ff95866ec4657",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityBoundaryOrderTransport.lean",
+      "blob": "937874e2b90477fff4e577b2562a26a8a16b7aa8",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityCanonicalSeparable.lean",
+      "blob": "241d97a4046c46a7e838ec910087561a2b478c08",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityCenterDistinctness.lean",
+      "blob": "d6bed0cac8d3a3f951362a4600a8d4fc24dd19a3",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityFiberComplete.lean",
+      "blob": "63a77428f070ca49fc7d5daa306a03461728d3f9",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityFunctionField.lean",
+      "blob": "24effc2e9208373e6e93607a1c6d588e8b5ea1d5",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityLocalizations.lean",
+      "blob": "5662a1bd04f60e008ab7f94263178094a2715541",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityNormBoundarySum.lean",
+      "blob": "75927588fc16230a6451ee16088585a9bf4a6f9f",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityNormFraction.lean",
+      "blob": "32600738e9d68cb71036b3e1efcb8cc372eeec55",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityNormMultiplicity.lean",
+      "blob": "ca993b71f9881f70b993117354000bd1484d0fe1",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityNormalization.lean",
+      "blob": "e287c76528c8e6a982b1a3c9ff3f26fd6ea7a0df",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityParameterOrders.lean",
+      "blob": "e4b4f15795dfa03ef02c349c0be32a7e19fd166c",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityPrimeContraction.lean",
+      "blob": "4903a9ee73d3d8216de471dcb02cdcccbb9482d8",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityPrimeNorms.lean",
+      "blob": "4b349b6b0bd4cce8685f9527ae55e2c00dc1c906",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityPrincipalNormOrder.lean",
+      "blob": "e7774d1359e5eb7b922f23421e64ca32bc4c0528",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityRamificationIndices.lean",
+      "blob": "9d827b2f5d38ca791a46d4f5fce0eb94c4197bc0",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinityResidueFields.lean",
+      "blob": "18c50ccdb25902a9dc513699195381689946700e",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_InfinitySeparable.lean",
+      "blob": "34119526d14d7b0f9b03ebcd97cc7584a6bd6e30",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_IntegralBoundaryFactor.lean",
+      "blob": "571f1029a686250ead53959b4b6a2a547e226994",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_KernelSectionInjection.UNCOMPILED.lean",
+      "blob": "a42572aadb0f2f9fe7535c5faac2234fcb239def",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_LocalFactorOrder.lean",
+      "blob": "f1e14fe6385be164e307a2f5c63d137bf7b87ab2",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_LocalFractionFactorOrder.lean",
+      "blob": "6039cd57f1f0bdcf21260f6aa1d7a7fa530cbf00",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_LocalValuationRigidity.lean",
+      "blob": "0651f4e74b491a2bae28b8659e0a62adfe11be08",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_NormBaseTwist.lean",
+      "blob": "ed0ce2810e1787ae1462845e85fbbd1d38080a40",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_OrderRingEquiv.lean",
+      "blob": "0df13983fa47a513bb3b4c835a9e79f06724bde7",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_PolynomialBasisWindow.lean",
+      "blob": "e85240919cc3e7129b053716b5546037d899bae0",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_PolynomialBoundaryOrders.lean",
+      "blob": "d5a06f029cc01151e76a26c217408106bdeb76b5",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_PrincipalDivisorCoefficient.lean",
+      "blob": "33feb1f895174c7e3e1e5e9b3318db8a61b76165",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_PrincipalDivisorQuotientDegree.lean",
+      "blob": "4ff53b39ca319e8d0b06fe3993a1b604cc973164",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_PrincipalOrderAddition.lean",
+      "blob": "24e36af143fdca9d0283a37f6f0b194d76e61384",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ProjectivePrincipalAddition.lean",
+      "blob": "88432c881631dc482b969a2729c0c0c85afbb682",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ProjectivePrincipalCoefficients.lean",
+      "blob": "998722ccac97042f6dde1f1a6e2c280fff2fc3d7",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ProjectivePrincipalDivisor.lean",
+      "blob": "27befd6841c09076f5581c9f64bc87e9b8d09343",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ProjectiveProductFormula.lean",
+      "blob": "65131694f270c8fc1fded79e88629c45cc011fdd",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_RationalBaseInversion.lean",
+      "blob": "fd91633415b572fc0233f35e54ae6ac8f580017d",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_RiemannRochSpace.lean",
+      "blob": "c949d1cc9c88451a8733b612085b756475984bd9",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_SectionClassFiber.lean",
+      "blob": "8199280acb1ff29912df5b4253ab5b93dd83e43a",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_SectionFiniteness.lean",
+      "blob": "408e918e34608b559add7d61fcd20ce131f9ad5a",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_SectionMultiplication.lean",
+      "blob": "7907640ba7fb28a3737ed110ea0b708131b9b7f4",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_SectionPrincipalTransport.lean",
+      "blob": "1a6825fa76b59f78db7db4f50e9cc90873a7ea9a",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_SeparableRelativeNorm.lean",
+      "blob": "73dbafedca9406ac50e5ae1a8a0bbb7f681e92df",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ShiftedAffineIdeal.UNCOMPILED.lean",
+      "blob": "fea3357fb1126d046e3b607b00e28ae79fcb12cc",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_TotalBoundaryCost.lean",
+      "blob": "a38a3647bc8aa566620081cf28a59aa4ff2ce2e9",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WAffineConditionCost.lean",
+      "blob": "f48c8af7f469b739c7b9de7d945f2a797dda5798",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WBasisPoleBound.lean",
+      "blob": "49fa9f408d9a560d3ddf06ee998a05e51f60912e",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WBasisPoleSections.lean",
+      "blob": "b549577ebe22f902d19d8eda28c837b7a4d1c2eb",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WChartBaseNorm.lean",
+      "blob": "c98235ce39e3f417b29fcc68afb5f4f8f177b299",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WChartNormDimension.lean",
+      "blob": "f0fa6ff9a110359ab1aafa012dab03c63b2415fb",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WChartPrincipalDegree.lean",
+      "blob": "97ab5831af501f135c2182d5f7a20dad6210afaa",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WChartQuotientFinite.lean",
+      "blob": "1ac81106e1f048fb669e8fddfc5b666b5a54bd11",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WPolynomialWindow.lean",
+      "blob": "486ea9da44c62baca2c3a2cda55b378343488746",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_WRegularSectionLift.lean",
+      "blob": "5b7bf5cda9eb13a91a60568686ead35103104427",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XBoundaryOrder.lean",
+      "blob": "506082d8ddbbe3b8347681b8bb43372a70cb4646",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XBoundaryZOrder.lean",
+      "blob": "a11c854d364024821c322ccaef1924d9a7e48f04",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionEquiv.lean",
+      "blob": "096479718b807530c7cc569b027dae016622aa2e",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionInjective.lean",
+      "blob": "908a081dc57ecdba7f30c03db1ff81798797bbb2",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XChartFractionMap.lean",
+      "blob": "fff302ef924a9e8d97f7c57299da3bbfd34018c3",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XChartWChartEquiv.lean",
+      "blob": "08374fe9c7e0ce855e75be02ee693dab8fa10e28",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XCoordinateOrders.lean",
+      "blob": "b589d9f86757ea23cf65a1d2c21f0f8be25e03c1",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XInfinityGerm.lean",
+      "blob": "8f967ddf53ff1264f8e6c96953e7daee9d5664ea",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XLocalDVR.lean",
+      "blob": "210b25b745b328c84a561b2c47a6c0af0159cc5c",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XLocalFractionEmbedding.lean",
+      "blob": "4615e13a05f9de7e551f91f26021fe6cae944ec3",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XSectionDimension.lean",
+      "blob": "6f18f558c77a7711dd5ef0bb9825c9a26a771537",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XSectionFiltration.lean",
+      "blob": "85d823ad40cdfe9f6d0978a3d82575b0d928011e",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_XSectionResidue.lean",
+      "blob": "6e136de159f104cc115f306bf982e30df0fad367",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZAffineOverlapEquiv.lean",
+      "blob": "98925070174838dbdf8376d6b0e6f8ee23483820",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZBoundaryOrder.lean",
+      "blob": "091f237cf3917847f3eac83a9d9c046175cc888a",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalDVR.lean",
+      "blob": "768bc7d6c1cec12c0116c74590765264d8554d33",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalDedekind.lean",
+      "blob": "40dd8870de804856da968b7406ecb7ad62751227",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalFractionEmbedding.lean",
+      "blob": "98c1ee8ae299dd3a6ae3abf030df0490b75f4957",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZLocalZUnit.lean",
+      "blob": "ad53c224a0a1d30854dd3a4b68a936bcb758f152",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZOverlapLocalization.lean",
+      "blob": "94fd1ed3749163e8ba7cc004dfb714e9a3a18026",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_YZOverlapMap.lean",
+      "blob": "57936786638863fd99e587ebdca03b1727fc661d",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ZBoundaryOrder.lean",
+      "blob": "e8647da0787abcd11dc0ecc6070f87ee5309ce30",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartFractionEquiv.lean",
+      "blob": "6a772e9139975b9c17d5750ef23ad3dbabe01882",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartFractionInjective.lean",
+      "blob": "9c55c5054648d9ebf603a3f1e1cad5303a38622b",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartFractionMap.lean",
+      "blob": "6d4fc6b81c41545743ab3531ef723600d127c97b",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ZChartWChartEquiv.lean",
+      "blob": "f4e730377981632deca64e7d51a02710a0e5f7e1",
+      "endpoint_keyword_matches": []
+    },
+    {
+      "path": "comms/candidates/N25F_ZeroDegreeConstants.lean",
+      "blob": "09cfa7fe95fddce0895413a26afe02bf8e518879",
+      "endpoint_keyword_matches": []
+    }
+  ]
+}

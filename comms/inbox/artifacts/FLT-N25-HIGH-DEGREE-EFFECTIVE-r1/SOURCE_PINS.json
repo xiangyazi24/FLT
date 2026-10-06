@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-06",
+  "repository": "xiangyazi24/FLT",
+  "production_commit": "51bbb4f191ad0d3753b87123635c100a638ae580",
+  "collaboration_branch": "research-dot/flt-collaboration-20261001",
+  "collaboration_commit": "bebaf732e868c6cd34b2072135cf9879c69bd123",
+  "dispatch_commit": "9700ca106515f04411193844fbb347d40d86e481",
+  "existing_coarse_bundle_commit": "1cb8d721bde52b4adf8bf73722e9f071d355939a",
+  "lean_toolchain": "leanprover/lean4:v4.31.0-rc2",
+  "mathlib_commit": "96fd0fff3b8837985ae21dd02e712cb5df72ec05",
+  "new_candidate_intended_module": "FLT.Assumptions.MazurProof.N25F_HighDegreeEffective",
+  "new_candidate_status": "LOCAL_SOURCE_ONLY_UNCOMPILED",
+  "actual_geometry_closure_status": "NOT_CONFIRMED",
+  "execution": "No Lean/Lake/build/cache acquisition/kernel or axiom audit/Slurm/SSH was run.",
+  "publication": "Source-preparation snapshot before the separately authorized candidate publication; no Git changes or publication were performed during that preparation.",
+  "inputs": [
+    {
+      "path": "COMMS.md",
+      "encoding": "utf-8",
+      "sha": "7f860ddfe24a814723a61a692d5198449a903152",
+      "display_url": "https://github.com/xiangyazi24/FLT/blob/research-dot/flt-collaboration-20261001/COMMS.md",
+      "display_title": "COMMS.md"
+    },
+    {
+      "path": "comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean",
+      "git_blob_sha": "509fe4b9d66e90a508c170f1753a7cee49b91b88",
+      "url": "https://github.com/xiangyazi24/FLT/blob/bebaf732e868c6cd34b2072135cf9879c69bd123/comms/candidates/N25F_CoarseLowerBound.UNCOMPILED.lean"
+    },
+    {
+      "path": "comms/candidates/N25F_SectionClassFiber.lean",
+      "git_blob_sha": "8199280acb1ff29912df5b4253ab5b93dd83e43a",
+      "url": "https://github.com/xiangyazi24/FLT/blob/bebaf732e868c6cd34b2072135cf9879c69bd123/comms/candidates/N25F_SectionClassFiber.lean"
+    },
+    {
+      "path": "comms/candidates/N25F_SectionFiniteness.lean",
+      "git_blob_sha": "408e918e34608b559add7d61fcd20ce131f9ad5a",
+      "url": "https://github.com/xiangyazi24/FLT/blob/bebaf732e868c6cd34b2072135cf9879c69bd123/comms/candidates/N25F_SectionFiniteness.lean"
+    },
+    {
+      "path": "comms/candidates/N25F_FullPicardDegree.lean",
+      "git_blob_sha": "ff3c3b7bbda266de4c76b69fc5fd472a1e6db505",
+      "url": "https://github.com/xiangyazi24/FLT/blob/bebaf732e868c6cd34b2072135cf9879c69bd123/comms/candidates/N25F_FullPicardDegree.lean"
+    },
+    {
+      "path": "comms/candidates/N25F_RiemannRochSpace.lean",
+      "git_blob_sha": "c949d1cc9c88451a8733b612085b756475984bd9",
+      "url": "https://github.com/xiangyazi24/FLT/blob/bebaf732e868c6cd34b2072135cf9879c69bd123/comms/candidates/N25F_RiemannRochSpace.lean"
+    },
+    {
+      "path": "comms/candidates/N25F_WBasisPoleBound.lean",
+      "git_blob_sha": "49fa9f408d9a560d3ddf06ee998a05e51f60912e",
+      "url": "https://github.com/xiangyazi24/FLT/blob/bebaf732e868c6cd34b2072135cf9879c69bd123/comms/candidates/N25F_WBasisPoleBound.lean"
+    },
+    {
+      "path": "Mathlib/LinearAlgebra/Dimension/Finite.lean",
+      "git_blob_sha": "d08c8e0cf7ff445a172fed84e993828d5e6d9a4d",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/96fd0fff3b8837985ae21dd02e712cb5df72ec05/Mathlib/LinearAlgebra/Dimension/Finite.lean"
+    }
+  ]
+}
