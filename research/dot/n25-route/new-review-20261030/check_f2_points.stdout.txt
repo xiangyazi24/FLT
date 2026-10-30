@@ -1,0 +1,3 @@
+F2 projective points: [(0, 0, 0, 1), (0, 0, 1, 0), (0, 1, 1, 0), (1, 0, 0, 0), (1, 1, 0, 1)]
+count: 5
+PASS: all 15 nonzero binary quadruples checked; F2 has no nontrivial scaling.
