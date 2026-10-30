@@ -1,0 +1,16 @@
+{
+  "schema": "research-dot-input-v1",
+  "task_id": "FLT-N25-ROUTE-DELIVER-20261030",
+  "revision_id": "1",
+  "repository": "xiangyazi24/FLT",
+  "source_base_commit": "ec88cc6179136943cd82916b6f2e911aa4a07a25",
+  "required_sources": {
+    "FLT/Assumptions/MazurProof/CyclicExclusion25.lean": "b892f8d2fe27c24229ff82f59a0e4b388edee4d10bb6202cf842a385ab5d0a7a",
+    "FLT/Assumptions/MazurProof/N25F_ClassNumberLower.lean": "1c987800e0d0e6c4581166d1252beccd603ee1c157fbd0f5c59ad3f268b48b37",
+    "FLT/Assumptions/MazurProof/UNDERSTANDING.md": "2dafa833072e7569ec07b2c847578a5c23abcb4fc56390726dce1efa267615bf",
+    "HANDOFF_2026-10-09.md": "dc879f50e63d14c5b80d5bb0f6382a3b070954563a33b69e7dacb4d82dadcda6"
+  },
+  "prior_dot_result": "a11846c1 comms/inbox/research-dot-FLT-N25-ROUTE-r1-status-only-20261007.md",
+  "scope": {"production_source_mutation": false, "build": false, "job_submission": false, "all_n_liveness_claim": false},
+  "primary_target": "MazurProof.CyclicExclusion25.no_explicit_order25_obstruction (C(Q) = five cusps for LMFDB 25.150.4.f.1)"
+}
